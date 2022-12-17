@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Depository.Abstraction\Depository.Abstraction.csproj" />
+      <ProjectReference Include="..\Depository.Core\Depository.Core.csproj" />
+      <ProjectReference Include="..\Depository.Extensions\Depository.Extensions.csproj" />
+    </ItemGroup>
+
+</Project>
