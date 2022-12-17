@@ -8,6 +8,20 @@ public static class AddDependencyExtension
 {
     public static async Task AddSingletonAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
     {
+        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Singleton);
+    }
+    public static async Task AddScopedAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
+    {
+        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Scoped);
+    }
+    
+    public static async Task AddTransientAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
+    {
+        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Transient);
+    }
+
+    private static async Task AddAsync<TDependency, TImplement>(IDepository depository, DependencyLifetime lifetime) where TImplement : TDependency
+    {
         var dependencyDescription = await depository.GetDependencyAsync(typeof(TDependency));
 
         if (dependencyDescription is null)
@@ -16,7 +30,7 @@ public static class AddDependencyExtension
             {
                 DependencyType = typeof(TDependency),
                 ResolvePolicy = DependencyResolvePolicy.LastWin,
-                Lifetime = DependencyLifetime.Singleton
+                Lifetime = lifetime
             };
             await depository.AddDependencyAsync(dependencyDescription);
         }
@@ -25,10 +39,5 @@ public static class AddDependencyExtension
         {
             ImplementType = typeof(TImplement),
         });
-    }
-
-    public static async Task<T> Resolve<T>(this IDepositoryResolve depository)
-    {
-        return (T)await depository.ResolveDependencyAsync(typeof(T));
     }
 }
