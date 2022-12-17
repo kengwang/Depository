@@ -1,6 +1,8 @@
-﻿namespace Depository.Abstraction.Models;
+﻿using Depository.Abstraction.Interfaces;
+
+namespace Depository.Abstraction.Models;
 
 public class DependencyResolveOption
 {
-    public DepositoryResolveScope? Scope { get; set; }
+    public IDepositoryResolveScope? Scope { get; set; }
 }

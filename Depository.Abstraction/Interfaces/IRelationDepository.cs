@@ -6,13 +6,16 @@ public interface IRelationDepository
 {
     public Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation);
 
+    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependency);
+    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependency);
+    
     /// <summary>
     /// Replace Dependency
     /// </summary>
-    /// <param name="dependencyType"></param>
+    /// <param name="dependencyDescription"></param>
     /// <param name="relation"></param>
     /// <returns></returns>
-    public Task ChangeFocusingRelationAsync(DependencyDescription dependencyType, DependencyRelation relation);
+    public Task ChangeFocusingRelationAsync(DependencyDescription dependencyDescription, DependencyRelation relation);
 
     /// <summary>
     /// Delete Relation

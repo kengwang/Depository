@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Enums;
+﻿using System.Runtime.CompilerServices;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
@@ -7,11 +8,14 @@ namespace Depository.Core;
 
 public class Depository : IDepository
 {
+    private DepositoryOption _option = new();
     private readonly Dictionary<DependencyDescription, List<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
     private readonly List<DependencyDescription> _dependencyDescriptions = new();
+    private readonly ConditionalWeakTable<object, List<Type>> _resolvedTypes = new();
+    private readonly Dictionary<Type, List<WeakReference>> _usedImpls = new();
     private readonly DepositoryResolveScope _rootScope = new();
-    
+
     public Task AddDependencyAsync(DependencyDescription description)
     {
         _dependencyDescriptions.Add(description);
@@ -25,7 +29,8 @@ public class Depository : IDepository
 
     public Task<DependencyDescription?> GetDependencyAsync(Type dependencyType)
     {
-        return Task.FromResult(_dependencyDescriptions.FirstOrDefault(dep => dep.DependencyType == dependencyType) ?? null);
+        return Task.FromResult(_dependencyDescriptions.FirstOrDefault(dep => dep.DependencyType == dependencyType) ??
+                               null);
     }
 
     public Task DeleteDependencyAsync(DependencyDescription dependencyDescription)
@@ -49,13 +54,33 @@ public class Depository : IDepository
         }
 
         relations.Add(relation);
+
+        // 通知修改
+        if (_option.AutoNotifyDependencyChange)
+        {
+        }
+
         return Task.CompletedTask;
     }
 
-    public Task ChangeFocusingRelationAsync(DependencyDescription dependencyType, DependencyRelation relation)
+    public async Task ChangeFocusingRelationAsync(DependencyDescription dependencyDescription,
+        DependencyRelation relation)
     {
-        _currentFocusing[dependencyType] = relation;
-        return Task.CompletedTask;
+        _currentFocusing[dependencyDescription] = relation;
+        if (_option.AutoNotifyDependencyChange)
+        {
+            // 回溯使用了此 Relation 的东西
+            if (!_usedImpls.TryGetValue(dependencyDescription.DependencyType, out var impls)) return;
+            foreach (var weakReference in impls.FindAll(t => t.IsAlive && t.Target is INotifyDependencyChanged)
+                         .ToList())
+            {
+                var newImpl =
+                    await ResolveRelationAsync(dependencyDescription, relation,
+                        new DependencyResolveOption()); // TODO: 可能之后会有其他的 Option 优化此处
+                ((INotifyDependencyChanged)weakReference.Target).DependencyChanged?
+                    .Invoke(dependencyDescription.DependencyType, newImpl);
+            }
+        }
     }
 
     public Task DeleteRelationAsync(DependencyDescription dependencyType, DependencyRelation relation)
@@ -86,11 +111,12 @@ public class Depository : IDepository
     public async Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option)
     {
         var dependencyDescription = GetDependencyDescription(dependency);
-        var relations = GetRelations(dependencyDescription);
+        var relations = await GetRelationsAsync(dependencyDescription);
         List<object> results = new();
         foreach (var relation in relations)
         {
-            results.Add(await ResolveRelation(dependencyDescription, relation, option));
+            var result = await ResolveRelationAsync(dependencyDescription, relation, option);
+            results.Add(result);
         }
 
         return results;
@@ -99,8 +125,8 @@ public class Depository : IDepository
     public async Task<object> ResolveDependencyAsync(Type dependency, DependencyResolveOption? option = null)
     {
         var dependencyDescription = GetDependencyDescription(dependency);
-        var relation = GetRelation(dependencyDescription);
-        return await ResolveRelation(dependencyDescription, relation, option);
+        var relation = await GetRelationAsync(dependencyDescription);
+        return await ResolveRelationAsync(dependencyDescription, relation, option);
     }
 
     private async Task<object> ImplementActivator(Type implementType, DependencyResolveOption? option)
@@ -116,11 +142,29 @@ public class Depository : IDepository
             parameters.Add(await ResolveDependencyAsync(parameterInfo.ParameterType, option));
         }
 
-        return constructorInfo.Invoke(parameters.ToArray());
+        var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
+
+
+        // Wire to the regenerator
+        var weakRef = new WeakReference(dependencyImpl);
+        var types = parameterInfos.Select(t => t.ParameterType).ToList();
+        foreach (var type in types)
+        {
+            if (!_usedImpls.TryGetValue(type, out var references))
+            {
+                references = new List<WeakReference>();
+                _usedImpls[type] = references;
+            }
+
+            references.Add(weakRef);
+        }
+
+        _resolvedTypes.GetOrCreateValue(dependencyImpl).AddRange(types);
+        return dependencyImpl;
     }
 
 
-    private async Task<object> ResolveRelation(
+    private async Task<object> ResolveRelationAsync(
         DependencyDescription dependencyDescription,
         DependencyRelation relation,
         DependencyResolveOption? option)
@@ -139,7 +183,7 @@ public class Depository : IDepository
     {
         if (option?.Scope is null) throw new ScopeNotSetException();
         if (await option.Scope.ExistAsync(relation.ImplementType))
-            return (await option.Scope.GetImplementAsync(relation.ImplementType))!;
+            return await option.Scope.GetImplementAsync(relation.ImplementType);
         var impl = await ImplementActivator(relation.ImplementType, option);
         await option.Scope.SetImplementAsync(relation.ImplementType, impl);
         return impl;
@@ -154,15 +198,15 @@ public class Depository : IDepository
     private async Task<object> ResolveSingleton(DependencyRelation relation, DependencyResolveOption? option)
     {
         if (await _rootScope.ExistAsync(relation.ImplementType))
-            return (await _rootScope.GetImplementAsync(relation.ImplementType))!;
+            return await _rootScope.GetImplementAsync(relation.ImplementType);
         var impl = await ImplementActivator(relation.ImplementType, option);
         await _rootScope.SetImplementAsync(relation.ImplementType, impl);
         return impl;
     }
 
-    private DependencyRelation GetRelation(DependencyDescription dependencyDescription)
+    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription)
     {
-        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation)) return relation;
+        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation)) return Task.FromResult(relation);
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
@@ -187,13 +231,13 @@ public class Depository : IDepository
             throw new RelationNotFoundException();
         }
 
-        return relation;
+        return Task.FromResult(relation);
     }
 
-    private List<DependencyRelation> GetRelations(DependencyDescription dependencyDescription)
+    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependencyDescription)
     {
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
-            return relations;
+            return Task.FromResult(relations);
 
         throw new RelationNotFoundException();
     }
