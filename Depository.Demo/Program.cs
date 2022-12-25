@@ -12,10 +12,9 @@ await depository.AddSingletonAsync<IRandomProvider, SharedRandomProvider>();
 
 await depository.AddSingletonAsync(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
 
-var guidGenerators = (await depository.Resolve<IEnumerable<IGuidGenerator>>()).ToList();
+var typeGeneric = await depository.ResolveAsync<ITypeGeneric<string>>();
 
-var guidGenerator = guidGenerators[0];
 
-Console.WriteLine(guidGenerator.GetRandom());
+Console.WriteLine(typeGeneric);
 
 Console.Read();

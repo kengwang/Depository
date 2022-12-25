@@ -27,7 +27,24 @@ public class DepositoryResolveScope : IDepositoryResolveScope
 
     public Task RemoveImplementAsync(Type type)
     {
+        // Dispose it before remove it
+        if (_implementations[type].Target is IDisposable disposableTarget)
+        {
+            disposableTarget.Dispose();
+        }
+
         _implementations.Remove(type);
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        foreach (var weakReference in _implementations.Values.ToList())
+        {
+            if (weakReference.Target is IDisposable disposableTarget)
+            {
+                disposableTarget.Dispose();
+            }
+        }
     }
 }

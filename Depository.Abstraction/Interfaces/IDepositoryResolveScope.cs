@@ -1,6 +1,6 @@
 ﻿namespace Depository.Abstraction.Interfaces;
 
-public interface IDepositoryResolveScope
+public interface IDepositoryResolveScope : IDisposable
 {
     public Task SetImplementAsync(Type type, object impl);
     public Task<object> GetImplementAsync(Type type);
