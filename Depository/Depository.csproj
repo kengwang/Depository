@@ -5,6 +5,17 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.0.1-pre1</Version>
+        <Title>Depository</Title>
+        <Authors>Kengwang</Authors>
+        <Description>An IoC Container</Description>
+        <Copyright>Copyright © Kengwang 2022</Copyright>
+        <PackageProjectUrl>https://github.com/kengwang/Depository</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>IoC</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>

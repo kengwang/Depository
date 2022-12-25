@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
@@ -8,7 +9,7 @@ namespace Depository.Core;
 
 public class Depository : IDepository
 {
-    private DepositoryOption _option = new();
+    private readonly DepositoryOption _option = new();
     private readonly Dictionary<DependencyDescription, List<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
     private readonly List<DependencyDescription> _dependencyDescriptions = new();
@@ -70,6 +71,7 @@ public class Depository : IDepository
         if (_option.AutoNotifyDependencyChange)
         {
             // 回溯使用了此 Relation 的东西
+            // TODO: 检查此处逻辑是否会造成复用
             if (!_usedImpls.TryGetValue(dependencyDescription.DependencyType, out var impls)) return;
             foreach (var weakReference in impls.FindAll(t => t.IsAlive && t.Target is INotifyDependencyChanged)
                          .ToList())
@@ -124,6 +126,23 @@ public class Depository : IDepository
 
     public async Task<object> ResolveDependencyAsync(Type dependency, DependencyResolveOption? option = null)
     {
+        if (dependency.IsGenericType && dependency.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        {
+            // check whether is IEnumerable
+            // and then return the fully Implemented stuff
+            var cachedGenericType = dependency.GenericTypeArguments[0];
+            var resolves = (await ResolveDependenciesAsync(cachedGenericType, option));
+            var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
+            foreach (var impl in resolves)
+            {
+                if (impl is null) continue;
+                if (cachedGenericType.IsInstanceOfType(impl))
+                    impls.Add(impl);
+            }
+
+            return impls;
+        }
+
         var dependencyDescription = GetDependencyDescription(dependency);
         var relation = await GetRelationAsync(dependencyDescription);
         return await ResolveRelationAsync(dependencyDescription, relation, option);
@@ -132,8 +151,12 @@ public class Depository : IDepository
     private async Task<object> ImplementActivator(Type implementType, DependencyResolveOption? option)
     {
         var constructorInfos = implementType.GetConstructors();
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
         if (constructorInfos.Length == 0)
-            throw new DependencyInitializationException("Cannot initialize a type with no constructor");
+            throw new DependencyInitializationException($"Cannot initialize {implementType.Name} with no constructor");
+        if (constructorInfos.Length > 1)
+            throw new DependencyInitializationException(
+                $"More than one constructor was founded in {implementType.Name}");
         var constructorInfo = constructorInfos[0];
         var parameterInfos = constructorInfo.GetParameters();
         var parameters = new List<object>();
@@ -172,35 +195,35 @@ public class Depository : IDepository
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         return dependencyDescription.Lifetime switch
         {
-            DependencyLifetime.Singleton => await ResolveSingleton(relation, option),
-            DependencyLifetime.Transient => await ResolveTransient(relation, option),
-            DependencyLifetime.Scoped => await ResolveScope(relation, option),
+            DependencyLifetime.Singleton => await ResolveSingleton(relation.ImplementType, option),
+            DependencyLifetime.Transient => await ResolveTransient(relation.ImplementType, option),
+            DependencyLifetime.Scoped => await ResolveScope(relation.ImplementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    private async Task<object> ResolveScope(DependencyRelation relation, DependencyResolveOption? option)
+    private async Task<object> ResolveScope(Type implementType, DependencyResolveOption? option)
     {
         if (option?.Scope is null) throw new ScopeNotSetException();
-        if (await option.Scope.ExistAsync(relation.ImplementType))
-            return await option.Scope.GetImplementAsync(relation.ImplementType);
-        var impl = await ImplementActivator(relation.ImplementType, option);
-        await option.Scope.SetImplementAsync(relation.ImplementType, impl);
+        if (await option.Scope.ExistAsync(implementType))
+            return await option.Scope.GetImplementAsync(implementType);
+        var impl = await ImplementActivator(implementType, option);
+        await option.Scope.SetImplementAsync(implementType, impl);
         return impl;
     }
 
-    private async Task<object> ResolveTransient(DependencyRelation relation, DependencyResolveOption? option)
+    private async Task<object> ResolveTransient(Type implementType, DependencyResolveOption? option)
     {
-        var impl = await ImplementActivator(relation.ImplementType, option);
+        var impl = await ImplementActivator(implementType, option);
         return impl;
     }
 
-    private async Task<object> ResolveSingleton(DependencyRelation relation, DependencyResolveOption? option)
+    private async Task<object> ResolveSingleton(Type implementType, DependencyResolveOption? option)
     {
-        if (await _rootScope.ExistAsync(relation.ImplementType))
-            return await _rootScope.GetImplementAsync(relation.ImplementType);
-        var impl = await ImplementActivator(relation.ImplementType, option);
-        await _rootScope.SetImplementAsync(relation.ImplementType, impl);
+        if (await _rootScope.ExistAsync(implementType))
+            return await _rootScope.GetImplementAsync(implementType);
+        var impl = await ImplementActivator(implementType, option);
+        await _rootScope.SetImplementAsync(implementType, impl);
         return impl;
     }
 

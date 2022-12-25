@@ -2,5 +2,5 @@
 
 public class DependencyNotFoundException : DepositoryResolveException
 {
-    public Type DependencyType { get; set; }
+    public Type DependencyType { get; set; } = null!;
 }

@@ -6,29 +6,41 @@ namespace Depository.Extensions;
 
 public static class AddDependencyExtension
 {
-    public static async Task AddSingletonAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
-    {
+    public static async Task AddSingletonAsync<TDependency, TImplement>(this IDepository depository)
+        where TImplement : TDependency =>
         await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Singleton);
-    }
-    public static async Task AddScopedAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
-    {
-        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Scoped);
-    }
-    
-    public static async Task AddTransientAsync<TDependency, TImplement>(this IDepository depository) where TImplement : TDependency
-    {
-        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Transient);
-    }
 
-    private static async Task AddAsync<TDependency, TImplement>(IDepository depository, DependencyLifetime lifetime) where TImplement : TDependency
+    public static async Task AddScopedAsync<TDependency, TImplement>(this IDepository depository)
+        where TImplement : TDependency =>
+        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Scoped);
+
+    public static async Task AddTransientAsync<TDependency, TImplement>(this IDepository depository)
+        where TImplement : TDependency =>
+        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Transient);
+
+    public static async Task AddAsync<TDependency, TImplement>(this IDepository depository, DependencyLifetime lifetime)
+        where TImplement : TDependency =>
+        await AddAsync(depository, typeof(TDependency), typeof(TImplement), lifetime);
+
+    public static async Task AddSingletonAsync(this IDepository depository, Type dependencyType, Type implementType)
+        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Singleton);
+    
+    public static async Task AddTransientAsync(this IDepository depository, Type dependencyType, Type implementType)
+        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Transient);
+    
+    public static async Task AddScopedAsync(this IDepository depository, Type dependencyType, Type implementType)
+        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Scoped);
+    
+    public static async Task AddAsync(this IDepository depository, Type dependencyType, Type implementType,
+        DependencyLifetime lifetime)
     {
-        var dependencyDescription = await depository.GetDependencyAsync(typeof(TDependency));
+        var dependencyDescription = await depository.GetDependencyAsync(dependencyType);
 
         if (dependencyDescription is null)
         {
             dependencyDescription = new DependencyDescription
             {
-                DependencyType = typeof(TDependency),
+                DependencyType = dependencyType,
                 ResolvePolicy = DependencyResolvePolicy.LastWin,
                 Lifetime = lifetime
             };
@@ -37,7 +49,7 @@ public static class AddDependencyExtension
 
         await depository.AddRelationAsync(dependencyDescription, new DependencyRelation
         {
-            ImplementType = typeof(TImplement),
+            ImplementType = implementType,
         });
     }
 }

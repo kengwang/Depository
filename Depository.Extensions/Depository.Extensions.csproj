@@ -4,7 +4,18 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <LangVersion>default</LangVersion>
+        <LangVersion>latest</LangVersion>
+        <Authors>Kengwang</Authors>
+        <Description>The Extension of Depository</Description>
+        <Copyright>Copyright © Kengwang 2022</Copyright>
+        <PackageProjectUrl>https://github.com/kengwang/Depository</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>IoC</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>0.0.1-pre1</Version>
+        <Title>Depository.Extensions</Title>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
