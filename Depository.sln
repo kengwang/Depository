@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Abstraction", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Core", "Depository.Core\Depository.Core.csproj", "{5EF419BA-BB1A-4E3D-90CA-32C749613925}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Demo", "Depository.Demo\Depository.Demo.csproj", "{BE86D4F8-EE37-4954-9B11-1DE529781EEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Tests", "Depository.Tests\Depository.Tests.csproj", "{BE86D4F8-EE37-4954-9B11-1DE529781EEF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Extensions", "Depository.Extensions\Depository.Extensions.csproj", "{FD290B02-CC6C-476B-8C4D-1B98FF6A3091}"
 EndProject

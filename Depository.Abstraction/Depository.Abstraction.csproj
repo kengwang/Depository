@@ -14,7 +14,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>IoC</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>0.0.1-pre1</Version>
+        <Version>0.0.1-pre2</Version>
         <Title>Depository.Abstraction</Title>
     </PropertyGroup>
 

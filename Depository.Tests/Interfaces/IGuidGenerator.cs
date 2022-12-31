@@ -1,7 +1,6 @@
-﻿namespace Depository.Demo;
+﻿namespace Depository.Demo.Interfaces;
 
 public interface IGuidGenerator
 {
     public Guid GetGuid();
-    public int GetRandom();
 }

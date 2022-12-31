@@ -9,18 +9,30 @@ public static class AddDependencyExtension
     public static async Task AddSingletonAsync<TDependency, TImplement>(this IDepository depository)
         where TImplement : TDependency =>
         await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Singleton);
+    
+    public static async Task AddSingletonAsync<TService>(this IDepository depository) =>
+        await AddAsync<TService>(depository, DependencyLifetime.Singleton);
 
     public static async Task AddScopedAsync<TDependency, TImplement>(this IDepository depository)
         where TImplement : TDependency =>
         await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Scoped);
+    
+    public static async Task AddScopedAsync<TService>(this IDepository depository) =>
+        await AddAsync<TService>(depository, DependencyLifetime.Scoped);
 
     public static async Task AddTransientAsync<TDependency, TImplement>(this IDepository depository)
         where TImplement : TDependency =>
         await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Transient);
+    
+    public static async Task AddTransientAsync<TService>(this IDepository depository) =>
+        await AddAsync<TService>(depository, DependencyLifetime.Transient);
 
     public static async Task AddAsync<TDependency, TImplement>(this IDepository depository, DependencyLifetime lifetime)
         where TImplement : TDependency =>
         await AddAsync(depository, typeof(TDependency), typeof(TImplement), lifetime);
+    
+    public static async Task AddAsync<TService>(this IDepository depository, DependencyLifetime lifetime) =>
+        await AddAsync(depository, typeof(TService), typeof(TService), lifetime);
 
     public static async Task AddSingletonAsync(this IDepository depository, Type dependencyType, Type implementType)
         => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Singleton);
