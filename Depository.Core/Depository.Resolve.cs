@@ -29,7 +29,7 @@ public partial class Depository
     }
 
 
-    public async Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option)
+    public async Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType && _dependencyDescriptions.All(t => t.DependencyType != dependency))
         {
