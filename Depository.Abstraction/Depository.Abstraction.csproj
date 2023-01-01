@@ -13,7 +13,7 @@
         <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>IoC</PackageTags>
-        <Version>1.0.0</Version>
+        <Version>1.0.1</Version>
         <Title>Depository.Abstraction</Title>
     </PropertyGroup>
 
