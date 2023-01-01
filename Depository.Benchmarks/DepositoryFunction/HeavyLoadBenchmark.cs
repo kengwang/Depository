@@ -38,7 +38,7 @@ public class HeavyLoadBenchmark
 
         return await _depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
     }
-    
+
     public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_ResolveMultiple()
     {
         for (var i = 0; i < IterationTime; i++)

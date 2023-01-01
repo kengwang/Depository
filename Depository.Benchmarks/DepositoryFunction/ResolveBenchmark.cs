@@ -9,9 +9,8 @@ namespace Depository.Benchmarks.DepositoryFunction;
 
 public class ResolveBenchmark
 {
-    
     private IDepository _depository = null!;
-    
+
     [IterationCleanup]
     public async void GlobalSetup()
     {
@@ -24,26 +23,26 @@ public class ResolveBenchmark
     {
         return await _depository.ResolveAsync<IGuidGenerator>();
     }
-    
+
     [Benchmark]
     public async Task<IGuidGenerator> ResolveMultipleToSingle()
     {
         await _depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
         return await _depository.ResolveAsync<IGuidGenerator>();
     }
-    
+
     [Benchmark]
-    public async Task<IEnumerable<IGuidGenerator>> ResolveMultipleToMultiple_UsingIEnumerable()
+    public async Task ResolveMultipleToMultiple_UsingIEnumerable()
     {
-        return await _depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        await _depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
     }
-    
+
     [Benchmark]
-    public async Task<IEnumerable<IGuidGenerator>> ResolveMultipleToMultiple_UsingMultipleResolve()
+    public async Task ResolveMultipleToMultiple_UsingMultipleResolve()
     {
-        return await _depository.ResolveMultipleAsync<IGuidGenerator>();
+        await _depository.ResolveMultipleAsync<IGuidGenerator>();
     }
-    
+
     [IterationCleanup]
     public void GlobalCleanup()
     {

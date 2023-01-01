@@ -14,26 +14,26 @@ namespace Depository.Benchmarks.IoCContainersComparison;
 public class MultiToMultiBenchmark
 {
     [Benchmark]
-    public async Task<IEnumerable<IGuidGenerator>> Depository_IEnumerable()
+    public async Task Depository_IEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        return await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
     }
-    
-    [Benchmark]
-    public async Task<IEnumerable<IGuidGenerator>> Depository_ResolveMultiple()
-    {
-        var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        return await depository.ResolveMultipleAsync<IGuidGenerator>();
-    }
-    
 
     [Benchmark]
-    public IEnumerable<IGuidGenerator> MicrosoftExtensionDependencyInjection()
+    public async Task Depository_ResolveMultiple()
+    {
+        var depository = DepositoryFactory.CreateNew();
+        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
+        await depository.ResolveMultipleAsync<IGuidGenerator>();
+    }
+
+
+    [Benchmark]
+    public object MicrosoftExtensionDependencyInjection()
     {
         ServiceCollection services = new();
         services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -41,9 +41,9 @@ public class MultiToMultiBenchmark
         var provider = services.BuildServiceProvider();
         return provider.GetService<IEnumerable<IGuidGenerator>>()!;
     }
-    
+
     [Benchmark]
-    public IEnumerable<IGuidGenerator> AutoFac()
+    public object AutoFac()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<RandomGuidGenerator>().As<IGuidGenerator>();

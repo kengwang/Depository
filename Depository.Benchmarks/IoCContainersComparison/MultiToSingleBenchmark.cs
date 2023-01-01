@@ -21,7 +21,7 @@ public class MultiToSingleBenchmark
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
         return await depository.ResolveAsync<IGuidGenerator>();
     }
-    
+
 
     [Benchmark]
     public IGuidGenerator MicrosoftExtensionDependencyInjection()
@@ -32,7 +32,7 @@ public class MultiToSingleBenchmark
         var provider = services.BuildServiceProvider();
         return provider.GetService<IGuidGenerator>()!;
     }
-    
+
     [Benchmark]
     public IGuidGenerator AutoFac()
     {

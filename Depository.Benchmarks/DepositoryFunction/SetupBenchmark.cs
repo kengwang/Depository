@@ -13,7 +13,7 @@ public class SetupBenchmark
     {
         return new Core.Depository();
     }
-    
+
     public IDepository Setup_Factory()
     {
         return DepositoryFactory.CreateNew();

@@ -13,7 +13,6 @@ namespace Depository.Benchmarks.IoCContainersComparison;
 [JsonExporterAttribute.FullCompressed]
 public class SingleToSingleBenchmark
 {
-    
     [Benchmark]
     public async Task<IGuidGenerator> Depository()
     {
@@ -21,7 +20,7 @@ public class SingleToSingleBenchmark
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         return await depository.ResolveAsync<IGuidGenerator>();
     }
-    
+
 
     [Benchmark]
     public IGuidGenerator MicrosoftExtensionDependencyInjection()
@@ -31,7 +30,7 @@ public class SingleToSingleBenchmark
         var provider = services.BuildServiceProvider();
         return provider.GetService<IGuidGenerator>()!;
     }
-    
+
     [Benchmark]
     public IGuidGenerator AutoFac()
     {

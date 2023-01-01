@@ -15,7 +15,7 @@ namespace Depository.Benchmarks.DepositoryFunction;
 public class AddDependencyBenchmark
 {
     private IDepository _depository = null!;
-    
+
     [IterationCleanup]
     public void GlobalSetup()
     {
@@ -27,7 +27,7 @@ public class AddDependencyBenchmark
     {
         _depository.Dispose();
     }
-    
+
     [Benchmark]
     public async Task AddDependency_Pure()
     {
