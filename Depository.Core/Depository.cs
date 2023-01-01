@@ -11,4 +11,12 @@ public partial class Depository : IDepository
     {
         throw new NotImplementedException();
     }
+
+    public void Dispose()
+    {
+        _dependencyDescriptions.Clear();
+        _dependencyRelations.Clear();
+        _usedImpls.Clear();
+        _rootScope.Dispose();
+    }
 }

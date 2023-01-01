@@ -2,12 +2,11 @@
 
 namespace Depository.Abstraction.Interfaces;
 
-public interface IDepository : 
+public interface IDepository :
     IDependencyDepository,
     IRelationDepository,
     IDepositoryResolve,
-    IDepositoryServiceRunner
+    IDepositoryServiceRunner,
+    IDisposable
 {
-
-    
 }

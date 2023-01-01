@@ -28,6 +28,7 @@ public partial class Depository
 
     public Task DeleteDependencyAsync(DependencyDescription dependencyDescription)
     {
+        _dependencyRelations.Remove(dependencyDescription);
         _dependencyDescriptions.Remove(dependencyDescription);
         return Task.CompletedTask;
     }
@@ -35,6 +36,7 @@ public partial class Depository
     public Task ClearAllDependenciesAsync()
     {
         _dependencyDescriptions.Clear();
+        _dependencyRelations.Clear();
         return Task.CompletedTask;
     }
     
