@@ -5,6 +5,12 @@ namespace Depository.Core;
 
 public class DepositoryResolveScope : IDepositoryResolveScope
 {
+    // ReSharper disable once UnusedMember.Global
+    public static IDepositoryResolveScope Create()
+    {
+        return new DepositoryResolveScope();
+    }
+    
     private readonly Dictionary<Type, WeakReference> _implementations = new();
 
     public Task SetImplementAsync(Type type, object impl)

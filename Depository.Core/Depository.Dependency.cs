@@ -26,10 +26,10 @@ public partial class Depository
                                null);
     }
 
-    public Task DeleteDependencyAsync(DependencyDescription dependencyDescription)
+    public Task DeleteDependencyAsync(DependencyDescription description)
     {
-        _dependencyRelations.Remove(dependencyDescription);
-        _dependencyDescriptions.Remove(dependencyDescription);
+        _dependencyRelations.Remove(description);
+        _dependencyDescriptions.Remove(description);
         return Task.CompletedTask;
     }
 

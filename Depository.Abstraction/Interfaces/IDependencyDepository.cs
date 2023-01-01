@@ -23,9 +23,9 @@ public interface IDependencyDepository
     /// <summary>
     /// Delete Dependency
     /// </summary>
-    /// <param name="dependencyDescription"></param>
+    /// <param name="description"></param>
     /// <returns></returns>
-    public Task DeleteDependencyAsync(DependencyDescription dependencyDescription);
+    public Task DeleteDependencyAsync(DependencyDescription description);
     
     public Task ClearAllDependenciesAsync();
 }

@@ -6,25 +6,25 @@ public interface IRelationDepository
 {
     public Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation);
 
-    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependency);
-    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependency);
+    public Task<DependencyRelation> GetRelationAsync(DependencyDescription description);
+    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription description);
     
     /// <summary>
     /// Replace Dependency
     /// </summary>
-    /// <param name="dependencyDescription"></param>
+    /// <param name="description"></param>
     /// <param name="relation"></param>
     /// <returns></returns>
-    public Task ChangeFocusingRelationAsync(DependencyDescription dependencyDescription, DependencyRelation relation);
+    public Task ChangeFocusingRelationAsync(DependencyDescription description, DependencyRelation relation);
 
     /// <summary>
     /// Delete Relation
     /// </summary>
-    /// <param name="dependencyType"></param>
+    /// <param name="description"></param>
     /// <param name="relation"></param>
     /// <returns></returns>
-    public Task DeleteRelationAsync(DependencyDescription dependencyType, DependencyRelation relation);
+    public Task DeleteRelationAsync(DependencyDescription description, DependencyRelation relation);
 
 
-    public Task ClearRelationsAsync(DependencyDescription dependencyType);
+    public Task ClearRelationsAsync(DependencyDescription description);
 }
