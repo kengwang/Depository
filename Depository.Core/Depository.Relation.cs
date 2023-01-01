@@ -27,7 +27,7 @@ public partial class Depository
 
         // 通知修改
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependency, relation);
+            await NotifyDependencyChange(dependency);
     }
 
     public async Task DeleteRelationAsync(DependencyDescription dependencyType, DependencyRelation relation)
@@ -38,7 +38,7 @@ public partial class Depository
         }
 
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependencyType, relation);
+            await NotifyDependencyChange(dependencyType);
     }
 
     public Task ClearRelationsAsync(DependencyDescription dependencyType)
@@ -53,7 +53,7 @@ public partial class Depository
     {
         _currentFocusing[dependencyDescription] = relation;
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependencyDescription, relation);
+            await NotifyDependencyChange(dependencyDescription);
     }
 
     public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription)

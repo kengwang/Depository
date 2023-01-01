@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Interfaces;
+﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
 
@@ -12,8 +13,26 @@ public partial class Depository : IDepository
     public Depository(Action<DepositoryOption>? option = null)
     {
         option?.Invoke(_option);
+        AddSelfToDepository();
     }
 
+    private async void AddSelfToDepository()
+    {
+        var description = new DependencyDescription
+        {
+            DependencyType = typeof(IDepository),
+            ResolvePolicy = DependencyResolvePolicy.LastWin,
+            Lifetime = DependencyLifetime.Singleton
+        };
+        var relation = new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(Depository)
+        };
+        await AddDependencyAsync(description);
+        await AddRelationAsync(description, relation);
+    }
+    
     public Task RunAsync(Type serviceType)
     {
         throw new NotImplementedException();

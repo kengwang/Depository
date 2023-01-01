@@ -13,7 +13,7 @@ public class DepositoryResolveScope : IDepositoryResolveScope
     
     private readonly Dictionary<Type, WeakReference> _implementations = new();
 
-    public Task SetImplementAsync(Type type, object impl)
+    public Task SetImplementAsync(Type type, object? impl)
     {
         _implementations[type] = new WeakReference(impl);
         return Task.CompletedTask;

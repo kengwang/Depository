@@ -1,5 +1,6 @@
 ﻿using Depository.Abstraction.Enums;
 using Depository.Abstraction.Models;
+using Depository.Abstraction.Models.Options;
 using Depository.Demo.Implements;
 using Depository.Demo.Interfaces;
 using Depository.Extensions;
@@ -250,6 +251,74 @@ public class DepositoryResolveTests
             .And.BeOfType<TypeGeneric<string>>();
     }
 
+    [Fact]
+    public async void ResolveConstructorInject_ShouldBeNormal()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
+        
+        // Action
+        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        
+        // Assert
+        service.IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async void ResolveIEnumerableConstructorInject_ShouldBeNormal()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorIEnumerableInjectService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(EmptyGuidGenerator));
+        
+        // Action
+        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        
+        // Assert
+        service.IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async void ResolveConstructorNotification_ShouldBeNormal()
+    {
+        // Init
+        var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
+        
+        
+        // Action
+        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator),new EmptyGuidGenerator());
+        
+        
+        // Assert
+        service.IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async void ResolveIEnumerableConstructorNotification_ShouldBeNormal()
+    {
+        // Init
+        var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(EmptyGuidGenerator));
+        
+        
+        // Action
+        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator),new EmptyGuidGenerator());
+        
+        
+        // Assert
+        service.IsNormal.Should().BeTrue();
+    }
+    
     // Actions
-    private Core.Depository CreateNewDepository() => new();
+    private Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => new(options);
 }

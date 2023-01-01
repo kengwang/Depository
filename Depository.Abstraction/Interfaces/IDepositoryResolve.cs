@@ -20,4 +20,6 @@ public interface IDepositoryResolve
     /// <param name="option"></param>
     /// <returns></returns>
     public Task<object> ResolveDependencyAsync(Type dependency, DependencyResolveOption? option = null);
+
+    public Task ChangeResolveTargetAsync(Type dependency, object? target);
 }

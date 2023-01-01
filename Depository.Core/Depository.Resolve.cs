@@ -12,20 +12,18 @@ public partial class Depository
 {
     private readonly ConditionalWeakTable<object, List<Type>> _resolvedTypes = new();
     private readonly Dictionary<Type, List<WeakReference>> _usedImpls = new();
-    
+
     private async Task NotifyDependencyChange(DependencyDescription dependencyDescription,
-        DependencyRelation relation)
+        object? target = null)
     {
-        // 回溯使用了此 Relation 的东西
+        // 回溯所有使用了的
         if (!_usedImpls.TryGetValue(dependencyDescription.DependencyType, out var impls)) return;
         foreach (var weakReference in impls.FindAll(t => t.IsAlive && t.Target is INotifyDependencyChanged)
                      .ToList())
         {
-            var newImpl =
-                await ResolveRelationAsync(dependencyDescription, relation,
-                    new DependencyResolveOption()); // TODO: 可能之后会有其他的 Option 优化此处
+            target ??= await ResolveDependencyAsync(dependencyDescription.DependencyType, new DependencyResolveOption());
             ((INotifyDependencyChanged)weakReference.Target).DependencyChanged?
-                .Invoke(dependencyDescription.DependencyType, newImpl);
+                .Invoke(dependencyDescription.DependencyType, target);
         }
     }
 
@@ -85,6 +83,18 @@ public partial class Depository
         var dependencyDescription = GetDependencyDescription(dependency);
         var relation = await GetRelationAsync(dependencyDescription);
         return await ResolveRelationAsync(dependencyDescription, relation, option);
+    }
+
+    public async Task ChangeResolveTargetAsync(Type dependency, object? target)
+    {
+        var description = GetDependencyDescription(dependency);
+        if (description.Lifetime == DependencyLifetime.Singleton)
+        {
+            await _rootScope.SetImplementAsync(dependency, target);
+        }
+
+        if (_option.AutoNotifyDependencyChange)
+             await NotifyDependencyChange(description);
     }
 
     private async Task<object> ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
@@ -158,10 +168,13 @@ public partial class Depository
             var types = parameterInfos.Select(t => t.ParameterType).ToList();
             foreach (var type in types)
             {
-                if (!_usedImpls.TryGetValue(type, out var references))
+                var actualType = type;
+                if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type))
+                    actualType = type.GenericTypeArguments[0];
+                if (!_usedImpls.TryGetValue(actualType, out var references))
                 {
                     references = new List<WeakReference>();
-                    _usedImpls[type] = references;
+                    _usedImpls[actualType] = references;
                 }
 
                 references.Add(weakRef);
@@ -213,5 +226,4 @@ public partial class Depository
         await _rootScope.SetImplementAsync(implementType, impl);
         return impl;
     }
-
 }
