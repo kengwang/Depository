@@ -18,10 +18,10 @@ public partial class Depository
             (relation.ImplementType.IsAbstract || relation.ImplementType.IsInterface))
             throw new ImplementNotInstantiableException();
         if (!_dependencyRelations.TryGetValue(dependency, out var relations))
-            {
-                relations = new List<DependencyRelation>();
-                _dependencyRelations.Add(dependency, relations);
-            }
+        {
+            relations = new List<DependencyRelation>();
+            _dependencyRelations.Add(dependency, relations);
+        }
 
         relations.Add(relation);
 
