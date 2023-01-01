@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1672593986907,
+  "lastUpdate": 1672596056014,
   "repoUrl": "https://github.com/kengwang/Depository",
   "entries": {
     "Benchmark.Net Benchmark": [
@@ -252,6 +252,132 @@ window.BENCHMARK_DATA = {
             "value": 32612.175851004464,
             "unit": "ns",
             "range": "± 247.35291513619924"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "committer": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "distinct": false,
+          "id": "5ea5cbc3ee68aa4cffc12696115585560502c277",
+          "message": "[feat] Add Notification Hub",
+          "timestamp": "2023-01-02T01:39:13+08:00",
+          "tree_id": "fa89d2967971c96af072149b848fbcb19325fa78",
+          "url": "https://github.com/kengwang/Depository/commit/5ea5cbc3ee68aa4cffc12696115585560502c277"
+        },
+        "date": 1672596055593,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveSingleToSingle",
+            "value": 4710.011376953125,
+            "unit": "ns",
+            "range": "± 105.65374439070109"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToSingle",
+            "value": 5009.478406732733,
+            "unit": "ns",
+            "range": "± 157.32085829263647"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingIEnumerable",
+            "value": 6821.372427133413,
+            "unit": "ns",
+            "range": "± 94.14115277460388"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingMultipleResolve",
+            "value": 5905.108061790466,
+            "unit": "ns",
+            "range": "± 97.45950908377557"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.Depository_MultiToMultiBenchmark_IEnumerable",
+            "value": 6970.448593521118,
+            "unit": "ns",
+            "range": "± 156.64814357368834"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.Depository_MultiToMultiBenchmark_ResolveMultiple",
+            "value": 6084.812467098236,
+            "unit": "ns",
+            "range": "± 117.63036543336734"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.MicrosoftExtensionDependencyInjection_MultiToMultiBenchmark",
+            "value": 5415.788223266602,
+            "unit": "ns",
+            "range": "± 111.32777426280664"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.AutoFac_MultiToMultiBenchmark",
+            "value": 154612.09657952725,
+            "unit": "ns",
+            "range": "± 5265.3300927616965"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.Depository_MultiToSingleBenchmark",
+            "value": 4846.369956334432,
+            "unit": "ns",
+            "range": "± 124.51901129695318"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.MicrosoftExtensionDependencyInjection_MultiToSingleBenchmark",
+            "value": 5105.405140762329,
+            "unit": "ns",
+            "range": "± 927.9096800570293"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.AutoFac_MultiToSingleBenchmark",
+            "value": 45556.379638671875,
+            "unit": "ns",
+            "range": "± 845.5427305354021"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.Depository_SingleToDefaultImplementBenchmark",
+            "value": 3652.5066481696235,
+            "unit": "ns",
+            "range": "± 76.04863012975798"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.MicrosoftExtensionDependencyInjection_SingleToDefaultImplementBenchmark",
+            "value": 4302.920500831604,
+            "unit": "ns",
+            "range": "± 798.9539008112093"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.AutoFac_SingleToDefaultImplementBenchmark",
+            "value": 34592.40743001302,
+            "unit": "ns",
+            "range": "± 964.4332756421447"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.Depository",
+            "value": 4516.815775944637,
+            "unit": "ns",
+            "range": "± 120.81104474062289"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.MicrosoftExtensionDependencyInjection",
+            "value": 4956.083919487,
+            "unit": "ns",
+            "range": "± 865.6078785488469"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.AutoFac",
+            "value": 36783.29044596354,
+            "unit": "ns",
+            "range": "± 427.3835882242102"
           }
         ]
       }
