@@ -6,7 +6,9 @@ on:
   pull_request:
     branches:
       - release/*
-
+      - benchmark/*
+          
+  
 jobs:
   benchmark:
     name: Run Benchmark
@@ -26,4 +28,18 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: benchmark-result
-          path: BenchmarkDotNet.Artifacts
+          path: Depository.Benchmarks/BenchmarkDotNet.Artifacts
+          
+          
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: Benchmark.Net Benchmark
+          tool: 'benchmarkdotnet'
+          output-file-path: Depository.Benchmarks/BenchmarkDotNet.Artifacts/results/Sample.Benchmarks-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          comment-always: true
+          alert-comment-cc-users: '@kengwang'

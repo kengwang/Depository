@@ -6,12 +6,10 @@ using Depository.Core;
 using Depository.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Depository.Benchmarks.IoCContainersComparison;
+// ReSharper disable once CheckNamespace
+namespace Depository.Benchmarks;
 
-[MemoryDiagnoser(false)]
-[JsonExporterAttribute.Full]
-[JsonExporterAttribute.FullCompressed]
-public class SingleToSingleBenchmark
+public partial class Benchmarks
 {
     [Benchmark]
     public async Task<IGuidGenerator> Depository()

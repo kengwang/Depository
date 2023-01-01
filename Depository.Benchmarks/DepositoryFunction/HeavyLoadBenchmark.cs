@@ -6,46 +6,34 @@ using Depository.Benchmarks.Interfaces;
 using Depository.Core;
 using Depository.Extensions;
 
-namespace Depository.Benchmarks.DepositoryFunction;
+// ReSharper disable once CheckNamespace
+namespace Depository.Benchmarks;
 
-[MemoryDiagnoser(false)]
-[JsonExporterAttribute.Full]
-[JsonExporterAttribute.FullCompressed]
-public class HeavyLoadBenchmark
+public partial class Benchmarks
 {
     [Params(10, 100, 1_000, 1_000_000)] public int IterationTime { get; set; }
 
-    private IDepository _depository = null!;
-
-    [IterationSetup]
-    public void IterationSetup()
-    {
-        _depository = DepositoryFactory.CreateNew();
-    }
-
-    [IterationCleanup]
-    public void IterationCleanup()
-    {
-        _depository.Dispose();
-    }
-
     public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_IEnumerable()
     {
+        var depository = DepositoryFactory.CreateNew();
+
         for (var i = 0; i < IterationTime; i++)
         {
-            await _depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+            await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         }
 
-        return await _depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        return await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
     }
 
     public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_ResolveMultiple()
     {
+        
+        var depository = DepositoryFactory.CreateNew();
         for (var i = 0; i < IterationTime; i++)
         {
-            await _depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+            await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         }
 
-        return await _depository.ResolveMultipleAsync<IGuidGenerator>();
+        return await depository.ResolveMultipleAsync<IGuidGenerator>();
     }
 }

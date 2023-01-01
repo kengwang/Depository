@@ -1,9 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Reflection;
 using BenchmarkDotNet.Running;
 using Depository.Benchmarks;
-using Depository.Benchmarks.DepositoryFunction;
 
 Console.WriteLine(@"
 Preface
@@ -25,6 +23,4 @@ This Benchmark is just for fun, don't over-interpret it!
 If in doubt, use another IoC container! Depository is garbage
 ");
 
-var summaries = BenchmarkSwitcher
-    .FromAssembly(Assembly.GetCallingAssembly())
-    .RunAll();
+BenchmarkRunner.Run<Benchmarks>();

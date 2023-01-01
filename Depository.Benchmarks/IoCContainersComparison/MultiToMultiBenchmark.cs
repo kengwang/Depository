@@ -6,15 +6,14 @@ using Depository.Core;
 using Depository.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Depository.Benchmarks.IoCContainersComparison;
+// ReSharper disable once CheckNamespace
+namespace Depository.Benchmarks;
 
-[MemoryDiagnoser(false)]
-[JsonExporterAttribute.Full]
-[JsonExporterAttribute.FullCompressed]
-public class MultiToMultiBenchmark
+
+public partial class Benchmarks
 {
     [Benchmark]
-    public async Task Depository_IEnumerable()
+    public async Task Depository_MultiToMultiBenchmark_IEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -23,7 +22,7 @@ public class MultiToMultiBenchmark
     }
 
     [Benchmark]
-    public async Task Depository_ResolveMultiple()
+    public async Task Depository_MultiToMultiBenchmark_ResolveMultiple()
     {
         var depository = DepositoryFactory.CreateNew();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -33,7 +32,7 @@ public class MultiToMultiBenchmark
 
 
     [Benchmark]
-    public object MicrosoftExtensionDependencyInjection()
+    public object MicrosoftExtensionDependencyInjection_MultiToMultiBenchmark()
     {
         ServiceCollection services = new();
         services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -43,7 +42,7 @@ public class MultiToMultiBenchmark
     }
 
     [Benchmark]
-    public object AutoFac()
+    public object AutoFac_MultiToMultiBenchmark()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<RandomGuidGenerator>().As<IGuidGenerator>();

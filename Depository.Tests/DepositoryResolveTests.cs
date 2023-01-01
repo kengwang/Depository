@@ -40,7 +40,7 @@ public class DepositoryResolveTests
     }
 
     [Fact]
-    public async void ResolveMultipleRegisteredService_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
+    public async void ResolveMultipleRegisteredService_ToSingleResolve_ShouldReturnRandomGuidGenerator()
     {
         // Init
         var depository = CreateNewDepository();
@@ -69,7 +69,9 @@ public class DepositoryResolveTests
         var guidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
 
         // Assert
-        guidGenerator.Should().NotBeNull().And.BeOfType<RandomGuidGenerator>();
+        guidGenerator.Should().NotBeNull()
+            .And.BeAssignableTo<IGuidGenerator>()
+            .And.BeOfType<RandomGuidGenerator>();
     }
 
 
@@ -163,7 +165,7 @@ public class DepositoryResolveTests
     }
 
     [Fact]
-    public async void ResolveMultipleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnEmptyGuidGenerator()
+    public async void ResolveMultipleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnRandomGuidGenerator()
     {
         // Init
         var depository = CreateNewDepository();
@@ -175,7 +177,8 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<IGuidGenerator>();
+            .And.BeAssignableTo<IGuidGenerator>()
+            .And.BeOfType<RandomGuidGenerator>();
     }
 
     [Fact]
@@ -213,6 +216,38 @@ public class DepositoryResolveTests
             .And.NotBeEmpty()
             .And.ContainItemsAssignableTo<IGuidGenerator>()
             .And.HaveCount(2);
+    }
+    
+    [Fact]
+    public async void ResolveGeneric_ToNormalType_ShouldReturnNormalType()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync<ITypeGeneric<string>, TypeGeneric<string>>();
+
+        // Action
+        var guidGenerator = await depository.ResolveAsync<ITypeGeneric<string>>();
+
+        // Assert
+        guidGenerator.Should().NotBeNull()
+            .And.BeAssignableTo<ITypeGeneric<string>>()
+            .And.BeOfType<TypeGeneric<string>>();
+    }
+    
+    [Fact]
+    public async void ResolveGeneric_ToNormalType_ShouldReturnGenericType()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync(typeof(ITypeGeneric<>),typeof(TypeGeneric<>));
+
+        // Action
+        var guidGenerator = await depository.ResolveAsync<ITypeGeneric<string>>();
+
+        // Assert
+        guidGenerator.Should().NotBeNull()
+            .And.BeAssignableTo<ITypeGeneric<string>>()
+            .And.BeOfType<TypeGeneric<string>>();
     }
 
     // Actions
