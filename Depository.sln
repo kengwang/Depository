@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Tests", "Deposit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Extensions", "Depository.Extensions\Depository.Extensions.csproj", "{FD290B02-CC6C-476B-8C4D-1B98FF6A3091}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Benchmarks", "Depository.Benchmarks\Depository.Benchmarks.csproj", "{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,5 +41,9 @@ Global
 		{FD290B02-CC6C-476B-8C4D-1B98FF6A3091}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD290B02-CC6C-476B-8C4D-1B98FF6A3091}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD290B02-CC6C-476B-8C4D-1B98FF6A3091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
