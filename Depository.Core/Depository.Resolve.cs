@@ -151,20 +151,25 @@ public partial class Depository
 
 
         // Wire to the regenerator
-        var weakRef = new WeakReference(dependencyImpl);
-        var types = parameterInfos.Select(t => t.ParameterType).ToList();
-        foreach (var type in types)
+        // ReSharper disable once InvertIf
+        if (!_option.ReflogForNotifiableDependencyOnly || dependencyImpl is INotifyDependencyChanged)
         {
-            if (!_usedImpls.TryGetValue(type, out var references))
+            var weakRef = new WeakReference(dependencyImpl);
+            var types = parameterInfos.Select(t => t.ParameterType).ToList();
+            foreach (var type in types)
             {
-                references = new List<WeakReference>();
-                _usedImpls[type] = references;
+                if (!_usedImpls.TryGetValue(type, out var references))
+                {
+                    references = new List<WeakReference>();
+                    _usedImpls[type] = references;
+                }
+
+                references.Add(weakRef);
             }
 
-            references.Add(weakRef);
+            _resolvedTypes.GetOrCreateValue(dependencyImpl).AddRange(types);
         }
 
-        _resolvedTypes.GetOrCreateValue(dependencyImpl).AddRange(types);
         return dependencyImpl;
     }
 
