@@ -7,12 +7,15 @@ using Depository.Extensions;
 
 namespace Depository.Benchmarks.DepositoryFunction;
 
+[MemoryDiagnoser(false)]
+[JsonExporterAttribute.Full]
+[JsonExporterAttribute.FullCompressed]
 public class ResolveBenchmark
 {
     private IDepository _depository = null!;
 
-    [IterationCleanup]
-    public async void GlobalSetup()
+    [IterationSetup]
+    public async void IterationSetup()
     {
         _depository = DepositoryFactory.CreateNew();
         await _depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -44,7 +47,7 @@ public class ResolveBenchmark
     }
 
     [IterationCleanup]
-    public void GlobalCleanup()
+    public void IterationCleanup()
     {
         _depository.Dispose();
     }

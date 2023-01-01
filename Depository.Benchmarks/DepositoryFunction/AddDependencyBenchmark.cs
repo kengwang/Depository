@@ -14,16 +14,16 @@ namespace Depository.Benchmarks.DepositoryFunction;
 [JsonExporterAttribute.FullCompressed]
 public class AddDependencyBenchmark
 {
-    private IDepository _depository = null!;
+    private IDepository _depository = DepositoryFactory.CreateNew();
 
-    [IterationCleanup]
-    public void GlobalSetup()
+    [IterationSetup]
+    public void IterationSetup()
     {
         _depository = DepositoryFactory.CreateNew();
     }
 
     [IterationCleanup]
-    public void GlobalCleanup()
+    public void IterationCleanup()
     {
         _depository.Dispose();
     }

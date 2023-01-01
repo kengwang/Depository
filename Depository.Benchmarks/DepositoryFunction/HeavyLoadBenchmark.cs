@@ -17,14 +17,14 @@ public class HeavyLoadBenchmark
 
     private IDepository _depository = null!;
 
-    [IterationCleanup]
-    public void GlobalSetup()
+    [IterationSetup]
+    public void IterationSetup()
     {
         _depository = DepositoryFactory.CreateNew();
     }
 
     [IterationCleanup]
-    public void GlobalCleanup()
+    public void IterationCleanup()
     {
         _depository.Dispose();
     }

@@ -9,11 +9,13 @@ namespace Depository.Benchmarks.DepositoryFunction;
 [JsonExporterAttribute.FullCompressed]
 public class SetupBenchmark
 {
+    [Benchmark]
     public IDepository Setup_Clean()
     {
         return new Core.Depository();
     }
 
+    [Benchmark]
     public IDepository Setup_Factory()
     {
         return DepositoryFactory.CreateNew();

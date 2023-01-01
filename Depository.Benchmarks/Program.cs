@@ -3,6 +3,7 @@
 using System.Reflection;
 using BenchmarkDotNet.Running;
 using Depository.Benchmarks;
+using Depository.Benchmarks.DepositoryFunction;
 
 Console.WriteLine(@"
 Preface
