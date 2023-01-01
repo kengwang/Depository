@@ -1,0 +1,26 @@
+﻿name: Benchmark For Depository
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  benchmark:
+    name: Run Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Run benchmark
+        run: cd Depository.Benchmarks && dotnet run
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: benchmark-result
+          path: BenchmarkDotNet.Artifacts
