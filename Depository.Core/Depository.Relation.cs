@@ -8,14 +8,20 @@ public partial class Depository
 {
     private readonly Dictionary<DependencyDescription, List<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
-    
+
     public async Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation)
     {
+        if (_option.CheckerOption.ImplementIsInheritedFromDependency &&
+            dependency.DependencyType.IsAssignableFrom(relation.ImplementType))
+            throw new ImplementNotInheritedFromDependencyException();
+        if (_option.CheckerOption.ImplementIsInstantiable &&
+            (relation.ImplementType.IsAbstract || relation.ImplementType.IsInterface))
+            throw new ImplementNotInstantiableException();
         if (!_dependencyRelations.TryGetValue(dependency, out var relations))
-        {
-            relations = new List<DependencyRelation>();
-            _dependencyRelations.Add(dependency, relations);
-        }
+            {
+                relations = new List<DependencyRelation>();
+                _dependencyRelations.Add(dependency, relations);
+            }
 
         relations.Add(relation);
 

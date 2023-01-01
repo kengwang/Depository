@@ -4,6 +4,7 @@ using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
+using Depository.Abstraction.Models.Options;
 
 namespace Depository.Core;
 
@@ -99,7 +100,7 @@ public partial class Depository
         {
             DependencyLifetime.Singleton => await ResolveSingleton(implementType, option),
             DependencyLifetime.Transient => await ResolveTransient(implementType, option),
-            DependencyLifetime.Scoped => await ResolveScope(implementType, option),
+            DependencyLifetime.Scoped => await ResolveScoped(implementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -120,7 +121,7 @@ public partial class Depository
             {
                 DependencyLifetime.Singleton => await ResolveSingleton(implementType, option),
                 DependencyLifetime.Transient => await ResolveTransient(implementType, option),
-                DependencyLifetime.Scoped => await ResolveScope(implementType, option),
+                DependencyLifetime.Scoped => await ResolveScoped(implementType, option),
                 _ => throw new ArgumentOutOfRangeException()
             };
             results.Add(impl);
@@ -178,12 +179,12 @@ public partial class Depository
         {
             DependencyLifetime.Singleton => await ResolveSingleton(relation.ImplementType, option),
             DependencyLifetime.Transient => await ResolveTransient(relation.ImplementType, option),
-            DependencyLifetime.Scoped => await ResolveScope(relation.ImplementType, option),
+            DependencyLifetime.Scoped => await ResolveScoped(relation.ImplementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    private async Task<object> ResolveScope(Type implementType, DependencyResolveOption? option)
+    private async Task<object> ResolveScoped(Type implementType, DependencyResolveOption? option)
     {
         if (option?.Scope is null) throw new ScopeNotSetException();
         if (await option.Scope.ExistAsync(implementType))

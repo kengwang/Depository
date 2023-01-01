@@ -1,4 +1,5 @@
 ﻿using Depository.Abstraction.Models;
+using Depository.Abstraction.Models.Options;
 
 namespace Depository.Abstraction.Interfaces;
 

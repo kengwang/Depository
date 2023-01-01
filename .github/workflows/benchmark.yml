@@ -2,10 +2,9 @@
 on:
   push:
     branches:
-      - release/*
+      - benchmark/*
   pull_request:
     branches:
-      - release/*
       - benchmark/*
           
   
