@@ -11,13 +11,13 @@ namespace Depository.Benchmarks;
 
 public partial class Benchmarks
 {
-    [Params(10, 100, 1_000, 1_000_000)] public int IterationTime { get; set; }
-
-    public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_IEnumerable()
+    
+    [Arguments(10,1_000,1_000_000)]
+    public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_IEnumerable(int iterationTime)
     {
         var depository = DepositoryFactory.CreateNew();
 
-        for (var i = 0; i < IterationTime; i++)
+        for (var i = 0; i < iterationTime; i++)
         {
             await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         }
@@ -25,11 +25,12 @@ public partial class Benchmarks
         return await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
     }
 
-    public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_ResolveMultiple()
+    [Arguments(10,1_000,1_000_000)]
+    public async Task<IEnumerable<IGuidGenerator>> HeavyLoad_ResolveMultiple(int iterationTime)
     {
         
         var depository = DepositoryFactory.CreateNew();
-        for (var i = 0; i < IterationTime; i++)
+        for (var i = 0; i < iterationTime; i++)
         {
             await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
         }
