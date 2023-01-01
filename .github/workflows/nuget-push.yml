@@ -38,7 +38,10 @@ jobs:
           path: Packages
 
       - name: Publish To NuGet
-        uses: EasyDesk/action-nuget-push@v1
-        with:
-          nuget-api-key: ${{ secrets.NUGET_APIKEY }}
-          publish-dir: 'Packages'
+        run: |
+          dotnet nuget push "Packages/*.nupkg" -k ${{ secrets.NUGET_APIKEY }} -s 'https://api.nuget.org/v3/index.json' --skip-duplicate
+      
+      - name: Publish To Github Package
+        run: |
+          dotnet nuget add source --username kengwang --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/kengwang/index.json"
+          dotnet nuget push "Packages/*.nupkg" --source "github" --skip-duplicate
