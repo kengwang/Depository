@@ -2,5 +2,5 @@
 
 public interface IConstructorInjectService
 {
-    public bool IsNormal { get; set; }
+
 }

@@ -3,7 +3,7 @@ using Depository.Demo.Interfaces;
 
 namespace Depository.Demo.Implements;
 
-public class ConstructorInjectNotifiableService : IConstructorInjectService, INotifyDependencyChanged
+public class ConstructorInjectNotifiableService : IConstructorInjectService, INotifyDependencyChanged, ICheckIsNormal
 {
 
     private readonly IGuidGenerator _generator;

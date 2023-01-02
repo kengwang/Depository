@@ -252,7 +252,7 @@ public class DepositoryAddTests
 
 
     // Actions
-    private Core.Depository CreateNewDepository() => new();
+    private static Core.Depository CreateNewDepository() => new();
 
     private static void AssertDepDescIfMatch(DependencyDescription? resolvedDependency, Type dependencyType,
         DependencyResolvePolicy policy, DependencyLifetime lifetime)

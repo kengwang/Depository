@@ -148,6 +148,102 @@ public class DepositoryResolveTests
             .And.HaveCount(2);
     }
 
+    [Fact]
+    public async void ResolveService_ToDefaultImplement_ShouldReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription
+        {
+            DependencyType = typeof(IGuidGenerator),
+            ResolvePolicy = DependencyResolvePolicy.LastWin,
+            Lifetime = DependencyLifetime.Singleton
+        };
+        await depository.AddDependencyAsync(description);
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(EmptyGuidGenerator),
+            DefaultImplementation = emptyGuidGenerator
+        });
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
+
+        // Assert
+        resolveGuidGenerator.Should().Be(emptyGuidGenerator);
+    }
+
+    [Fact]
+    public async void ResolveMultipleService_ToDefaultImplements_UsingResolves_ShouldAllReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription
+        {
+            DependencyType = typeof(IGuidGenerator),
+            ResolvePolicy = DependencyResolvePolicy.LastWin,
+            Lifetime = DependencyLifetime.Singleton
+        };
+        await depository.AddDependencyAsync(description);
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(EmptyGuidGenerator),
+            DefaultImplementation = emptyGuidGenerator
+        });
+
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(RandomGuidGenerator),
+            DefaultImplementation = emptyGuidGenerator
+        });
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveDependenciesAsync(typeof(IGuidGenerator));
+
+        // Assert
+        resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
+    }
+
+    [Fact]
+    public async void ResolveMultipleService_ToDefaultImplement_UsingIEnumerable_ShouldAllReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription
+        {
+            DependencyType = typeof(IGuidGenerator),
+            ResolvePolicy = DependencyResolvePolicy.LastWin,
+            Lifetime = DependencyLifetime.Singleton
+        };
+        await depository.AddDependencyAsync(description);
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(EmptyGuidGenerator),
+            DefaultImplementation = emptyGuidGenerator
+        });
+
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(RandomGuidGenerator),
+            DefaultImplementation = emptyGuidGenerator
+        });
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IEnumerable<IGuidGenerator>));
+
+        // Assert
+        Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(resolveGuidGenerator).ToList()
+            .Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
+    }
+
     // Extensions
 
     [Fact]
@@ -218,7 +314,7 @@ public class DepositoryResolveTests
             .And.ContainItemsAssignableTo<IGuidGenerator>()
             .And.HaveCount(2);
     }
-    
+
     [Fact]
     public async void ResolveGeneric_ToNormalType_ShouldReturnNormalType()
     {
@@ -234,13 +330,13 @@ public class DepositoryResolveTests
             .And.BeAssignableTo<ITypeGeneric<string>>()
             .And.BeOfType<TypeGeneric<string>>();
     }
-    
+
     [Fact]
     public async void ResolveGeneric_ToNormalType_ShouldReturnGenericType()
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(ITypeGeneric<>),typeof(TypeGeneric<>));
+        await depository.AddSingletonAsync(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
 
         // Action
         var guidGenerator = await depository.ResolveAsync<ITypeGeneric<string>>();
@@ -256,69 +352,119 @@ public class DepositoryResolveTests
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
-        
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService), typeof(ConstructorInjectService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+
         // Action
         var service = await depository.ResolveAsync<IConstructorInjectService>();
-        
+
         // Assert
-        service.IsNormal.Should().BeTrue();
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
-    
+
     [Fact]
     public async void ResolveIEnumerableConstructorInject_ShouldBeNormal()
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorIEnumerableInjectService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(EmptyGuidGenerator));
-        
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+            typeof(ConstructorIEnumerableInjectService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
+
         // Action
         var service = await depository.ResolveAsync<IConstructorInjectService>();
-        
+
         // Assert
-        service.IsNormal.Should().BeTrue();
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
-    
+
     [Fact]
     public async void ResolveConstructorNotification_ShouldBeNormal()
     {
         // Init
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
-        
-        
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+            typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+
+
         // Action
         var service = await depository.ResolveAsync<IConstructorInjectService>();
-        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator),new EmptyGuidGenerator());
-        
-        
+        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator), new EmptyGuidGenerator());
+
+
         // Assert
-        service.IsNormal.Should().BeTrue();
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
-    
+
     [Fact]
     public async void ResolveIEnumerableConstructorNotification_ShouldBeNormal()
     {
         // Init
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(RandomGuidGenerator));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator),typeof(EmptyGuidGenerator));
-        
-        
+        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+            typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
+
+
         // Action
         var service = await depository.ResolveAsync<IConstructorInjectService>();
-        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator),new EmptyGuidGenerator());
-        
-        
+        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator), new EmptyGuidGenerator());
+
+
         // Assert
-        service.IsNormal.Should().BeTrue();
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+    }
+
+    [Fact]
+    public async void ResolveService_ToDefaultImplement_UsingExtension_ShouldReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveAsync<IGuidGenerator>();
+
+        // Assert
+        resolveGuidGenerator.Should().Be(emptyGuidGenerator);
+    }
+
+    [Fact]
+    public async void ResolveMultipleService_ToDefaultImplement_UsingExtension_ShouldAllReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveMultipleAsync<IGuidGenerator>();
+
+        // Assert
+        resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
     
+    [Fact]
+    public async void ResolveMultipleService_ToDefaultImplement_UsingExtension_IEnumerable_ShouldAllReturnDefaultImplement()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
+
+        // Action
+        var resolveGuidGenerator = await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+
+        // Assert
+        resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
+    }
+
     // Actions
-    private Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => new(options);
+    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => new(options);
 }

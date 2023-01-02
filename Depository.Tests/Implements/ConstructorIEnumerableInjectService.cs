@@ -2,7 +2,7 @@
 
 namespace Depository.Demo.Implements;
 
-public class ConstructorIEnumerableInjectService : IConstructorInjectService
+public class ConstructorIEnumerableInjectService : IConstructorInjectService, ICheckIsNormal
 {
     public bool IsNormal { get; set; }
 

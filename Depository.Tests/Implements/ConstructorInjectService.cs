@@ -2,7 +2,7 @@
 
 namespace Depository.Demo.Implements;
 
-public class ConstructorInjectService : IConstructorInjectService
+public class ConstructorInjectService : IConstructorInjectService, ICheckIsNormal
 {
     private IGuidGenerator _generator;
     
