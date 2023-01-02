@@ -11,6 +11,8 @@ public static class ResolveExtension
     
     public static async Task<List<T>> ResolveMultipleAsync<T>(this IDepositoryResolve depository)
     {
-        return (await depository.ResolveDependenciesAsync(typeof(T))).Cast<T>().ToList();
+        return (await depository.ResolveDependenciesAsync(typeof(T)))
+            .Select(o => (T)o)
+            .ToList();
     }
 }
