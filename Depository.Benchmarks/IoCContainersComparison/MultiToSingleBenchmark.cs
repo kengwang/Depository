@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace Depository.Benchmarks;
 
-public partial class Benchmarks
+public partial class IoCContainersBenchmarks
 {
     [Benchmark]
     public async Task<IGuidGenerator> Depository_MultiToSingleBenchmark()

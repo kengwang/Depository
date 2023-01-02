@@ -10,7 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Depository.Benchmarks;
 
 
-public partial class Benchmarks
+[MemoryDiagnoser(false)]
+[JsonExporterAttribute.Full]
+[JsonExporterAttribute.FullCompressed]
+public partial class IoCContainersBenchmarks
 {
     [Benchmark]
     public async Task<IGuidGenerator> Depository_SingleToDefaultImplementBenchmark()

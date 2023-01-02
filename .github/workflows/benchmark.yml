@@ -46,3 +46,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-always: true
           alert-comment-cc-users: '@kengwang'
+      
+      - name: Store Result in Another Place
+        run: |
+          mkdir -p ${{ runner.temp }}/benchmark-result
+          cp -r Depository.Benchmarks/BenchmarkDotNet.Artifacts/ ${{ runner.temp }}/benchmark-result
+          
+      - name: Checkout Github Page
+        uses: actions/checkout@v2.6.0
+        with:
+          ref: gh-pages
+            
+      - name: Restore Result
+        run: |
+          mkdir -p bench/${{ github.sha }}
+          cp -r ${{ runner.temp }}/benchmark-result bench/${{ github.sha }}
+          
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update Benchmark on ${{ github.sha }}

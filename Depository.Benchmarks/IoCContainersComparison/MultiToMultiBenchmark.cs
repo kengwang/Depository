@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Depository.Benchmarks;
 
 
-public partial class Benchmarks
+public partial class IoCContainersBenchmarks
 {
     [Benchmark]
     public async Task Depository_MultiToMultiBenchmark_IEnumerable()

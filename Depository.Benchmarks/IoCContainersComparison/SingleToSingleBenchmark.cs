@@ -9,10 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace Depository.Benchmarks;
 
-public partial class Benchmarks
+public partial class IoCContainersBenchmarks
 {
     [Benchmark]
-    public async Task<IGuidGenerator> Depository()
+    public async Task<IGuidGenerator> Depository_SingleToSingle()
     {
         var depository = DepositoryFactory.CreateNew();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -21,7 +21,7 @@ public partial class Benchmarks
 
 
     [Benchmark]
-    public IGuidGenerator MicrosoftExtensionDependencyInjection()
+    public IGuidGenerator MicrosoftExtensionDependencyInjection_SingleToSingle()
     {
         ServiceCollection services = new();
         services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -30,7 +30,7 @@ public partial class Benchmarks
     }
 
     [Benchmark]
-    public IGuidGenerator AutoFac()
+    public IGuidGenerator AutoFac_SingleToSingle()
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<RandomGuidGenerator>().As<IGuidGenerator>();

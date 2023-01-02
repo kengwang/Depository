@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Depository.Abstraction.Interfaces;
 
 namespace Depository.Benchmarks;
 
