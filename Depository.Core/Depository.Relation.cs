@@ -1,6 +1,7 @@
 ﻿using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
+using Depository.Abstraction.Models.Options;
 
 namespace Depository.Core;
 
@@ -17,13 +18,28 @@ public partial class Depository
         if (_option.CheckerOption.ImplementIsInstantiable &&
             (relation.ImplementType.IsAbstract || relation.ImplementType.IsInterface))
             throw new ImplementNotInstantiableException();
+
+
         if (!_dependencyRelations.TryGetValue(dependency, out var relations))
         {
             relations = new List<DependencyRelation>();
             _dependencyRelations.Add(dependency, relations);
         }
 
+        switch (_option.ImplementTypeDuplicatedAction)
+        {
+            case ImplementTypeDuplicatedAction.Throw:
+                if (relations.Any(dependencyRelation => dependencyRelation.ImplementType == relation.ImplementType))
+                    throw new ImplementDuplicatedException();
+                break;
+            case ImplementTypeDuplicatedAction.Ignore:
+                if (relations.Any(dependencyRelation => dependencyRelation.ImplementType == relation.ImplementType))
+                    return;
+                break;
+        }
+
         relations.Add(relation);
+
 
         // 通知修改
         if (_option.AutoNotifyDependencyChange)
