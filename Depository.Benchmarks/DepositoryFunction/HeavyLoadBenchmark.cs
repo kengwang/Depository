@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using Depository.Abstraction.Models.Options;
 using Depository.Benchmarks.Implements;
 using Depository.Benchmarks.Interfaces;
 using Depository.Core;
@@ -27,8 +28,8 @@ public partial class Benchmarks
     [Benchmark]
     public async Task<List<IGuidGenerator>> HeavyLoad_ResolveMultiple()
     {
-        
-        var depository = DepositoryFactory.CreateNew();
+        // For Benchmark Purpose only
+        var depository = DepositoryFactory.CreateNew(options=>options.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue);
         for (var i = 0; i < 1_000_000; i++)
         {
             await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
