@@ -8,11 +8,18 @@ public partial class Depository
     {
         var subscribers =
             (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification>)))
-            .Cast<INotificationSubscriber<TNotification>>()
+            .Select(receiver => (INotificationSubscriber<TNotification>)receiver)
             .ToList();
         foreach (var subscriber in subscribers)
         {
-            await subscriber.HandleNotification(notification);
+            try
+            {
+                await subscriber.HandleNotification(notification);
+            }
+            catch
+            {
+                // ignored
+            }
         }
     }
 
@@ -21,12 +28,19 @@ public partial class Depository
     {
         var subscribers =
             (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification, TResult>)))
-            .Cast<INotificationSubscriber<TNotification, TResult>>()
+            .Select(receiver => (INotificationSubscriber<TNotification, TResult>)receiver)
             .ToList();
         var results = new List<TResult>();
         foreach (var subscriber in subscribers)
         {
-            results.Add(await subscriber.HandleNotification(notification));
+            try
+            {
+                results.Add(await subscriber.HandleNotification(notification));
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         return results;
