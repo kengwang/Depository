@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1672596056014,
+  "lastUpdate": 1672643635746,
   "repoUrl": "https://github.com/kengwang/Depository",
   "entries": {
     "Benchmark.Net Benchmark": [
@@ -378,6 +378,78 @@ window.BENCHMARK_DATA = {
             "value": 36783.29044596354,
             "unit": "ns",
             "range": "± 427.3835882242102"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "committer": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "distinct": false,
+          "id": "e82a9481dfdbdbffb14cc8744b337e017ff913de",
+          "message": "[fix]<benchmark>: PublishNotificationWithResult Not Running",
+          "timestamp": "2023-01-02T14:59:21+08:00",
+          "tree_id": "3a6de7b8156c34a8d4c9c4bd50bfa41ffe3bf2f2",
+          "url": "https://github.com/kengwang/Depository/commit/e82a9481dfdbdbffb14cc8744b337e017ff913de"
+        },
+        "date": 1672643635049,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Depository.Benchmarks.Benchmarks.HeavyLoad_IEnumerable",
+            "value": 302602093.23333335,
+            "unit": "ns",
+            "range": "± 660312.4385889192"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.HeavyLoad_ResolveMultiple",
+            "value": 734744723.7333333,
+            "unit": "ns",
+            "range": "± 9155127.72436304"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotification",
+            "value": 3735.381635812613,
+            "unit": "ns",
+            "range": "± 28.733933730852048"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotificationWithResult",
+            "value": 4010.2438715616863,
+            "unit": "ns",
+            "range": "± 54.41501140108148"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveSingleToSingle",
+            "value": 3717.4159131368,
+            "unit": "ns",
+            "range": "± 32.24333752371852"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToSingle",
+            "value": 4089.3941869099936,
+            "unit": "ns",
+            "range": "± 44.22225103950553"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingIEnumerable",
+            "value": 5783.461315699986,
+            "unit": "ns",
+            "range": "± 66.48003660070398"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingMultipleResolve",
+            "value": 4692.273872375488,
+            "unit": "ns",
+            "range": "± 48.92874619146272"
           }
         ]
       }
