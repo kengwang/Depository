@@ -23,7 +23,7 @@ public partial class Benchmarks
     {
         var depository = DepositoryFactory.CreateNew();
         await depository.AddSingletonAsync<INotificationSubscriber<Notification,NotificationResult>, NotificationAndResultSubscriber>();
-        await depository.PublishNotificationAsync(new Notification());
+        await depository.PublishNotificationWithResultAsync<Notification,NotificationResult>(new Notification());
     }
 }
 
