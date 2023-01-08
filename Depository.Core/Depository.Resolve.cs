@@ -36,7 +36,7 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
-        var relations = await GetRelationsAsync(dependencyDescription);
+        var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
         {
@@ -81,7 +81,7 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
-        var relation = await GetRelationAsync(dependencyDescription);
+        var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
         return await ResolveRelationAsync(dependencyDescription, relation, option);
     }
 
@@ -101,7 +101,7 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        var relation = await GetRelationAsync(dependencyDescription);
+        var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         var implementType = relation.ImplementType;
         if (!dependency.ContainsGenericParameters)
@@ -119,7 +119,7 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        var relations = await GetRelationsAsync(dependencyDescription);
+        var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
         {

@@ -63,6 +63,20 @@ public partial class Depository
         return Task.CompletedTask;
     }
 
+    public async Task DisableRelationAsync(DependencyDescription description, DependencyRelation relation)
+    {
+        relation.IsEnabled = false;
+        if (_option.AutoNotifyDependencyChange)
+            await NotifyDependencyChange(description);
+    }
+
+    public async Task EnableRelationAsync(DependencyDescription description, DependencyRelation relation)
+    {
+        relation.IsEnabled = true;
+        if (_option.AutoNotifyDependencyChange)
+            await NotifyDependencyChange(description);
+    }
+
 
     public async Task ChangeFocusingRelationAsync(DependencyDescription dependencyDescription,
         DependencyRelation relation)
@@ -72,20 +86,28 @@ public partial class Depository
             await NotifyDependencyChange(dependencyDescription);
     }
 
-    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription)
+    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription,
+        bool includeDisabled = false, string? relationName = null)
     {
         if (_currentFocusing.TryGetValue(dependencyDescription, out var relation)) return Task.FromResult(relation);
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
+            if (relationName is not null)
+            {
+                var resolvedRelation = relations.FirstOrDefault(t => t.Name == relationName);
+                if (resolvedRelation is null) throw new DependencyNotFoundException();
+                return Task.FromResult(resolvedRelation);
+            }
+
             switch (dependencyDescription.ResolvePolicy)
             {
                 case DependencyResolvePolicy.LastWin:
-                    relation = relations.Last();
+                    relation = includeDisabled ? relations.Last() : relations.Last(t => t.IsEnabled);
                     _currentFocusing[dependencyDescription] = relation;
                     break;
                 case DependencyResolvePolicy.FirstWin:
-                    relation = relations[0];
+                    relation = includeDisabled ? relations.First(t => t.IsEnabled) : relations[0];
                     _currentFocusing[dependencyDescription] = relation;
                     break;
                 case DependencyResolvePolicy.WaitForFocusing:
@@ -102,10 +124,15 @@ public partial class Depository
         return Task.FromResult(relation);
     }
 
-    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependencyDescription)
+    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependencyDescription,
+        bool includeDisabled = false)
     {
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
-            return Task.FromResult(relations);
+            return Task.FromResult(
+                includeDisabled
+                    ? relations
+                    : relations.Where(relation => relation.IsEnabled).ToList()
+            );
 
         throw new RelationNotFoundException();
     }
