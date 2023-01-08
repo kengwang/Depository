@@ -6,8 +6,8 @@ public interface IRelationDepository
 {
     public Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation);
 
-    public Task<DependencyRelation> GetRelationAsync(DependencyDescription description);
-    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription description);
+    public Task<DependencyRelation> GetRelationAsync(DependencyDescription description, bool includeDisabled = false, string? relationName = null);
+    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription description, bool includeDisabled = false);
     
     /// <summary>
     /// Replace Dependency
@@ -27,4 +27,8 @@ public interface IRelationDepository
 
 
     public Task ClearRelationsAsync(DependencyDescription description);
+
+    public Task DisableRelationAsync(DependencyDescription description, DependencyRelation relation);
+    
+    public Task EnableRelationAsync(DependencyDescription description, DependencyRelation relation);
 }
