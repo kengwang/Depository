@@ -11,7 +11,8 @@ namespace Depository.Benchmarks;
 public partial class Benchmarks
 {
     
-    [Benchmark]
+    //[Benchmark]
+    [Obsolete("Disable Heavy Load Text")]
     public async Task<IGuidGenerator> HeavyLoad_IEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
@@ -25,7 +26,8 @@ public partial class Benchmarks
         return guidGenerators.First();
     }
 
-    [Benchmark]
+    //[Benchmark]
+    [Obsolete("Disable Heavy Load Text")]
     public async Task<List<IGuidGenerator>> HeavyLoad_ResolveMultiple()
     {
         // For Benchmark Purpose only
