@@ -1,6 +1,7 @@
 ﻿using Depository.Abstraction.Enums;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
+using Depository.Core;
 using Depository.Demo.Implements;
 using Depository.Demo.Interfaces;
 using Depository.Extensions;
@@ -38,6 +39,57 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull().And.BeOfType<RandomGuidGenerator>();
+    }
+    
+    [Fact]
+    public async void ResolveSingleRegisteredService_InScope_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription
+        {
+            DependencyType = typeof(IGuidGenerator),
+            ResolvePolicy = DependencyResolvePolicy.LastWin,
+            Lifetime = DependencyLifetime.Scoped
+        };
+        await depository.AddDependencyAsync(description);
+        await depository.AddRelationAsync(description, new DependencyRelation
+        {
+            RelationType = DependencyRelationType.Once,
+            ImplementType = typeof(RandomGuidGenerator),
+            DefaultImplementation = null
+        });
+        
+
+        // Action
+        using (var scopeA = DepositoryResolveScope.Create())
+        using (var scopeB = DepositoryResolveScope.Create())
+        {
+            var guidGeneratorA1 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            {
+                Scope = scopeA
+            });
+        
+            var guidGeneratorA2 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            {
+                Scope = scopeA
+            });
+        
+            var guidGeneratorB1 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            {
+                Scope = scopeB
+            });
+        
+            var guidGeneratorB2 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            {
+                Scope = scopeB
+            });
+            
+            // Assert
+            guidGeneratorA1.Should().Be(guidGeneratorA2);
+            guidGeneratorB1.Should().Be(guidGeneratorB2);
+            guidGeneratorA1.Should().NotBe(guidGeneratorB1);
+        }
     }
 
     [Fact]
@@ -466,5 +518,5 @@ public class DepositoryResolveTests
     }
 
     // Actions
-    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => new(options);
+    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => DepositoryFactory.CreateNew(options);
 }

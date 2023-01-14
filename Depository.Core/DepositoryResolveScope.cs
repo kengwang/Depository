@@ -31,7 +31,7 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         return Task.FromResult(_implementations.ContainsKey(type));
     }
 
-    public Task RemoveImplementAsync(Type type)
+    public Task  RemoveImplementAsync(Type type)
     {
         // Dispose it before remove it
         if (_implementations[type].Target is IDisposable disposableTarget)

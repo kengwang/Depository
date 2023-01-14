@@ -32,11 +32,6 @@ public partial class Depository : IDepository
         await AddDependencyAsync(description);
         await AddRelationAsync(description, relation);
     }
-    
-    public Task RunAsync(Type serviceType)
-    {
-        throw new NotImplementedException();
-    }
 
     public void Dispose()
     {

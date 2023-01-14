@@ -1,6 +1,7 @@
 ﻿using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
+using Depository.Core;
 using Depository.Demo.Implements;
 using Depository.Demo.Interfaces;
 using Depository.Extensions;
@@ -252,7 +253,7 @@ public class DepositoryAddTests
 
 
     // Actions
-    private static Core.Depository CreateNewDepository() => new();
+    private static Core.Depository CreateNewDepository() => DepositoryFactory.CreateNew();
 
     private static void AssertDepDescIfMatch(DependencyDescription? resolvedDependency, Type dependencyType,
         DependencyResolvePolicy policy, DependencyLifetime lifetime)

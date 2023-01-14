@@ -1,5 +1,6 @@
 ﻿using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
+using Depository.Core;
 using Depository.Demo.Implements;
 using Depository.Demo.Interfaces;
 using Depository.Extensions;
@@ -51,6 +52,25 @@ public class DepositoryNotificationTests
             .And.AllSatisfy(t => t.IsNormal.Should().BeTrue());
     }
     
+    [Fact]
+    public async void PublishResultedNotification_ToSingle_ShouldReceive()
+    {
+        // Init
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync<INotificationSubscriber<TestNotification, string>, ResultedNotificationSubscriber>();
+        
+        // Action
+        var result = await depository.PublishNotificationWithResultAsync<TestNotification, string>(new TestNotification());
+        
+
+        // Assert
+        var receiver = await depository.ResolveAsync<INotificationSubscriber<TestNotification, string>>();
+        receiver
+            .As<ICheckIsNormal>()
+            .IsNormal.Should().BeTrue();
+        result.Should().Contain("Received");
+    }
+    
     // Actions
-    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => new(options);
+    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => DepositoryFactory.CreateNew(options);
 }

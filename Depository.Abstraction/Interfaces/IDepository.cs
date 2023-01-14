@@ -6,7 +6,6 @@ public interface IDepository :
     IDependencyDepository,
     IRelationDepository,
     IDepositoryResolve,
-    IDepositoryServiceRunner,
     INotificationHub,
     IDisposable
 {
