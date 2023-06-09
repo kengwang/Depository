@@ -96,7 +96,7 @@ public partial class Depository
             if (relationName is not null)
             {
                 var resolvedRelation = relations.FirstOrDefault(t => t.Name == relationName);
-                if (resolvedRelation is null) throw new DependencyNotFoundException();
+                if (resolvedRelation is null) throw new DependencyNotFoundException(dependencyDescription.DependencyType);
                 return Task.FromResult(resolvedRelation);
             }
 
@@ -134,6 +134,6 @@ public partial class Depository
                     : relations.Where(relation => relation.IsEnabled).ToList()
             );
 
-        throw new RelationNotFoundException();
+        return Task.FromResult(new List<DependencyRelation>());
     }
 }

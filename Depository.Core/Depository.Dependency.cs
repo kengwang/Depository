@@ -40,10 +40,9 @@ public partial class Depository
         return Task.CompletedTask;
     }
     
-    private DependencyDescription GetDependencyDescription(Type dependency)
+    private DependencyDescription? GetDependencyDescription(Type dependency)
     {
         var dependencyDescription = _dependencyDescriptions.FirstOrDefault(t => t.DependencyType == dependency);
-        if (dependencyDescription is null) throw new DependencyNotFoundException { DependencyType = dependency };
         return dependencyDescription;
     }
 }

@@ -37,7 +37,6 @@ public partial class Depository : IDepository
     {
         _dependencyDescriptions.Clear();
         _dependencyRelations.Clear();
-        _usedImpls.Clear();
         _rootScope.Dispose();
     }
 }

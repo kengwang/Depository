@@ -3,7 +3,7 @@ using Depository.Demo.Interfaces;
 
 namespace Depository.Demo.Implements;
 
-public class ConstructorInjectNotifiableService : IConstructorInjectService, INotifyDependencyChanged, ICheckIsNormal
+public class ConstructorInjectNotifiableService : IConstructorInjectService, INotifyDependencyChanged<IGuidGenerator>, ICheckIsNormal
 {
 
     private readonly IGuidGenerator _generator;
@@ -11,8 +11,12 @@ public class ConstructorInjectNotifiableService : IConstructorInjectService, INo
     public ConstructorInjectNotifiableService(IGuidGenerator generator)
     {
         _generator = generator;
-        DependencyChanged += (_, _) => IsNormal = true;
     }
-    public DependencyChangedEventHandler? DependencyChanged { get; set; }
+
     public bool IsNormal { get; set; }
+    public Task OnDependencyChanged(IGuidGenerator? marker)
+    {
+        IsNormal = true;
+        return Task.CompletedTask;
+    }
 }
