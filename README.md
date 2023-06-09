@@ -2,6 +2,8 @@
 
 An IoC Container which can add services anytime.
 
+**Warning**: This project is still improving, the `Abstraction` may not be stable. Temporarily, don't use it in production environment.
+
 | Unit Tests |                                               NuGet                                               |
 |:----------:|:-------------------------------------------------------------------------------------------------:|
 |[![Depository.Core Unit Tests](https://github.com/kengwang/Depository/actions/workflows/unit-test.yml/badge.svg)](https://github.com/kengwang/Depository/actions/workflows/unit-test.yml) | [![Nuget](https://img.shields.io/nuget/v/Depository)](https://www.nuget.org/packages/Depository/) |

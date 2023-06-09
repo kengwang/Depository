@@ -3,8 +3,6 @@
 public class DepositoryOption
 {
     public bool AutoNotifyDependencyChange { get; set; } = false;
-    public bool ReflogForNotifiableDependencyOnly { get; set; } = true;
-
     public ImplementTypeDuplicatedAction ImplementTypeDuplicatedAction { get; set; } =
         ImplementTypeDuplicatedAction.Ignore;
     public DependencyResolveOption ResolveOption { get; set; } = new();

@@ -1,8 +1,7 @@
 ﻿namespace Depository.Abstraction.Interfaces;
 
-public interface INotifyDependencyChanged
+public interface INotifyDependencyChanged<in T>
 {
-    public DependencyChangedEventHandler? DependencyChanged { get; }
+    // !Notice: marker will always be null!
+    public Task OnDependencyChanged(T? marker);
 }
-
-public delegate void DependencyChangedEventHandler(Type changedType, object? implement);

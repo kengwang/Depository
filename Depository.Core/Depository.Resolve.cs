@@ -10,20 +10,16 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private readonly ConditionalWeakTable<object, List<Type>> _resolvedTypes = new();
-    private readonly Dictionary<Type, List<WeakReference>> _usedImpls = new();
-
-    private async Task NotifyDependencyChange(DependencyDescription dependencyDescription,
-        object? target = null)
+    private async Task NotifyDependencyChange(DependencyDescription dependencyDescription)
     {
-        // 回溯所有使用了的
-        if (!_usedImpls.TryGetValue(dependencyDescription.DependencyType, out var impls)) return;
-        foreach (var weakReference in impls.FindAll(t => t.IsAlive && t.Target is INotifyDependencyChanged)
-                     .ToList())
+        var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(dependencyDescription.DependencyType);
+        var description = GetDependencyDescription(notificationType);
+        if (description is null) return;
+        var relations = await GetRelationsAsync(description);
+        foreach (var relation in relations)
         {
-            target ??= await ResolveDependencyAsync(dependencyDescription.DependencyType, new DependencyResolveOption());
-            ((INotifyDependencyChanged)weakReference.Target).DependencyChanged?
-                .Invoke(dependencyDescription.DependencyType, target);
+            var result = await ResolveRelationAsync(description, relation);
+            notificationType.GetMethods()[0].Invoke(result, new object?[] { null });
         }
     }
 
@@ -36,6 +32,7 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
+        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
         var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
@@ -81,6 +78,7 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
+        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
         var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
         return await ResolveRelationAsync(dependencyDescription, relation, option);
     }
@@ -88,19 +86,21 @@ public partial class Depository
     public async Task ChangeResolveTargetAsync(Type dependency, object? target)
     {
         var description = GetDependencyDescription(dependency);
+        if (description is null) throw new DependencyNotFoundException(dependency);
         if (description.Lifetime == DependencyLifetime.Singleton)
         {
             await _rootScope.SetImplementAsync(dependency, target);
         }
 
         if (_option.AutoNotifyDependencyChange)
-             await NotifyDependencyChange(description);
+            await NotifyDependencyChange(description);
     }
 
     private async Task<object> ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
+        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
         var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         var implementType = relation.ImplementType;
@@ -119,6 +119,7 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
+        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
         var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
@@ -158,31 +159,6 @@ public partial class Depository
         }
 
         var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
-
-
-        // Wire to the regenerator
-        // ReSharper disable once InvertIf
-        if (!_option.ReflogForNotifiableDependencyOnly || dependencyImpl is INotifyDependencyChanged)
-        {
-            var weakRef = new WeakReference(dependencyImpl);
-            var types = parameterInfos.Select(t => t.ParameterType).ToList();
-            foreach (var type in types)
-            {
-                var actualType = type;
-                if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type))
-                    actualType = type.GenericTypeArguments[0];
-                if (!_usedImpls.TryGetValue(actualType, out var references))
-                {
-                    references = new List<WeakReference>();
-                    _usedImpls[actualType] = references;
-                }
-
-                references.Add(weakRef);
-            }
-
-            _resolvedTypes.GetOrCreateValue(dependencyImpl).AddRange(types);
-        }
-
         return dependencyImpl;
     }
 
@@ -190,7 +166,7 @@ public partial class Depository
     private async Task<object> ResolveRelationAsync(
         DependencyDescription dependencyDescription,
         DependencyRelation relation,
-        DependencyResolveOption? option)
+        DependencyResolveOption? option = null)
     {
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         return dependencyDescription.Lifetime switch

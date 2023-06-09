@@ -1,4 +1,5 @@
 ﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
 using Depository.Core;
@@ -438,6 +439,8 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         await depository.AddSingletonAsync(typeof(IConstructorInjectService),
             typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(INotifyDependencyChanged<IGuidGenerator>),
+            typeof(ConstructorInjectNotifiableService));
         await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
 
 
@@ -456,6 +459,8 @@ public class DepositoryResolveTests
         // Init
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+            typeof(ConstructorInjectNotifiableService));
+        await depository.AddSingletonAsync(typeof(INotifyDependencyChanged<IGuidGenerator>),
             typeof(ConstructorInjectNotifiableService));
         await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
         await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
