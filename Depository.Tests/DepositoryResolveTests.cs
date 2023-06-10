@@ -18,7 +18,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveSingleRegisteredService_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -45,7 +45,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveSingleRegisteredService_InScope_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -96,7 +96,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleRegisteredService_ToSingleResolve_ShouldReturnRandomGuidGenerator()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -132,7 +132,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleRegisteredService_ToMultipleResolves_ShouldReturnMultipleGuidGenerators()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -168,7 +168,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleRegisteredService_ToIEnumerable_ShouldReturnMultipleGuidGenerators()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -204,7 +204,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveService_ToDefaultImplement_ShouldReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -231,7 +231,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleService_ToDefaultImplements_UsingResolves_ShouldAllReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -265,7 +265,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleService_ToDefaultImplement_UsingIEnumerable_ShouldAllReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var description = new DependencyDescription
         {
@@ -302,7 +302,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveSingleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnEmptyGuidGenerator()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
 
@@ -317,7 +317,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnRandomGuidGenerator()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -335,7 +335,7 @@ public class DepositoryResolveTests
     public async void
         ResolveMultipleRegisteredService_ToMultipleResolves_UsingExtension_ShouldReturnMultipleGuidGenerators()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -353,7 +353,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleRegisteredService_ToIEnumerable_UsingExtension_ShouldReturnMultipleGuidGenerators()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
         await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
@@ -371,7 +371,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveGeneric_ToNormalType_ShouldReturnNormalType()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync<ITypeGeneric<string>, TypeGeneric<string>>();
 
@@ -387,7 +387,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveGeneric_ToNormalType_ShouldReturnGenericType()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
 
@@ -403,7 +403,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveConstructorInject_ShouldBeNormal()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync(typeof(IConstructorInjectService), typeof(ConstructorInjectService));
         await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
@@ -418,7 +418,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveIEnumerableConstructorInject_ShouldBeNormal()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         await depository.AddSingletonAsync(typeof(IConstructorInjectService),
             typeof(ConstructorIEnumerableInjectService));
@@ -435,7 +435,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveConstructorNotification_ShouldBeNormal()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         await depository.AddSingletonAsync(typeof(IConstructorInjectService),
             typeof(ConstructorInjectNotifiableService));
@@ -456,7 +456,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveIEnumerableConstructorNotification_ShouldBeNormal()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         await depository.AddSingletonAsync(typeof(IConstructorInjectService),
             typeof(ConstructorInjectNotifiableService));
@@ -478,7 +478,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveService_ToDefaultImplement_UsingExtension_ShouldReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
@@ -493,7 +493,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleService_ToDefaultImplement_UsingExtension_ShouldAllReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
@@ -509,7 +509,7 @@ public class DepositoryResolveTests
     [Fact]
     public async void ResolveMultipleService_ToDefaultImplement_UsingExtension_IEnumerable_ShouldAllReturnDefaultImplement()
     {
-        // Init
+        // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
         await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);

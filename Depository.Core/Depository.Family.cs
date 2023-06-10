@@ -7,7 +7,7 @@ public partial class Depository
     
     private readonly ConditionalWeakTable<object, List<WeakReference>> _fatherToChildRelation = new();
     private readonly ConditionalWeakTable<object, List<WeakReference>> _childToFatherRelation = new();
-    public Task<List<object>> GetChildren(object father)
+    public Task<List<object>> GetChildrenAsync(object father)
     {
         if (_fatherToChildRelation.TryGetValue(father, out var refs))
         {
@@ -17,7 +17,7 @@ public partial class Depository
         return Task.FromResult(new List<object>());
     }
 
-    public Task<List<object>> GetParents(object child)
+    public Task<List<object>> GetParentsAsync(object child)
     {
         if (_childToFatherRelation.TryGetValue(child, out var refs))
         {
