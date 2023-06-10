@@ -2,6 +2,6 @@
 
 public interface IDepositoryFamily
 {
-    public Task<List<object>> GetChildren(object father);
-    public Task<List<object>> GetParents(object child);
+    public Task<List<object>> GetChildrenAsync(object father);
+    public Task<List<object>> GetParentsAsync(object child);
 }
