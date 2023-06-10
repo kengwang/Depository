@@ -7,6 +7,7 @@ public interface IDepository :
     IRelationDepository,
     IDepositoryResolve,
     INotificationHub,
+    IDepositoryImplementation,
     IDisposable
 {
 }
