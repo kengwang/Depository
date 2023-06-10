@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Depository.Benchmarks.IoCContainersBenchmarks-20230610-023405</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.3, OS=ubuntu 22.04
+Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
+.NET SDK=7.0.302
+  [Host]     : .NET 7.0.5 (7.0.523.17405), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.5 (7.0.523.17405), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>                                                           Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>Depository_MultiToMultiBenchmark_IEnumerable</td><td>5.602 &mu;s</td><td>0.1119 &mu;s</td><td>0.2209 &mu;s</td><td>3.91 KB</td>
+</tr><tr><td>Depository_MultiToMultiBenchmark_ResolveMultiple</td><td>4.561 &mu;s</td><td>0.0911 &mu;s</td><td>0.1666 &mu;s</td><td>3.77 KB</td>
+</tr><tr><td>MicrosoftExtensionDependencyInjection_MultiToMultiBenchmark</td><td>5.863 &mu;s</td><td>0.1151 &mu;s</td><td>0.2016 &mu;s</td><td>4.51 KB</td>
+</tr><tr><td>AutoFac_MultiToMultiBenchmark</td><td>198.932 &mu;s</td><td>3.9435 &mu;s</td><td>5.1277 &mu;s</td><td>24.19 KB</td>
+</tr><tr><td>Depository_MultiToSingleBenchmark</td><td>3.389 &mu;s</td><td>0.0665 &mu;s</td><td>0.0841 &mu;s</td><td>3.13 KB</td>
+</tr><tr><td>MicrosoftExtensionDependencyInjection_MultiToSingleBenchmark</td><td>4.317 &mu;s</td><td>0.0853 &mu;s</td><td>0.2093 &mu;s</td><td>3.95 KB</td>
+</tr><tr><td>AutoFac_MultiToSingleBenchmark</td><td>52.464 &mu;s</td><td>1.0309 &mu;s</td><td>1.8325 &mu;s</td><td>16.26 KB</td>
+</tr><tr><td>Depository_SingleToDefaultImplementBenchmark</td><td>1.890 &mu;s</td><td>0.0371 &mu;s</td><td>0.0600 &mu;s</td><td>2.23 KB</td>
+</tr><tr><td>MicrosoftExtensionDependencyInjection_SingleToDefaultImplementBenchmark</td><td>4.245 &mu;s</td><td>0.2140 &mu;s</td><td>0.6310 &mu;s</td><td>3.6 KB</td>
+</tr><tr><td>AutoFac_SingleToDefaultImplementBenchmark</td><td>40.530 &mu;s</td><td>0.7746 &mu;s</td><td>1.0340 &mu;s</td><td>13.31 KB</td>
+</tr><tr><td>Depository_SingleToSingle</td><td>2.997 &mu;s</td><td>0.0593 &mu;s</td><td>0.0729 &mu;s</td><td>2.76 KB</td>
+</tr><tr><td>MicrosoftExtensionDependencyInjection_SingleToSingle</td><td>4.804 &mu;s</td><td>0.2206 &mu;s</td><td>0.6503 &mu;s</td><td>3.8 KB</td>
+</tr><tr><td>AutoFac_SingleToSingle</td><td>41.370 &mu;s</td><td>0.8251 &mu;s</td><td>1.4233 &mu;s</td><td>13.79 KB</td>
+</tr></tbody></table>
+</body>
+</html>
