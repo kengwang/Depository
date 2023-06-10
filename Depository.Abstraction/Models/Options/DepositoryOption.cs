@@ -7,6 +7,7 @@ public class DepositoryOption
         ImplementTypeDuplicatedAction.Ignore;
     public DependencyResolveOption ResolveOption { get; set; } = new();
     public DepositoryCheckerOption CheckerOption { get; set; } = new();
+    public DepositoryResolveScopeOption ScopeOption { get; set; } = new();
 }
 
 public enum ImplementTypeDuplicatedAction

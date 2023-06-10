@@ -89,7 +89,7 @@ public partial class Depository
         if (description is null) throw new DependencyNotFoundException(dependency);
         if (description.Lifetime == DependencyLifetime.Singleton)
         {
-            await _rootScope.SetImplementAsync(dependency, target);
+            await _rootScope.SetImplementationAsync(dependency, target);
         }
 
         if (_option.AutoNotifyDependencyChange)
@@ -182,9 +182,12 @@ public partial class Depository
     {
         if (option?.Scope is null) throw new ScopeNotSetException();
         if (await option.Scope.ExistAsync(implementType))
-            return await option.Scope.GetImplementAsync(implementType);
+        {
+            var ret = await option.Scope.GetImplementAsync(implementType);
+            if (ret is not null) return ret;
+        }
         var impl = await ImplementActivator(implementType, option);
-        await option.Scope.SetImplementAsync(implementType, impl);
+        await option.Scope.SetImplementationAsync(implementType, impl);
         return impl;
     }
 
@@ -197,9 +200,12 @@ public partial class Depository
     private async Task<object> ResolveSingleton(Type implementType, DependencyResolveOption? option)
     {
         if (await _rootScope.ExistAsync(implementType))
-            return await _rootScope.GetImplementAsync(implementType);
+        {
+            var ret = await _rootScope.GetImplementAsync(implementType);
+            if (ret is not null) return ret;
+        }
         var impl = await ImplementActivator(implementType, option);
-        await _rootScope.SetImplementAsync(implementType, impl);
+        await _rootScope.SetImplementationAsync(implementType, impl);
         return impl;
     }
 }
