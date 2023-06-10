@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1686365482796,
+  "lastUpdate": 1686366749534,
   "repoUrl": "https://github.com/kengwang/Depository",
   "entries": {
     "Benchmark.Net Benchmark": [
@@ -630,6 +630,66 @@ window.BENCHMARK_DATA = {
             "value": 4556.330728891733,
             "unit": "ns",
             "range": "± 154.45940436483724"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "committer": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "distinct": true,
+          "id": "93098bac94c87c2d094202b8e078a5fe3bcb12cf",
+          "message": "[feat] Add Family feature",
+          "timestamp": "2023-06-10T10:53:38+08:00",
+          "tree_id": "037ceb6203d96db8b9498a1e509b72e5f8ad374d",
+          "url": "https://github.com/kengwang/Depository/commit/93098bac94c87c2d094202b8e078a5fe3bcb12cf"
+        },
+        "date": 1686366749034,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotification",
+            "value": 5658.235885620117,
+            "unit": "ns",
+            "range": "± 125.45568225406568"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotificationWithResult",
+            "value": 5936.231780052185,
+            "unit": "ns",
+            "range": "± 107.39503391060504"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveSingleToSingle",
+            "value": 5270.7932932535805,
+            "unit": "ns",
+            "range": "± 94.37642018169011"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToSingle",
+            "value": 5930.518881017511,
+            "unit": "ns",
+            "range": "± 141.2568360859364"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingIEnumerable",
+            "value": 7669.267391628689,
+            "unit": "ns",
+            "range": "± 154.38861107259643"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingMultipleResolve",
+            "value": 6732.466196877615,
+            "unit": "ns",
+            "range": "± 111.66653338369832"
           }
         ]
       }
