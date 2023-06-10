@@ -155,10 +155,25 @@ public partial class Depository
         var parameters = new List<object>();
         foreach (var parameterInfo in parameterInfos)
         {
-            parameters.Add(await ResolveDependencyAsync(parameterInfo.ParameterType, option));
+            if (option?.FatherImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
+            {
+                parameters.Add(impl);
+            }
+            else
+            {
+                parameters.Add(await ResolveDependencyAsync(parameterInfo.ParameterType, option));
+            }
         }
 
         var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
+        if (option?.FatherImplementations is { Count: > 0 })
+        {
+            foreach (var kvp in option.FatherImplementations)
+            {
+                _fatherToChildRelation.GetOrCreateValue(kvp.Value).Add(new WeakReference(dependencyImpl));
+                _childToFatherRelation.GetOrCreateValue(dependencyImpl).Add(new WeakReference(kvp.Value));
+            }
+        }
         return dependencyImpl;
     }
 
