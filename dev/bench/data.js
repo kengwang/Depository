@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1673706680138,
+  "lastUpdate": 1686361610699,
   "repoUrl": "https://github.com/kengwang/Depository",
   "entries": {
     "Benchmark.Net Benchmark": [
@@ -510,6 +510,66 @@ window.BENCHMARK_DATA = {
             "value": 4813.508804829916,
             "unit": "ns",
             "range": "± 67.71683035388945"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "committer": {
+            "email": "atkengwang@qq.com",
+            "name": "kengwang",
+            "username": "kengwang"
+          },
+          "distinct": false,
+          "id": "44c2086ae1fb3e6b440ff34c55bb64ee6217fb9e",
+          "message": "[BREAKING] Change Scope Implementation",
+          "timestamp": "2023-06-10T09:33:27+08:00",
+          "tree_id": "1991a1f7a722edc677a76c4ca73ee482049c53ab",
+          "url": "https://github.com/kengwang/Depository/commit/44c2086ae1fb3e6b440ff34c55bb64ee6217fb9e"
+        },
+        "date": 1686361609856,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotification",
+            "value": 2313.3198501041957,
+            "unit": "ns",
+            "range": "± 22.52225947082708"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.PublishNotificationWithResult",
+            "value": 2339.1705510066104,
+            "unit": "ns",
+            "range": "± 15.220856526296172"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveSingleToSingle",
+            "value": 2198.0855242411294,
+            "unit": "ns",
+            "range": "± 37.73452537562737"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToSingle",
+            "value": 2369.437658437093,
+            "unit": "ns",
+            "range": "± 8.538851743591161"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingIEnumerable",
+            "value": 4152.159601338704,
+            "unit": "ns",
+            "range": "± 22.85866035585547"
+          },
+          {
+            "name": "Depository.Benchmarks.Benchmarks.ResolveMultipleToMultiple_UsingMultipleResolve",
+            "value": 3168.384479522705,
+            "unit": "ns",
+            "range": "± 57.451479807994346"
           }
         ]
       }
