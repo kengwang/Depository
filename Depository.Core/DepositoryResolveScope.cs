@@ -1,56 +1,109 @@
 ﻿using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Models.Options;
 
 namespace Depository.Core;
 
 public class DepositoryResolveScope : IDepositoryResolveScope
 {
-    // ReSharper disable once UnusedMember.Global
-    public static IDepositoryResolveScope Create()
-    {
-        return new DepositoryResolveScope();
-    }
-    
-    private readonly Dictionary<Type, WeakReference> _implementations = new();
+    private readonly DepositoryResolveScopeOption? _option;
 
-    public Task SetImplementAsync(Type type, object? impl)
+    // ReSharper disable once UnusedMember.Global
+    public static IDepositoryResolveScope Create(DepositoryResolveScopeOption? option = null)
     {
-        _implementations[type] = new WeakReference(impl);
+        return new DepositoryResolveScope(option);
+    }
+
+    private readonly Dictionary<Type, List<WeakReference>> _implementations = new();
+
+    public DepositoryResolveScope(DepositoryResolveScopeOption? option = null)
+    {
+        _option = option;
+    }
+
+    public Task SetImplementationAsync(Type type, object? impl)
+    {
+        _implementations.TryGetValue(type, out var implList);
+        if (implList is null)
+        {
+            implList = new List<WeakReference>();
+            _implementations[type] = implList;
+        }
+
+        implList.RemoveAll(t => t.Target == impl);
+        implList.Add(new WeakReference(impl));
         return Task.CompletedTask;
     }
 
-    public Task<object> GetImplementAsync(Type type)
+    public Task<List<object>?> GetImplementsAsync(Type type)
     {
-        _implementations.TryGetValue(type, out var implRef);
-        if (implRef?.Target is null) throw new ImplementNotFoundException();
-        return Task.FromResult(implRef.Target);
+        _implementations.TryGetValue(type, out var implRefList);
+        if (implRefList is null)
+            return Task.FromResult<List<object>?>(null);
+
+        return Task.FromResult(implRefList.Select(i => i.Target).ToList())!;
+    }
+
+    public Task<object?> GetImplementAsync(Type type)
+    {
+        _implementations.TryGetValue(type, out var implRefList);
+        if (implRefList is not { Count: > 0 })
+            return Task.FromResult<object?>(null);
+
+        return Task.FromResult(implRefList[implRefList.Count - 1].Target);
     }
 
     public Task<bool> ExistAsync(Type type)
     {
-        return Task.FromResult(_implementations.ContainsKey(type));
+        _implementations.TryGetValue(type, out var implList);
+        return Task.FromResult(implList is { Count: > 0 });
     }
 
-    public Task  RemoveImplementAsync(Type type)
+    public Task RemoveAllImplementsAsync(Type type)
     {
+        _implementations.TryGetValue(type, out var implList);
+        if (implList is null) return Task.CompletedTask;
         // Dispose it before remove it
-        if (_implementations[type].Target is IDisposable disposableTarget)
+        if (_option?.AutoDisposeWhenRemoved is true)
+            foreach (var weakReference in implList)
+            {
+                if (weakReference.Target is IDisposable disposableTarget)
+                {
+                    disposableTarget.Dispose();
+                }
+            }
+
+        implList.Clear();
+        _implementations.Remove(type);
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveImplementAsync(Type type, object implement)
+    {
+        _implementations.TryGetValue(type, out var implList);
+        if (implList is null) return Task.CompletedTask;
+        foreach (var weakReference in implList)
         {
-            disposableTarget.Dispose();
+            if (weakReference.Target == implement) implList.Remove(weakReference);
         }
 
-        _implementations.Remove(type);
         return Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        foreach (var weakReference in _implementations.Values.ToList())
-        {
-            if (weakReference.Target is IDisposable disposableTarget)
+        if (_option?.AutoDisposeWhenRemoved is true)
+            foreach (var weakReferences in _implementations.Values.ToList())
             {
-                disposableTarget.Dispose();
+                foreach (var weakReference in weakReferences)
+                {
+                    if (weakReference.Target is IDisposable disposableTarget)
+                    {
+                        disposableTarget.Dispose();
+                    }
+                }
             }
-        }
+
+        _implementations.Clear();
     }
 }

@@ -8,11 +8,12 @@ namespace Depository.Core;
 public partial class Depository : IDepository
 {
     private readonly DepositoryOption _option = new();
-    private readonly DepositoryResolveScope _rootScope = new();
+    private readonly DepositoryResolveScope _rootScope;
 
     public Depository(Action<DepositoryOption>? option = null)
     {
         option?.Invoke(_option);
+        _rootScope = new DepositoryResolveScope(_option.ScopeOption);
         AddSelfToDepository();
     }
 
