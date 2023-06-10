@@ -53,6 +53,18 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         return Task.FromResult(implRefList[implRefList.Count - 1].Target);
     }
 
+    public Task AddImplementAsync(Type type, object impl)
+    {
+        _implementations.TryGetValue(type, out var implList);
+        if (implList is null)
+        {
+            implList = new List<WeakReference>();
+            _implementations[type] = implList;
+        }
+        implList.Add(new WeakReference(impl));
+        return Task.CompletedTask;
+    }
+
     public Task<bool> ExistAsync(Type type)
     {
         _implementations.TryGetValue(type, out var implList);
@@ -84,7 +96,7 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         if (implList is null) return Task.CompletedTask;
         foreach (var weakReference in implList)
         {
-            if (weakReference.Target == implement) implList.Remove(weakReference);
+            if (weakReference.Target == implement || weakReference.IsAlive == false || weakReference.Target is null) implList.Remove(weakReference);
         }
 
         return Task.CompletedTask;
