@@ -43,6 +43,20 @@ public class DepositoryResolveTests
     }
     
     [Fact]
+    public async void ResolveAsyncConstructorService_ShouldBeNormal()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        await depository.AddSingletonAsync(typeof(IAsyncConstructService), typeof(AsyncConstructorService));
+
+        // Action
+        var service = await depository.ResolveAsync<IAsyncConstructService>();
+
+        // Assert
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
     public async void ResolveSingleRegisteredService_InScope_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
         // Arrange

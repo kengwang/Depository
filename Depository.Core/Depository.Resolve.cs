@@ -174,6 +174,9 @@ public partial class Depository
                 _childToFatherRelation.GetOrCreateValue(dependencyImpl).Add(new WeakReference(kvp.Value));
             }
         }
+
+        if (option?.CheckAsyncConstructor is not false && dependencyImpl is IAsyncConstructService asyncConstructService)
+            await asyncConstructService.InitializeService();
         return dependencyImpl;
     }
 
