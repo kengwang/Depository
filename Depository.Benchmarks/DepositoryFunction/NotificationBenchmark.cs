@@ -43,7 +43,7 @@ public class NotificationResult
 // ReSharper disable once ClassNeverInstantiated.Global
 public class NotificationSubscriber : INotificationSubscriber<Notification>
 {
-    public Task HandleNotification(Notification notification)
+    public Task HandleNotification(Notification notification, CancellationToken ctk = new CancellationToken())
     {
         return Task.CompletedTask;
     }
@@ -51,7 +51,8 @@ public class NotificationSubscriber : INotificationSubscriber<Notification>
 
 public class NotificationAndResultSubscriber : INotificationSubscriber<Notification, NotificationResult>
 {
-    public Task<NotificationResult> HandleNotification(Notification notification)
+
+    public Task<NotificationResult> HandleNotification(Notification notification, CancellationToken ctk = new CancellationToken())
     {
         return Task.FromResult(new NotificationResult());
     }

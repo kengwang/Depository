@@ -1,11 +1,11 @@
 ﻿using Depository.Abstraction.Interfaces;
-using Depository.Demo.Interfaces;
+using Depository.Tests.Interfaces;
 
-namespace Depository.Demo.Implements;
+namespace Depository.Tests.Implements;
 
 public class NotTheNotificationSubscriber : INotificationSubscriber<string>, ICheckIsNormal
 {
-    public Task HandleNotification(string notification)
+    public Task HandleNotification(string notification, CancellationToken ctk = new())
     {
         IsNormal = true;
         return Task.CompletedTask;

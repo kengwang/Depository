@@ -1,13 +1,13 @@
 ﻿using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
 using Depository.Core;
-using Depository.Demo.Implements;
-using Depository.Demo.Interfaces;
 using Depository.Extensions;
+using Depository.Tests.Implements;
+using Depository.Tests.Interfaces;
 using FluentAssertions;
 using Xunit;
 
-namespace Depository.Demo;
+namespace Depository.Tests;
 
 public class DepositoryNotificationTests
 {

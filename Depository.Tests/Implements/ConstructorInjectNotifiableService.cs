@@ -1,7 +1,7 @@
 ﻿using Depository.Abstraction.Interfaces;
-using Depository.Demo.Interfaces;
+using Depository.Tests.Interfaces;
 
-namespace Depository.Demo.Implements;
+namespace Depository.Tests.Implements;
 
 public class ConstructorInjectNotifiableService : IConstructorInjectService, INotifyDependencyChanged<IGuidGenerator>, ICheckIsNormal
 {

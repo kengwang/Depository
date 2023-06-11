@@ -4,27 +4,20 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    public async Task PublishNotificationAsync<TNotification>(TNotification notification)
+    public async Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new())
     {
         var subscribers =
             (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification>)))
             .Select(receiver => (INotificationSubscriber<TNotification>)receiver)
             .ToList();
-        foreach (var subscriber in subscribers)
-        {
-            try
-            {
-                await subscriber.HandleNotification(notification);
-            }
-            catch
-            {
-                // ignored
-            }
-        }
+        var tasks = subscribers
+            .Select(handler => handler.HandleNotification(notification, ctk))
+            .ToArray();
+        await Task.WhenAll(tasks);
     }
 
     public async Task<List<TResult>> PublishNotificationWithResultAsync<TNotification, TResult>(
-        TNotification notification)
+        TNotification notification,CancellationToken ctk = new())
     {
         var subscribers =
             (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification, TResult>)))
@@ -35,7 +28,7 @@ public partial class Depository
         {
             try
             {
-                results.Add(await subscriber.HandleNotification(notification));
+                results.Add(await subscriber.HandleNotification(notification, ctk).ConfigureAwait(false));
             }
             catch (Exception)
             {

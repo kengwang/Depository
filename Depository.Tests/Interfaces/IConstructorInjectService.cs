@@ -1,4 +1,4 @@
-﻿namespace Depository.Demo.Interfaces;
+﻿namespace Depository.Tests.Interfaces;
 
 public interface IConstructorInjectService
 {

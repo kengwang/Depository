@@ -1,6 +1,6 @@
-﻿using Depository.Demo.Interfaces;
+﻿using Depository.Tests.Interfaces;
 
-namespace Depository.Demo.Implements;
+namespace Depository.Tests.Implements;
 
 public class TypeGeneric<T> : ITypeGeneric<T>
 {
