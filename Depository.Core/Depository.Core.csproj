@@ -12,11 +12,11 @@
         <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>IoC</PackageTags>
-        <Version>1.0.7</Version>
+        <Version>1.0.8</Version>
         <Title>Depository.Core</Title>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <AssemblyVersion>1.0.7</AssemblyVersion>
-        <FileVersion>1.0.7</FileVersion>
+        <AssemblyVersion>1.0.8</AssemblyVersion>
+        <FileVersion>1.0.8</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
