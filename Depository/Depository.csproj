@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <Version>1.0.8</Version>
+        <Version>1.0.9</Version>
         <Title>Depository</Title>
         <Authors>Kengwang</Authors>
         <Description>An IoC Container</Description>
@@ -15,8 +15,8 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>IoC</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <AssemblyVersion>1.0.8</AssemblyVersion>
-        <FileVersion>1.0.8</FileVersion>
+        <AssemblyVersion>1.0.9</AssemblyVersion>
+        <FileVersion>1.0.9</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
