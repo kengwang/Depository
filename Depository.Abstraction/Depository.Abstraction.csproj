@@ -13,10 +13,10 @@
         <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>IoC</PackageTags>
-        <Version>1.0.9</Version>
+        <Version>1.1.0</Version>
         <Title>Depository.Abstraction</Title>
-        <AssemblyVersion>1.0.9</AssemblyVersion>
-        <FileVersion>1.0.9</FileVersion>
+        <AssemblyVersion>1.1.0</AssemblyVersion>
+        <FileVersion>1.1.0</FileVersion>
     </PropertyGroup>
 
 </Project>
