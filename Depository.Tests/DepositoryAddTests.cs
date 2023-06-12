@@ -17,19 +17,11 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        var relation = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        };
+        var relation = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
         await depository.AddRelationAsync(description, relation);
 
         // Action
@@ -47,19 +39,11 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Transient
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Transient);
         await depository.AddDependencyAsync(description);
-        var relation = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        };
+        var relation = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
         await depository.AddRelationAsync(description, relation);
 
         // Action
@@ -77,19 +61,11 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Scoped
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Scoped);
         await depository.AddDependencyAsync(description);
-        var relation = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        };
+        var relation = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
         await depository.AddRelationAsync(description, relation);
 
         // Action
@@ -107,25 +83,13 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        var relation1 = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        };
-        var relation2 = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = null
-        };
+        var relation1 = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
+        var relation2 = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(EmptyGuidGenerator), DefaultImplementation: null);
         await depository.AddRelationAsync(description, relation1);
         await depository.AddRelationAsync(description, relation2);
 
@@ -144,25 +108,13 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.FirstWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.FirstWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        var relation1 = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        };
-        var relation2 = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = null
-        };
+        var relation1 = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
+        var relation2 = new DependencyRelation(RelationType: DependencyRelationType.Once,
+            ImplementType: typeof(EmptyGuidGenerator), DefaultImplementation: null);
         await depository.AddRelationAsync(description, relation1);
         await depository.AddRelationAsync(description, relation2);
 

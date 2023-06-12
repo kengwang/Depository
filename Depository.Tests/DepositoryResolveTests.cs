@@ -20,19 +20,12 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -61,19 +54,12 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Scoped
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Scoped);
         await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
         
 
         // Action
@@ -112,25 +98,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = null
-        });
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: null));
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -148,25 +124,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = null
-        });
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: null));
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -184,25 +150,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = null
-        });
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = null
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: null));
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -220,20 +176,13 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = emptyGuidGenerator
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
@@ -247,27 +196,17 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = emptyGuidGenerator
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: emptyGuidGenerator));
 
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = emptyGuidGenerator
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = await depository.ResolveDependenciesAsync(typeof(IGuidGenerator));
@@ -281,27 +220,17 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IGuidGenerator),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
         await depository.AddDependencyAsync(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(EmptyGuidGenerator),
-            DefaultImplementation = emptyGuidGenerator
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(EmptyGuidGenerator),
+                DefaultImplementation: emptyGuidGenerator));
 
-        await depository.AddRelationAsync(description, new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(RandomGuidGenerator),
-            DefaultImplementation = emptyGuidGenerator
-        });
+        await depository.AddRelationAsync(description,
+            new DependencyRelation(RelationType: DependencyRelationType.Once,
+                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IEnumerable<IGuidGenerator>));

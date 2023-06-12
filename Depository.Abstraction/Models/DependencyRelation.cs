@@ -2,11 +2,12 @@
 
 namespace Depository.Abstraction.Models;
 
-public class DependencyRelation
+public record DependencyRelation(
+    DependencyRelationType RelationType,
+    Type ImplementType,
+    object? DefaultImplementation = null,
+    string? Name = null,
+    bool IsEnabled = true)
 {
-    public DependencyRelationType RelationType { get; set; }
-    public Type ImplementType { get; set; } = null!;
-    public object? DefaultImplementation { get; set; }
-    public string? Name { get; set; }
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled { get; set; } = IsEnabled;
 }

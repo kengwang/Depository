@@ -19,17 +19,10 @@ public partial class Depository : IDepository
 
     private async void AddSelfToDepository()
     {
-        var description = new DependencyDescription
-        {
-            DependencyType = typeof(IDepository),
-            ResolvePolicy = DependencyResolvePolicy.LastWin,
-            Lifetime = DependencyLifetime.Singleton
-        };
-        var relation = new DependencyRelation
-        {
-            RelationType = DependencyRelationType.Once,
-            ImplementType = typeof(Depository)
-        };
+        var description = new DependencyDescription(DependencyType: typeof(IDepository),
+            ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: DependencyLifetime.Singleton);
+        var relation =
+            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: typeof(Depository));
         await AddDependencyAsync(description);
         await AddRelationAsync(description, relation);
     }
