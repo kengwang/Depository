@@ -71,12 +71,12 @@ public static class AddDependencyExtension
         if (dependencyDescription is null)
         {
             dependencyDescription = new DependencyDescription(DependencyType: dependencyType,
-                ResolvePolicy: DependencyResolvePolicy.LastWin, Lifetime: lifetime);
+                Lifetime: lifetime);
             await depository.AddDependencyAsync(dependencyDescription);
         }
 
         await depository.AddRelationAsync(dependencyDescription,
-            new DependencyRelation(RelationType: DependencyRelationType.Once, ImplementType: implementType,
+            new DependencyRelation(ImplementType: implementType,
                 DefaultImplementation: defaultImplement, Name: relationName, IsEnabled: isEnabled));
     }
 }

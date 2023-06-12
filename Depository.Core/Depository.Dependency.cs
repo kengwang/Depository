@@ -5,11 +5,11 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private readonly List<DependencyDescription> _dependencyDescriptions = new();
+    private readonly HashSet<DependencyDescription> _dependencyDescriptions = new();
 
     public Task AddDependencyAsync(DependencyDescription description)
     {
-        _dependencyDescriptions.RemoveAll(t => t.DependencyType == description.DependencyType);
+        _dependencyDescriptions.RemoveWhere(t => t.DependencyType == description.DependencyType);
         _dependencyDescriptions.Add(description);
         return Task.CompletedTask;
     }

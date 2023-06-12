@@ -24,4 +24,4 @@ If in doubt, use another IoC container! Depository is garbage
 ");
 
 BenchmarkRunner.Run<Benchmarks>();
-BenchmarkRunner.Run<IoCContainersBenchmarks>();
+//BenchmarkRunner.Run<IoCContainersBenchmarks>();

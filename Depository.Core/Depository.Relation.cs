@@ -7,7 +7,7 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private readonly Dictionary<DependencyDescription, List<DependencyRelation>> _dependencyRelations = new();
+    private readonly Dictionary<DependencyDescription, HashSet<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
 
     public async Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation)
@@ -22,7 +22,7 @@ public partial class Depository
 
         if (!_dependencyRelations.TryGetValue(dependency, out var relations))
         {
-            relations = new List<DependencyRelation>();
+            relations = new HashSet<DependencyRelation>();
             _dependencyRelations.Add(dependency, relations);
         }
 
@@ -89,32 +89,21 @@ public partial class Depository
     public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription,
         bool includeDisabled = false, string? relationName = null)
     {
-        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation)) return Task.FromResult(relation);
+        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled) return Task.FromResult(relation);
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
             if (relationName is not null)
             {
                 var resolvedRelation = relations.FirstOrDefault(t => t.Name == relationName);
-                if (resolvedRelation is null) throw new DependencyNotFoundException(dependencyDescription.DependencyType);
+                if (resolvedRelation is null)
+                    throw new DependencyNotFoundException(dependencyDescription.DependencyType);
                 return Task.FromResult(resolvedRelation);
             }
 
-            switch (dependencyDescription.ResolvePolicy)
-            {
-                case DependencyResolvePolicy.LastWin:
-                    relation = includeDisabled ? relations.Last() : relations.Last(t => t.IsEnabled);
-                    _currentFocusing[dependencyDescription] = relation;
-                    break;
-                case DependencyResolvePolicy.FirstWin:
-                    relation = includeDisabled ? relations.First(t => t.IsEnabled) : relations[0];
-                    _currentFocusing[dependencyDescription] = relation;
-                    break;
-                case DependencyResolvePolicy.WaitForFocusing:
-                    throw new RelationNotFocusingException();
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            relation = includeDisabled ? relations.Last() : relations.LastOrDefault(t => t.IsEnabled);
+            if (!includeDisabled)
+                _currentFocusing[dependencyDescription] = relation;
         }
         else
         {
@@ -130,7 +119,7 @@ public partial class Depository
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
             return Task.FromResult(
                 includeDisabled
-                    ? relations
+                    ? relations.ToList()
                     : relations.Where(relation => relation.IsEnabled).ToList()
             );
 

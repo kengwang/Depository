@@ -3,7 +3,6 @@
 namespace Depository.Abstraction.Models;
 
 public record DependencyRelation(
-    DependencyRelationType RelationType,
     Type ImplementType,
     object? DefaultImplementation = null,
     string? Name = null,
