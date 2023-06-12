@@ -10,9 +10,25 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private async Task NotifyDependencyChange(DependencyDescription dependencyDescription)
+    private async Task NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
     {
-        var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(dependencyDescription.DependencyType);
+        if (mode is 0 or 1)
+        {
+            // Notify List
+            await PostTypeChangeNotification(
+                typeof(IEnumerable<>).MakeGenericType(dependencyDescription.DependencyType));
+        }
+
+        if (mode is 0 or 2)
+        {
+            // Notify Single
+            await PostTypeChangeNotification(dependencyDescription.DependencyType);
+        }
+    }
+
+    private async Task PostTypeChangeNotification(Type type)
+    {
+        var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(type);
         var description = GetDependencyDescription(notificationType);
         if (description is null) return;
         var relations = await GetRelationsAsync(description);
@@ -22,7 +38,6 @@ public partial class Depository
             notificationType.GetMethods()[0].Invoke(result, new object?[] { null });
         }
     }
-
 
     public async Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option = null)
     {
@@ -175,7 +190,8 @@ public partial class Depository
             }
         }
 
-        if (option?.CheckAsyncConstructor is not false && dependencyImpl is IAsyncConstructService asyncConstructService)
+        if (option?.CheckAsyncConstructor is not false &&
+            dependencyImpl is IAsyncConstructService asyncConstructService)
             await asyncConstructService.InitializeService();
         return dependencyImpl;
     }
@@ -204,6 +220,7 @@ public partial class Depository
             var ret = await option.Scope.GetImplementAsync(implementType);
             if (ret is not null) return ret;
         }
+
         var impl = await ImplementActivator(implementType, option);
         await option.Scope.SetImplementationAsync(implementType, impl);
         return impl;
@@ -222,6 +239,7 @@ public partial class Depository
             var ret = await _rootScope.GetImplementAsync(implementType);
             if (ret is not null) return ret;
         }
+
         var impl = await ImplementActivator(implementType, option);
         await _rootScope.SetImplementationAsync(implementType, impl);
         return impl;

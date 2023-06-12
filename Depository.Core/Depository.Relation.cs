@@ -43,7 +43,7 @@ public partial class Depository
 
         // 通知修改
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependency);
+            await NotifyDependencyChange(dependency, 1);
     }
 
     public async Task DeleteRelationAsync(DependencyDescription dependencyType, DependencyRelation relation)
@@ -83,13 +83,14 @@ public partial class Depository
     {
         _currentFocusing[dependencyDescription] = relation;
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependencyDescription);
+            await NotifyDependencyChange(dependencyDescription, 2);
     }
 
     public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription,
         bool includeDisabled = false, string? relationName = null)
     {
-        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled) return Task.FromResult(relation);
+        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled)
+            return Task.FromResult(relation);
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
