@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Depository.Benchmarks.Benchmarks-20230612-111817</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.3, OS=ubuntu 22.04
+Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
+.NET SDK=7.0.302
+  [Host]     : .NET 7.0.5 (7.0.523.17405), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.5 (7.0.523.17405), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>                                  Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>PublishNotification</td><td>6.721 &mu;s</td><td>0.1322 &mu;s</td><td>0.2349 &mu;s</td><td>3.93 KB</td>
+</tr><tr><td>PublishNotificationWithResult</td><td>6.404 &mu;s</td><td>0.1262 &mu;s</td><td>0.1351 &mu;s</td><td>3.88 KB</td>
+</tr><tr><td>ResolveSingleToSingle</td><td>5.848 &mu;s</td><td>0.1142 &mu;s</td><td>0.1068 &mu;s</td><td>3.42 KB</td>
+</tr><tr><td>ResolveMultipleToSingle</td><td>6.308 &mu;s</td><td>0.0902 &mu;s</td><td>0.1074 &mu;s</td><td>3.79 KB</td>
+</tr><tr><td>ResolveMultipleToMultiple_UsingIEnumerable</td><td>8.273 &mu;s</td><td>0.1622 &mu;s</td><td>0.2619 &mu;s</td><td>4.57 KB</td>
+</tr><tr><td>ResolveMultipleToMultiple_UsingMultipleResolve</td><td>7.916 &mu;s</td><td>0.1576 &mu;s</td><td>0.3359 &mu;s</td><td>4.44 KB</td>
+</tr></tbody></table>
+</body>
+</html>
