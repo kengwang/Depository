@@ -2,8 +2,8 @@
 
 public interface IDepositoryImplementation
 {
-    public Task AddImplementation(Type implementType, object implement);
-    public Task RemoveImplementation(Type implementType, object implement);
-    public Task RemoveAllImplementation(Type implementType);
-    public Task SetImplementation(Type implementType, object implement);
+    public void AddImplementation(Type implementType, object implement);
+    public void RemoveImplementation(Type implementType, object implement);
+    public void RemoveAllImplementation(Type implementType);
+    public void SetImplementation(Type implementType, object implement);
 }

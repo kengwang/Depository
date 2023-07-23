@@ -14,14 +14,14 @@ public class DepositoryFamilyTests
     {
         // Arrange
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IConstructorInjectService, CustomFatherService>();
+        depository.AddSingleton<IConstructorInjectService, CustomFatherService>();
         var guidGen = new EmptyGuidGenerator();
 
         // Action
-        var result = await depository.ResolveAsync<IConstructorInjectService>(fatherImplementations: new Dictionary<Type, object>
+        var result = depository.Resolve<IConstructorInjectService>(fatherImplementations: new Dictionary<Type, object>
             { { typeof(IGuidGenerator), guidGen } });
-        var fathers = await depository.GetParentsAsync(result);
-        var children = await depository.GetChildrenAsync(guidGen);
+        var fathers = depository.GetParents(result);
+        var children = depository.GetChildren(guidGen);
         
         // Assert
         result.Should().NotBeNull();

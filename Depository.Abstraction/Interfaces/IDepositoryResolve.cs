@@ -11,7 +11,7 @@ public interface IDepositoryResolve
     /// <param name="dependency">Dependency Type</param>
     /// <param name="option"></param>
     /// <returns></returns>
-    public Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option = null);
+    public List<object> ResolveDependencies(Type dependency, DependencyResolveOption? option = null);
 
     /// <summary>
     /// Resolve Dependency in Depository
@@ -19,7 +19,7 @@ public interface IDepositoryResolve
     /// <param name="dependency">Dependency Type</param>
     /// <param name="option"></param>
     /// <returns></returns>
-    public Task<object> ResolveDependencyAsync(Type dependency, DependencyResolveOption? option = null);
+    public object ResolveDependency(Type dependency, DependencyResolveOption? option = null);
 
-    public Task ChangeResolveTargetAsync(Type dependency, object? target);
+    public void ChangeResolveTarget(Type dependency, object? target);
 }

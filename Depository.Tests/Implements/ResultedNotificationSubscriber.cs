@@ -7,7 +7,7 @@ public class ResultedNotificationSubscriber : INotificationSubscriber<TestNotifi
 {
 
    
-    public Task<string> HandleNotification(TestNotification notification, CancellationToken ctk = new())
+    public Task<string> HandleNotificationAsync(TestNotification notification, CancellationToken ctk = new())
     {
         IsNormal = true;
         return Task.FromResult("Received");

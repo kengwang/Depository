@@ -11,37 +11,37 @@ public partial class Benchmarks
 {
 
     [Benchmark]
-    public async Task<IGuidGenerator> ResolveSingleToSingle()
+    public IGuidGenerator ResolveSingleToSingle()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        return await depository.ResolveAsync<IGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        return depository.Resolve<IGuidGenerator>();
     }
 
     [Benchmark]
-    public async Task<IGuidGenerator> ResolveMultipleToSingle()
+    public IGuidGenerator ResolveMultipleToSingle()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        return await depository.ResolveAsync<IGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        return depository.Resolve<IGuidGenerator>();
     }
 
     [Benchmark]
-    public async Task ResolveMultipleToMultiple_UsingIEnumerable()
+    public void ResolveMultipleToMultiple_UsingIEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.Resolve<IEnumerable<IGuidGenerator>>();
     }
 
     [Benchmark]
     public async Task ResolveMultipleToMultiple_UsingMultipleResolve()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        await depository.ResolveMultipleAsync<IGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.ResolveMultiple<IGuidGenerator>();
     }
 }

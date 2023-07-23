@@ -19,14 +19,14 @@ public class DepositoryAddTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
-        await depository.AddRelationAsync(description, relation);
+        depository.AddRelation(description, relation);
 
         // Action
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
 
         // Assert
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator), DependencyLifetime.Singleton);
@@ -40,14 +40,14 @@ public class DepositoryAddTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Transient);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
-        await depository.AddRelationAsync(description, relation);
+        depository.AddRelation(description, relation);
 
         // Action
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
 
         // Assert
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
@@ -62,14 +62,14 @@ public class DepositoryAddTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Scoped);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
-        await depository.AddRelationAsync(description, relation);
+        depository.AddRelation(description, relation);
 
         // Action
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
 
         // Assert
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
@@ -84,17 +84,17 @@ public class DepositoryAddTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var relation1 = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
         var relation2 = new DependencyRelation(
             ImplementType: typeof(EmptyGuidGenerator), DefaultImplementation: null);
-        await depository.AddRelationAsync(description, relation1);
-        await depository.AddRelationAsync(description, relation2);
+        depository.AddRelation(description, relation1);
+        depository.AddRelation(description, relation2);
 
         // Action
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
 
         // Assert
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
@@ -108,9 +108,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionSingletonToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(RandomGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddSingleton<RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(RandomGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(RandomGuidGenerator),
             DependencyLifetime.Singleton);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
@@ -120,9 +120,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionTransientToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddTransientAsync<RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(RandomGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddTransient<RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(RandomGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(RandomGuidGenerator),
             DependencyLifetime.Transient);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
@@ -132,9 +132,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionScopedToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddScopedAsync<RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(RandomGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddScoped<RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(RandomGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(RandomGuidGenerator),
             DependencyLifetime.Scoped);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
@@ -144,9 +144,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionSingletonToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
             DependencyLifetime.Singleton);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
@@ -156,9 +156,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionTransientToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddTransientAsync<IGuidGenerator, RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
             DependencyLifetime.Transient);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
@@ -168,9 +168,9 @@ public class DepositoryAddTests
     public async void AddServiceExtensionScopedToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
-        await depository.AddTransientAsync<IGuidGenerator, RandomGuidGenerator>();
-        var resolvedDependency = await depository.GetDependencyAsync(typeof(IGuidGenerator));
-        var resolvedRelation = await depository.GetRelationAsync(resolvedDependency!);
+        depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();
+        var resolvedDependency = depository.GetDependency(typeof(IGuidGenerator));
+        var resolvedRelation = depository.GetRelation(resolvedDependency!);
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
             DependencyLifetime.Transient);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);

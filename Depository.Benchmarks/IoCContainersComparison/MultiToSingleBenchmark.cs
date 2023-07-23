@@ -12,12 +12,12 @@ namespace Depository.Benchmarks;
 public partial class IoCContainersBenchmarks
 {
     [Benchmark]
-    public async Task<IGuidGenerator> Depository_MultiToSingleBenchmark()
+    public IGuidGenerator Depository_MultiToSingleBenchmark()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        return await depository.ResolveAsync<IGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        return depository.Resolve<IGuidGenerator>();
     }
 
 

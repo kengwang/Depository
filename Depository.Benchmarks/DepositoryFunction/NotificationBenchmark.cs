@@ -14,7 +14,7 @@ public partial class Benchmarks
     public async Task PublishNotification()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<INotificationSubscriber<Notification>, NotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<Notification>, NotificationSubscriber>();
         await depository.PublishNotificationAsync(new Notification());
     }
     
@@ -22,7 +22,7 @@ public partial class Benchmarks
     public async Task PublishNotificationWithResult()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<INotificationSubscriber<Notification,NotificationResult>, NotificationAndResultSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<Notification,NotificationResult>, NotificationAndResultSubscriber>();
         await depository.PublishNotificationWithResultAsync<Notification,NotificationResult>(new Notification());
     }
 }
@@ -43,7 +43,7 @@ public class NotificationResult
 // ReSharper disable once ClassNeverInstantiated.Global
 public class NotificationSubscriber : INotificationSubscriber<Notification>
 {
-    public Task HandleNotification(Notification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(Notification notification, CancellationToken ctk = new CancellationToken())
     {
         return Task.CompletedTask;
     }
@@ -52,7 +52,7 @@ public class NotificationSubscriber : INotificationSubscriber<Notification>
 public class NotificationAndResultSubscriber : INotificationSubscriber<Notification, NotificationResult>
 {
 
-    public Task<NotificationResult> HandleNotification(Notification notification, CancellationToken ctk = new CancellationToken())
+    public Task<NotificationResult> HandleNotificationAsync(Notification notification, CancellationToken ctk = new CancellationToken())
     {
         return Task.FromResult(new NotificationResult());
     }

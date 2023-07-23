@@ -17,14 +17,14 @@ public class DepositoryNotificationTests
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<INotificationSubscriber<TestNotification>, NormalNotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<TestNotification>, NormalNotificationSubscriber>();
         
         // Action
         await depository.PublishNotificationAsync(new TestNotification());
         
 
         // Assert
-        var receiver = await depository.ResolveAsync<INotificationSubscriber<TestNotification>>();
+        var receiver = depository.Resolve<INotificationSubscriber<TestNotification>>();
         receiver
             .As<NormalNotificationSubscriber>()
             .IsNormal.Should().BeTrue();
@@ -36,16 +36,16 @@ public class DepositoryNotificationTests
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<INotificationSubscriber<TestNotification>, NormalNotificationSubscriber>();
-        await depository.AddSingletonAsync<INotificationSubscriber<TestNotification>, AnotherNotificationSubscriber>();
-        await depository.AddSingletonAsync<INotificationSubscriber<string>, NotTheNotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<TestNotification>, NormalNotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<TestNotification>, AnotherNotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<string>, NotTheNotificationSubscriber>();
         
         // Action
         await depository.PublishNotificationAsync(new TestNotification());
         
 
         // Assert
-        var receivers = await depository.ResolveMultipleAsync<INotificationSubscriber<TestNotification>>();
+        var receivers = depository.ResolveMultiple<INotificationSubscriber<TestNotification>>();
         receivers
             .Cast<ICheckIsNormal>()
             .Should().HaveCount(2)
@@ -57,14 +57,14 @@ public class DepositoryNotificationTests
     {
         // Init
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<INotificationSubscriber<TestNotification, string>, ResultedNotificationSubscriber>();
+        depository.AddSingleton<INotificationSubscriber<TestNotification, string>, ResultedNotificationSubscriber>();
         
         // Action
         var result = await depository.PublishNotificationWithResultAsync<TestNotification, string>(new TestNotification());
         
 
         // Assert
-        var receiver = await depository.ResolveAsync<INotificationSubscriber<TestNotification, string>>();
+        var receiver = depository.Resolve<INotificationSubscriber<TestNotification, string>>();
         receiver
             .As<ICheckIsNormal>()
             .IsNormal.Should().BeTrue();

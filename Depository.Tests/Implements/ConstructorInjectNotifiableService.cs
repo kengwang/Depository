@@ -14,9 +14,8 @@ public class ConstructorInjectNotifiableService : IConstructorInjectService, INo
     }
 
     public bool IsNormal { get; set; }
-    public Task OnDependencyChanged(IGuidGenerator? marker)
+    public void OnDependencyChanged(IGuidGenerator? marker)
     {
         IsNormal = true;
-        return Task.CompletedTask;
     }
 }

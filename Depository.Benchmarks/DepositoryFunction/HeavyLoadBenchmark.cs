@@ -13,30 +13,30 @@ public partial class Benchmarks
     
     //[Benchmark]
     [Obsolete("Disable Heavy Load Text")]
-    public async Task<IGuidGenerator> HeavyLoad_IEnumerable()
+    public IGuidGenerator HeavyLoad_IEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
 
         for (var i = 0; i < 1_000_000; i++)
         {
-            await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+            depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
         }
 
-        var guidGenerators = await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        var guidGenerators = depository.Resolve<IEnumerable<IGuidGenerator>>();
         return guidGenerators.First();
     }
 
     //[Benchmark]
     [Obsolete("Disable Heavy Load Text")]
-    public async Task<List<IGuidGenerator>> HeavyLoad_ResolveMultiple()
+    public List<IGuidGenerator> HeavyLoad_ResolveMultiple()
     {
         // For Benchmark Purpose only
         var depository = DepositoryFactory.CreateNew(options=>options.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue);
         for (var i = 0; i < 1_000_000; i++)
         {
-            await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+            depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
         }
 
-        return await depository.ResolveMultipleAsync<IGuidGenerator>();
+        return depository.ResolveMultiple<IGuidGenerator>();
     }
 }

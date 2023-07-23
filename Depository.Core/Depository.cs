@@ -17,14 +17,14 @@ public partial class Depository : IDepository
         AddSelfToDepository();
     }
 
-    private async void AddSelfToDepository()
+    private void AddSelfToDepository()
     {
         var description =
             new DependencyDescription(DependencyType: typeof(IDepository), Lifetime: DependencyLifetime.Singleton);
         var relation =
             new DependencyRelation(ImplementType: typeof(Depository));
-        await AddDependencyAsync(description);
-        await AddRelationAsync(description, relation);
+        AddDependency(description);
+        AddRelation(description, relation);
     }
 
     public void Dispose()

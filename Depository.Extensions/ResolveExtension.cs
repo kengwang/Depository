@@ -5,12 +5,12 @@ namespace Depository.Extensions;
 
 public static class ResolveExtension
 {
-    public static async Task<T> ResolveAsync<T>(this IDepositoryResolve depository, DependencyResolveOption? option)
+    public static T Resolve<T>(this IDepositoryResolve depository, DependencyResolveOption? option)
     {
-        return (T)await depository.ResolveDependencyAsync(typeof(T), option);
+        return (T)depository.ResolveDependency(typeof(T), option);
     }
 
-    public static async Task<T> ResolveAsync<T>(this IDepositoryResolve depository, string? relationName = null,
+    public static T Resolve<T>(this IDepositoryResolve depository, string? relationName = null,
         bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
         Dictionary<Type, object>? fatherImplementations = null, bool checkAsyncConstruct = true)
     {
@@ -24,21 +24,21 @@ public static class ResolveExtension
                 FatherImplementations = fatherImplementations,
                 CheckAsyncConstructor = checkAsyncConstruct
             };
-            return (T)await depository.ResolveDependencyAsync(typeof(T), option);
+            return (T)depository.ResolveDependency(typeof(T), option);
         }
 
-        return (T)await depository.ResolveDependencyAsync(typeof(T));
+        return (T)depository.ResolveDependency(typeof(T));
     }
 
-    public static async Task<List<T>> ResolveMultipleAsync<T>(this IDepositoryResolve depository,
+    public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         DependencyResolveOption? option)
     {
-        return (await depository.ResolveDependenciesAsync(typeof(T)))
+        return (depository.ResolveDependencies(typeof(T)))
             .Select(o => (T)o)
             .ToList();
     }
 
-    public static async Task<List<T>> ResolveMultipleAsync<T>(this IDepositoryResolve depository,
+    public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         string? relationName = null, bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
         Dictionary<Type, object>? fatherImplementations = null, bool checkAsyncConstruct = true)
     {
@@ -53,12 +53,12 @@ public static class ResolveExtension
                 FatherImplementations = fatherImplementations,
                 CheckAsyncConstructor = checkAsyncConstruct
             };
-            return (await depository.ResolveDependenciesAsync(typeof(T), option))
+            return (depository.ResolveDependencies(typeof(T), option))
                 .Select(o => (T)o)
                 .ToList();
         }
 
-        return (await depository.ResolveDependenciesAsync(typeof(T)))
+        return (depository.ResolveDependencies(typeof(T)))
             .Select(o => (T)o)
             .ToList();
     }

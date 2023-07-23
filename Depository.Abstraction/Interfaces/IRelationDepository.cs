@@ -4,10 +4,10 @@ namespace Depository.Abstraction.Interfaces;
 
 public interface IRelationDepository
 {
-    public Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation);
+    public void AddRelation(DependencyDescription dependency, DependencyRelation relation);
 
-    public Task<DependencyRelation> GetRelationAsync(DependencyDescription description, bool includeDisabled = false, string? relationName = null);
-    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription description, bool includeDisabled = false);
+    public DependencyRelation? GetRelation(DependencyDescription description, bool includeDisabled = false, string? relationName = null);
+    public List<DependencyRelation> GetRelations(DependencyDescription description, bool includeDisabled = false);
     
     /// <summary>
     /// Replace Dependency
@@ -15,7 +15,7 @@ public interface IRelationDepository
     /// <param name="description"></param>
     /// <param name="relation"></param>
     /// <returns></returns>
-    public Task ChangeFocusingRelationAsync(DependencyDescription description, DependencyRelation relation);
+    public void ChangeFocusingRelation(DependencyDescription description, DependencyRelation relation);
 
     /// <summary>
     /// Delete Relation
@@ -23,12 +23,12 @@ public interface IRelationDepository
     /// <param name="description"></param>
     /// <param name="relation"></param>
     /// <returns></returns>
-    public Task DeleteRelationAsync(DependencyDescription description, DependencyRelation relation);
+    public void DeleteRelation(DependencyDescription description, DependencyRelation relation);
 
 
-    public Task ClearRelationsAsync(DependencyDescription description);
+    public void ClearRelations(DependencyDescription description);
 
-    public Task DisableRelationAsync(DependencyDescription description, DependencyRelation relation);
+    public void DisableRelation(DependencyDescription description, DependencyRelation relation);
     
-    public Task EnableRelationAsync(DependencyDescription description, DependencyRelation relation);
+    public void EnableRelation(DependencyDescription description, DependencyRelation relation);
 }

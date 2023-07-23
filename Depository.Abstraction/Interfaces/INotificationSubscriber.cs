@@ -2,10 +2,10 @@
 
 public interface INotificationSubscriber<in TNotification>
 {
-    public Task HandleNotification(TNotification notification, CancellationToken ctk = new());
+    public Task HandleNotificationAsync(TNotification notification, CancellationToken ctk = new());
 }
 
 public interface INotificationSubscriber<in TNotification, TResult>
 {
-    public Task<TResult> HandleNotification(TNotification notification, CancellationToken ctk = new());
+    public Task<TResult> HandleNotificationAsync(TNotification notification, CancellationToken ctk = new());
 }

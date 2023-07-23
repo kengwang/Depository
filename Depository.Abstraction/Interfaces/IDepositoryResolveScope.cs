@@ -2,11 +2,11 @@
 
 public interface IDepositoryResolveScope : IDisposable
 {
-    public Task SetImplementationAsync(Type type, object? impl);
-    public Task<List<object>?> GetImplementsAsync(Type type);
-    public Task<object?> GetImplementAsync(Type type);
-    public Task AddImplementAsync(Type type, object impl);
-    public Task<bool> ExistAsync(Type type);
-    public Task RemoveAllImplementsAsync(Type type);
-    public Task RemoveImplementAsync(Type type, object implement);
+    public void SetImplementation(Type type, object? impl);
+    public List<object>? GetImplements(Type type);
+    public object? GetImplement(Type type);
+    public void AddImplement(Type type, object impl);
+    public bool Exist(Type type);
+    public void RemoveAllImplements(Type type);
+    public void RemoveImplement(Type type, object implement);
 }

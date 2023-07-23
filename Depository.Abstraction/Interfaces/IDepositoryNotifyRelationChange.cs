@@ -2,5 +2,5 @@
 
 public interface IDepositoryNotifyRelationChange
 {
-    public Task NotifyRelationChange(Type changedType);
+    public void NotifyRelationChange(Type changedType);
 }

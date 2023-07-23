@@ -6,76 +6,75 @@ namespace Depository.Extensions;
 
 public static class AddDependencyExtension
 {
-    public static async Task AddSingletonAsync<TDependency, TImplement>(this IDepository depository,
+    public static void AddSingleton<TDependency, TImplement>(this IDepository depository,
         object? defaultImplement = null, string? relationName = null, bool isEnabled = true)
         where TImplement : TDependency =>
-        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Singleton, defaultImplement,
+        Add<TDependency, TImplement>(depository, DependencyLifetime.Singleton, defaultImplement,
             relationName, isEnabled);
 
-    public static async Task
-        AddSingletonAsync<TService>(this IDepository depository, object? defaultImplement = null,
+    public static void AddSingleton<TService>(this IDepository depository, object? defaultImplement = null,
             string? relationName = null, bool isEnabled = true) =>
-        await AddAsync<TService>(depository, DependencyLifetime.Singleton, defaultImplement, relationName, isEnabled);
+        Add<TService>(depository, DependencyLifetime.Singleton, defaultImplement, relationName, isEnabled);
 
-    public static async Task AddScopedAsync<TDependency, TImplement>(this IDepository depository,
+    public static void AddScoped<TDependency, TImplement>(this IDepository depository,
         string? relationName = null, bool isEnabled = true)
         where TImplement : TDependency =>
-        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Scoped, null, relationName, isEnabled);
+        Add<TDependency, TImplement>(depository, DependencyLifetime.Scoped, null, relationName, isEnabled);
 
-    public static async Task AddScopedAsync<TService>(this IDepository depository, string? relationName = null,
+    public static void AddScoped<TService>(this IDepository depository, string? relationName = null,
         bool isEnabled = true) =>
-        await AddAsync<TService>(depository, DependencyLifetime.Scoped, null, relationName, isEnabled);
+        Add<TService>(depository, DependencyLifetime.Scoped, null, relationName, isEnabled);
 
-    public static async Task AddTransientAsync<TDependency, TImplement>(this IDepository depository,
+    public static void AddTransient<TDependency, TImplement>(this IDepository depository,
         string? relationName = null, bool isEnabled = true)
         where TImplement : TDependency =>
-        await AddAsync<TDependency, TImplement>(depository, DependencyLifetime.Transient, null, relationName,
+        Add<TDependency, TImplement>(depository, DependencyLifetime.Transient, null, relationName,
             isEnabled);
 
-    public static async Task AddTransientAsync<TService>(this IDepository depository, string? relationName = null,
+    public static void AddTransient<TService>(this IDepository depository, string? relationName = null,
         bool isEnabled = true) =>
-        await AddAsync<TService>(depository, DependencyLifetime.Transient, null, relationName, isEnabled);
+        Add<TService>(depository, DependencyLifetime.Transient, null, relationName, isEnabled);
 
-    public static async Task AddAsync<TDependency, TImplement>(this IDepository depository, DependencyLifetime lifetime,
+    public static void Add<TDependency, TImplement>(this IDepository depository, DependencyLifetime lifetime,
         object? defaultImplement = null, string? relationName = null, bool isEnabled = true)
         where TImplement : TDependency =>
-        await AddAsync(depository, typeof(TDependency), typeof(TImplement), lifetime, defaultImplement, relationName,
+        Add(depository, typeof(TDependency), typeof(TImplement), lifetime, defaultImplement, relationName,
             isEnabled);
 
-    public static async Task AddAsync<TService>(this IDepository depository, DependencyLifetime lifetime,
+    public static void Add<TService>(this IDepository depository, DependencyLifetime lifetime,
         object? defaultImplement = null, string? relationName = null, bool isEnabled = true) =>
-        await AddAsync(depository, typeof(TService), typeof(TService), lifetime, defaultImplement, relationName,
+        Add(depository, typeof(TService), typeof(TService), lifetime, defaultImplement, relationName,
             isEnabled);
 
-    public static async Task AddSingletonAsync(this IDepository depository, Type dependencyType, Type implementType,
+    public static void AddSingleton(this IDepository depository, Type dependencyType, Type implementType,
         object? defaultImplement = null, string? relationName = null, bool isEnabled = true)
-        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Singleton, defaultImplement,
+        => Add(depository, dependencyType, implementType, DependencyLifetime.Singleton, defaultImplement,
             relationName, isEnabled);
 
-    public static async Task AddTransientAsync(this IDepository depository, Type dependencyType, Type implementType,
+    public static void AddTransient(this IDepository depository, Type dependencyType, Type implementType,
         string? relationName = null, bool isEnabled = true)
-        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Transient, null, relationName,
+        => Add(depository, dependencyType, implementType, DependencyLifetime.Transient, null, relationName,
             isEnabled);
 
-    public static async Task AddScopedAsync(this IDepository depository, Type dependencyType, Type implementType,
+    public static void AddScoped(this IDepository depository, Type dependencyType, Type implementType,
         string? relationName = null, bool isEnabled = true)
-        => await AddAsync(depository, dependencyType, implementType, DependencyLifetime.Scoped, null, relationName,
+        => Add(depository, dependencyType, implementType, DependencyLifetime.Scoped, null, relationName,
             isEnabled);
 
-    public static async Task AddAsync(this IDepository depository, Type dependencyType, Type implementType,
+    public static void Add(this IDepository depository, Type dependencyType, Type implementType,
         DependencyLifetime lifetime, object? defaultImplement = null, string? relationName = null,
         bool isEnabled = true)
     {
-        var dependencyDescription = await depository.GetDependencyAsync(dependencyType);
+        var dependencyDescription = depository.GetDependency(dependencyType);
 
         if (dependencyDescription is null)
         {
             dependencyDescription = new DependencyDescription(DependencyType: dependencyType,
                 Lifetime: lifetime);
-            await depository.AddDependencyAsync(dependencyDescription);
+            depository.AddDependency(dependencyDescription);
         }
 
-        await depository.AddRelationAsync(dependencyDescription,
+        depository.AddRelation(dependencyDescription,
             new DependencyRelation(ImplementType: implementType,
                 DefaultImplementation: defaultImplement, Name: relationName, IsEnabled: isEnabled));
     }

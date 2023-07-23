@@ -22,14 +22,14 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description,
+        depository.AddDependency(description);
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
-        var guidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
+        var guidGenerator = depository.ResolveDependency(typeof(IGuidGenerator));
 
         // Assert
         guidGenerator.Should().NotBeNull().And.BeOfType<RandomGuidGenerator>();
@@ -40,10 +40,10 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(IAsyncConstructService), typeof(AsyncConstructorService));
+        depository.AddSingleton(typeof(IAsyncConstructService), typeof(AsyncConstructorService));
 
         // Action
-        var service = await depository.ResolveAsync<IAsyncConstructService>();
+        var service = depository.Resolve<IAsyncConstructService>();
 
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
@@ -56,8 +56,8 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Scoped);
-        await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description,
+        depository.AddDependency(description);
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
         
@@ -66,22 +66,22 @@ public class DepositoryResolveTests
         using (var scopeA = DepositoryResolveScope.Create())
         using (var scopeB = DepositoryResolveScope.Create())
         {
-            var guidGeneratorA1 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            var guidGeneratorA1 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
             {
                 Scope = scopeA
             });
         
-            var guidGeneratorA2 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            var guidGeneratorA2 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
             {
                 Scope = scopeA
             });
         
-            var guidGeneratorB1 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            var guidGeneratorB1 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
             {
                 Scope = scopeB
             });
         
-            var guidGeneratorB2 = await depository.ResolveDependencyAsync(typeof(IGuidGenerator), new DependencyResolveOption()
+            var guidGeneratorB2 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
             {
                 Scope = scopeB
             });
@@ -100,17 +100,17 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description,
+        depository.AddDependency(description);
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: null));
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
-        var guidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
+        var guidGenerator = depository.ResolveDependency(typeof(IGuidGenerator));
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -126,17 +126,17 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description,
+        depository.AddDependency(description);
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: null));
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
-        var guidGenerator = await depository.ResolveDependenciesAsync(typeof(IGuidGenerator));
+        var guidGenerator = depository.ResolveDependencies(typeof(IGuidGenerator));
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -152,17 +152,17 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
-        await depository.AddRelationAsync(description,
+        depository.AddDependency(description);
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: null));
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
-        var guidGenerator = await depository.ResolveDependencyAsync(typeof(IEnumerable<IGuidGenerator>));
+        var guidGenerator = depository.ResolveDependency(typeof(IEnumerable<IGuidGenerator>));
 
         // Assert
         var guidGeneratorList = Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(guidGenerator).ToList();
@@ -178,14 +178,14 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: emptyGuidGenerator));
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IGuidGenerator));
+        var resolveGuidGenerator = depository.ResolveDependency(typeof(IGuidGenerator));
 
         // Assert
         resolveGuidGenerator.Should().Be(emptyGuidGenerator);
@@ -198,18 +198,18 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: emptyGuidGenerator));
 
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveDependenciesAsync(typeof(IGuidGenerator));
+        var resolveGuidGenerator = depository.ResolveDependencies(typeof(IGuidGenerator));
 
         // Assert
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
@@ -222,18 +222,18 @@ public class DepositoryResolveTests
         var depository = CreateNewDepository();
         var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
             Lifetime: DependencyLifetime.Singleton);
-        await depository.AddDependencyAsync(description);
+        depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
                 DefaultImplementation: emptyGuidGenerator));
 
-        await depository.AddRelationAsync(description,
+        depository.AddRelation(description,
             new DependencyRelation(
                 ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveDependencyAsync(typeof(IEnumerable<IGuidGenerator>));
+        var resolveGuidGenerator = depository.ResolveDependency(typeof(IEnumerable<IGuidGenerator>));
 
         // Assert
         Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(resolveGuidGenerator).ToList()
@@ -247,10 +247,10 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
 
         // Action
-        var guidGenerator = await depository.ResolveAsync<IGuidGenerator>();
+        var guidGenerator = depository.Resolve<IGuidGenerator>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -262,11 +262,11 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
 
         // Action
-        var guidGenerator = await depository.ResolveAsync<IGuidGenerator>();
+        var guidGenerator = depository.Resolve<IGuidGenerator>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -280,11 +280,11 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
 
         // Action
-        var guidGenerator = await depository.ResolveMultipleAsync<IGuidGenerator>();
+        var guidGenerator = depository.ResolveMultiple<IGuidGenerator>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -298,11 +298,11 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>();
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
 
         // Action
-        var guidGenerator = await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        var guidGenerator = depository.Resolve<IEnumerable<IGuidGenerator>>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -316,10 +316,10 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync<ITypeGeneric<string>, TypeGeneric<string>>();
+        depository.AddSingleton<ITypeGeneric<string>, TypeGeneric<string>>();
 
         // Action
-        var guidGenerator = await depository.ResolveAsync<ITypeGeneric<string>>();
+        var guidGenerator = depository.Resolve<ITypeGeneric<string>>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -332,10 +332,10 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
+        depository.AddSingleton(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
 
         // Action
-        var guidGenerator = await depository.ResolveAsync<ITypeGeneric<string>>();
+        var guidGenerator = depository.Resolve<ITypeGeneric<string>>();
 
         // Assert
         guidGenerator.Should().NotBeNull()
@@ -348,11 +348,11 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService), typeof(ConstructorInjectService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        depository.AddSingleton(typeof(IConstructorInjectService), typeof(ConstructorInjectService));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
 
         // Action
-        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        var service = depository.Resolve<IConstructorInjectService>();
 
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
@@ -363,13 +363,13 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+        depository.AddSingleton(typeof(IConstructorInjectService),
             typeof(ConstructorIEnumerableInjectService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
 
         // Action
-        var service = await depository.ResolveAsync<IConstructorInjectService>();
+        var service = depository.Resolve<IConstructorInjectService>();
 
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
@@ -380,16 +380,16 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+        depository.AddSingleton(typeof(IConstructorInjectService),
             typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(INotifyDependencyChanged<IGuidGenerator>),
+        depository.AddSingleton(typeof(INotifyDependencyChanged<IGuidGenerator>),
             typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
 
 
         // Action
-        var service = await depository.ResolveAsync<IConstructorInjectService>();
-        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator), new EmptyGuidGenerator());
+        var service = depository.Resolve<IConstructorInjectService>();
+        depository.ChangeResolveTarget(typeof(IGuidGenerator), new EmptyGuidGenerator());
 
 
         // Assert
@@ -401,17 +401,17 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
-        await depository.AddSingletonAsync(typeof(IConstructorInjectService),
+        depository.AddSingleton(typeof(IConstructorInjectService),
             typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(INotifyDependencyChanged<IGuidGenerator>),
+        depository.AddSingleton(typeof(INotifyDependencyChanged<IGuidGenerator>),
             typeof(ConstructorInjectNotifiableService));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
-        await depository.AddSingletonAsync(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
 
 
         // Action
-        var service = await depository.ResolveAsync<IConstructorInjectService>();
-        await depository.ChangeResolveTargetAsync(typeof(IGuidGenerator), new EmptyGuidGenerator());
+        var service = depository.Resolve<IConstructorInjectService>();
+        depository.ChangeResolveTarget(typeof(IGuidGenerator), new EmptyGuidGenerator());
 
 
         // Assert
@@ -424,10 +424,10 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveAsync<IGuidGenerator>();
+        var resolveGuidGenerator = depository.Resolve<IGuidGenerator>();
 
         // Assert
         resolveGuidGenerator.Should().Be(emptyGuidGenerator);
@@ -439,11 +439,11 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveMultipleAsync<IGuidGenerator>();
+        var resolveGuidGenerator = depository.ResolveMultiple<IGuidGenerator>();
 
         // Assert
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
@@ -455,11 +455,11 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository();
         var emptyGuidGenerator = new EmptyGuidGenerator();
-        await depository.AddSingletonAsync<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
-        await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator);
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>(emptyGuidGenerator);
 
         // Action
-        var resolveGuidGenerator = await depository.ResolveAsync<IEnumerable<IGuidGenerator>>();
+        var resolveGuidGenerator = depository.Resolve<IEnumerable<IGuidGenerator>>();
 
         // Assert
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));

@@ -25,8 +25,8 @@ var depository = DepositoryFactory.CreateNew();
 You can add then add Your first dependency
 
 ```csharp
-// Just like using Microsoft.Extensnion.DependencyInjection, but REMENBER everything is ASYNC
-await depository.AddSingletonAsync<IGuidGenerator, RandomGuidGenerator>();
+// Just like using Microsoft.Extensnion.DependencyInjection
+depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
 ```
 
 You don't have to build a container, because `Depository` is a container
@@ -34,7 +34,7 @@ You don't have to build a container, because `Depository` is a container
 You can then resolve `IGuidGenerator`
 
 ```csharp
-var generator = await depository.ResolveAsync<IGuidGenerator>();
+var generator = depository.Resolve<IGuidGenerator>();
 ```
 
 Congratulation, you successfully learned how to use it!

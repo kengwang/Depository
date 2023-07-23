@@ -2,23 +2,23 @@
 
 public partial class Depository
 {
-    public async Task AddImplementation(Type implementType, object implement)
+    public void AddImplementation(Type implementType, object implement)
     {
-        await _rootScope.AddImplementAsync(implementType, implement);
+        _rootScope.AddImplement(implementType, implement);
     }
 
-    public async Task RemoveImplementation(Type implementType, object implement)
+    public void RemoveImplementation(Type implementType, object implement)
     {
-        await _rootScope.RemoveImplementAsync(implementType, implement);
+        _rootScope.RemoveImplement(implementType, implement);
     }
 
-    public async Task RemoveAllImplementation(Type implementType)
+    public void RemoveAllImplementation(Type implementType)
     {
-        await _rootScope.RemoveAllImplementsAsync(implementType);
+        _rootScope.RemoveAllImplements(implementType);
     }
 
-    public async Task SetImplementation(Type implementType, object implement)
+    public void SetImplementation(Type implementType, object implement)
     {
-        await _rootScope.SetImplementationAsync(implementType, implement);
+        _rootScope.SetImplementation(implementType, implement);
     }
 }

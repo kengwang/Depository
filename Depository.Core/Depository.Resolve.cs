@@ -10,56 +10,56 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private async Task NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
+    private void NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
     {
         if (mode is 0 or 1)
         {
             // Notify List
-            await PostTypeChangeNotification(
+            PostTypeChangeNotification(
                 typeof(IEnumerable<>).MakeGenericType(dependencyDescription.DependencyType));
         }
 
         if (mode is 0 or 2)
         {
             // Notify Single
-            await PostTypeChangeNotification(dependencyDescription.DependencyType);
+            PostTypeChangeNotification(dependencyDescription.DependencyType);
         }
     }
 
-    private async Task PostTypeChangeNotification(Type type)
+    private void PostTypeChangeNotification(Type type)
     {
         var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(type);
         var description = GetDependencyDescription(notificationType);
         if (description is null) return;
-        var relations = await GetRelationsAsync(description);
+        var relations = GetRelations(description);
         foreach (var relation in relations)
         {
-            var result = await ResolveRelationAsync(description, relation);
+            var result = ResolveRelation(description, relation);
             notificationType.GetMethods()[0].Invoke(result, new object?[] { null });
         }
     }
 
-    public async Task<List<object>> ResolveDependenciesAsync(Type dependency, DependencyResolveOption? option = null)
+    public List<object> ResolveDependencies(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType && _dependencyDescriptions.All(t => t.DependencyType != dependency))
         {
-            return await ResolveGenericDependencies(dependency, option);
+            return ResolveGenericDependencies(dependency, option);
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
-        var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
+        var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
         {
-            var result = await ResolveRelationAsync(dependencyDescription, relation, option);
+            var result = ResolveRelation(dependencyDescription, relation, option);
             results.Add(result);
         }
 
         return results;
     }
 
-    public async Task<object> ResolveDependencyAsync(Type dependency, DependencyResolveOption? option = null)
+    public object ResolveDependency(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType)
         {
@@ -68,7 +68,7 @@ public partial class Depository
                 // check whether is IEnumerable
                 // and then return the fully Implemented stuff
                 var cachedGenericType = dependency.GenericTypeArguments[0];
-                var resolves = (await ResolveDependenciesAsync(cachedGenericType, option));
+                var resolves = ResolveDependencies(cachedGenericType, option);
                 var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impl in resolves)
@@ -87,55 +87,56 @@ public partial class Depository
                 // check if is implemented as an existed generic
                 if (_dependencyDescriptions.All(t => t.DependencyType != dependency))
                 {
-                    return await ResolveGenericDependency(dependency, option);
+                    return ResolveGenericDependency(dependency, option);
                 }
             }
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
-        var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
-        return await ResolveRelationAsync(dependencyDescription, relation, option);
+        var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
+        return ResolveRelation(dependencyDescription, relation, option);
     }
 
-    public async Task ChangeResolveTargetAsync(Type dependency, object? target)
+    public void ChangeResolveTarget(Type dependency, object? target)
     {
         var description = GetDependencyDescription(dependency);
         if (description is null) throw new DependencyNotFoundException(dependency);
         if (description.Lifetime == DependencyLifetime.Singleton)
         {
-            await _rootScope.SetImplementationAsync(dependency, target);
+            _rootScope.SetImplementation(dependency, target);
         }
 
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(description);
+            NotifyDependencyChange(description);
     }
 
-    private async Task<object> ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
+    private object? ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
         if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
-        var relation = await GetRelationAsync(dependencyDescription, option?.IncludeDisabled is true);
+        var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
+        if (relation is null) return null;
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         var implementType = relation.ImplementType;
         if (!dependency.ContainsGenericParameters)
             implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
         return dependencyDescription.Lifetime switch
         {
-            DependencyLifetime.Singleton => await ResolveSingleton(implementType, option),
-            DependencyLifetime.Transient => await ResolveTransient(implementType, option),
-            DependencyLifetime.Scoped => await ResolveScoped(implementType, option),
+            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+            DependencyLifetime.Transient => ResolveTransient(implementType, option),
+            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    private async Task<List<object>> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
+    private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
         if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
-        var relations = await GetRelationsAsync(dependencyDescription, option?.IncludeDisabled is true);
+        var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
         {
@@ -145,9 +146,9 @@ public partial class Depository
                 implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
             var impl = dependencyDescription.Lifetime switch
             {
-                DependencyLifetime.Singleton => await ResolveSingleton(implementType, option),
-                DependencyLifetime.Transient => await ResolveTransient(implementType, option),
-                DependencyLifetime.Scoped => await ResolveScoped(implementType, option),
+                DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+                DependencyLifetime.Transient => ResolveTransient(implementType, option),
+                DependencyLifetime.Scoped => ResolveScoped(implementType, option),
                 _ => throw new ArgumentOutOfRangeException()
             };
             results.Add(impl);
@@ -156,7 +157,7 @@ public partial class Depository
         return results;
     }
 
-    private async Task<object> ImplementActivator(Type implementType, DependencyResolveOption? option)
+    private object ImplementActivator(Type implementType, DependencyResolveOption? option)
     {
         var constructorInfos = implementType.GetConstructors();
         // ReSharper disable once ConvertIfStatementToSwitchStatement
@@ -176,7 +177,7 @@ public partial class Depository
             }
             else
             {
-                parameters.Add(await ResolveDependencyAsync(parameterInfo.ParameterType, option));
+                parameters.Add(ResolveDependency(parameterInfo.ParameterType, option));
             }
         }
 
@@ -192,12 +193,12 @@ public partial class Depository
 
         if (option?.CheckAsyncConstructor is not false &&
             dependencyImpl is IAsyncConstructService asyncConstructService)
-            await asyncConstructService.InitializeService();
+            asyncConstructService.InitializeService().ConfigureAwait(false);
         return dependencyImpl;
     }
 
 
-    private async Task<object> ResolveRelationAsync(
+    private object ResolveRelation(
         DependencyDescription dependencyDescription,
         DependencyRelation relation,
         DependencyResolveOption? option = null)
@@ -205,43 +206,43 @@ public partial class Depository
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         return dependencyDescription.Lifetime switch
         {
-            DependencyLifetime.Singleton => await ResolveSingleton(relation.ImplementType, option),
-            DependencyLifetime.Transient => await ResolveTransient(relation.ImplementType, option),
-            DependencyLifetime.Scoped => await ResolveScoped(relation.ImplementType, option),
+            DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
+            DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
+            DependencyLifetime.Scoped => ResolveScoped(relation.ImplementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    private async Task<object> ResolveScoped(Type implementType, DependencyResolveOption? option)
+    private object ResolveScoped(Type implementType, DependencyResolveOption? option)
     {
         if (option?.Scope is null) throw new ScopeNotSetException();
-        if (await option.Scope.ExistAsync(implementType))
+        if (option.Scope.Exist(implementType))
         {
-            var ret = await option.Scope.GetImplementAsync(implementType);
+            var ret = option.Scope.GetImplement(implementType);
             if (ret is not null) return ret;
         }
 
-        var impl = await ImplementActivator(implementType, option);
-        await option.Scope.SetImplementationAsync(implementType, impl);
+        var impl = ImplementActivator(implementType, option);
+        option.Scope.SetImplementation(implementType, impl);
         return impl;
     }
 
-    private async Task<object> ResolveTransient(Type implementType, DependencyResolveOption? option)
+    private object ResolveTransient(Type implementType, DependencyResolveOption? option)
     {
-        var impl = await ImplementActivator(implementType, option);
+        var impl = ImplementActivator(implementType, option);
         return impl;
     }
 
-    private async Task<object> ResolveSingleton(Type implementType, DependencyResolveOption? option)
+    private object ResolveSingleton(Type implementType, DependencyResolveOption? option)
     {
-        if (await _rootScope.ExistAsync(implementType))
+        if (_rootScope.Exist(implementType))
         {
-            var ret = await _rootScope.GetImplementAsync(implementType);
+            var ret = _rootScope.GetImplement(implementType);
             if (ret is not null) return ret;
         }
 
-        var impl = await ImplementActivator(implementType, option);
-        await _rootScope.SetImplementationAsync(implementType, impl);
+        var impl = ImplementActivator(implementType, option);
+        _rootScope.SetImplementation(implementType, impl);
         return impl;
     }
 }

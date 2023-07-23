@@ -6,7 +6,7 @@ namespace Depository.Tests.Implements;
 public class AnotherNotificationSubscriber : INotificationSubscriber<TestNotification>, ICheckIsNormal
 {
     public bool IsNormal { get; set; }
-    public Task HandleNotification(TestNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(TestNotification notification, CancellationToken ctk = new CancellationToken())
     {
         IsNormal = true;
         return Task.CompletedTask;

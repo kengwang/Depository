@@ -21,7 +21,7 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         _option = option;
     }
 
-    public Task SetImplementationAsync(Type type, object? impl)
+    public void SetImplementation(Type type, object? impl)
     {
         _implementations.TryGetValue(type, out var implList);
         if (implList is null)
@@ -32,28 +32,21 @@ public class DepositoryResolveScope : IDepositoryResolveScope
 
         implList.RemoveAll(t => t.Target == impl);
         implList.Add(new WeakReference(impl));
-        return Task.CompletedTask;
     }
 
-    public Task<List<object>?> GetImplementsAsync(Type type)
+    public List<object>? GetImplements(Type type)
     {
         _implementations.TryGetValue(type, out var implRefList);
-        if (implRefList is null)
-            return Task.FromResult<List<object>?>(null);
-
-        return Task.FromResult(implRefList.Select(i => i.Target).ToList())!;
+        return implRefList?.Select(i => i.Target).ToList();
     }
 
-    public Task<object?> GetImplementAsync(Type type)
+    public object? GetImplement(Type type)
     {
         _implementations.TryGetValue(type, out var implRefList);
-        if (implRefList is not { Count: > 0 })
-            return Task.FromResult<object?>(null);
-
-        return Task.FromResult(implRefList[implRefList.Count - 1].Target);
+        return implRefList is not { Count: > 0 } ? null : implRefList[implRefList.Count - 1].Target;
     }
 
-    public Task AddImplementAsync(Type type, object impl)
+    public void AddImplement(Type type, object impl)
     {
         _implementations.TryGetValue(type, out var implList);
         if (implList is null)
@@ -62,19 +55,18 @@ public class DepositoryResolveScope : IDepositoryResolveScope
             _implementations[type] = implList;
         }
         implList.Add(new WeakReference(impl));
-        return Task.CompletedTask;
     }
 
-    public Task<bool> ExistAsync(Type type)
+    public bool Exist(Type type)
     {
         _implementations.TryGetValue(type, out var implList);
-        return Task.FromResult(implList is { Count: > 0 });
+        return implList is { Count: > 0 };
     }
 
-    public Task RemoveAllImplementsAsync(Type type)
+    public void RemoveAllImplements(Type type)
     {
         _implementations.TryGetValue(type, out var implList);
-        if (implList is null) return Task.CompletedTask;
+        if (implList is null) return;
         // Dispose it before remove it
         if (_option?.AutoDisposeWhenRemoved is true)
             foreach (var weakReference in implList)
@@ -87,19 +79,16 @@ public class DepositoryResolveScope : IDepositoryResolveScope
 
         implList.Clear();
         _implementations.Remove(type);
-        return Task.CompletedTask;
     }
 
-    public Task RemoveImplementAsync(Type type, object implement)
+    public void RemoveImplement(Type type, object implement)
     {
         _implementations.TryGetValue(type, out var implList);
-        if (implList is null) return Task.CompletedTask;
+        if (implList is null) return;
         foreach (var weakReference in implList)
         {
             if (weakReference.Target == implement || weakReference.IsAlive == false || weakReference.Target is null) implList.Remove(weakReference);
         }
-
-        return Task.CompletedTask;
     }
 
     public void Dispose()

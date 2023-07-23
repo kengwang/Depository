@@ -7,37 +7,34 @@ public partial class Depository
 {
     private readonly HashSet<DependencyDescription> _dependencyDescriptions = new();
 
-    public Task AddDependencyAsync(DependencyDescription description)
+    public void AddDependency(DependencyDescription description)
     {
         _dependencyDescriptions.RemoveWhere(t => t.DependencyType == description.DependencyType);
         _dependencyDescriptions.Add(description);
-        return Task.CompletedTask;
     }
 
 
-    public Task<bool> DependencyExist(Type dependencyType)
+    public bool DependencyExist(Type dependencyType)
     {
-        return Task.FromResult(_dependencyDescriptions.Any(des => des.DependencyType == dependencyType));
+        return _dependencyDescriptions.Any(des => des.DependencyType == dependencyType);
     }
 
-    public Task<DependencyDescription?> GetDependencyAsync(Type dependencyType)
+    public DependencyDescription? GetDependency(Type dependencyType)
     {
-        return Task.FromResult(_dependencyDescriptions.FirstOrDefault(dep => dep.DependencyType == dependencyType) ??
-                               null);
+        return _dependencyDescriptions.FirstOrDefault(dep => dep.DependencyType == dependencyType) ??
+                               null;
     }
 
-    public Task DeleteDependencyAsync(DependencyDescription description)
+    public void DeleteDependency(DependencyDescription description)
     {
         _dependencyRelations.Remove(description);
         _dependencyDescriptions.Remove(description);
-        return Task.CompletedTask;
     }
 
-    public Task ClearAllDependenciesAsync()
+    public void ClearAllDependencies()
     {
         _dependencyDescriptions.Clear();
         _dependencyRelations.Clear();
-        return Task.CompletedTask;
     }
     
     private DependencyDescription? GetDependencyDescription(Type dependency)

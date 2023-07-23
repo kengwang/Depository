@@ -16,11 +16,11 @@ namespace Depository.Benchmarks;
 public partial class IoCContainersBenchmarks
 {
     [Benchmark]
-    public async Task<IGuidGenerator> Depository_SingleToDefaultImplementBenchmark()
+    public IGuidGenerator Depository_SingleToDefaultImplementBenchmark()
     {
         var depository = DepositoryFactory.CreateNew();
-        await depository.AddSingletonAsync<IGuidGenerator>(new RandomGuidGenerator());
-        return await depository.ResolveAsync<IGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator>(new RandomGuidGenerator());
+        return depository.Resolve<IGuidGenerator>();
     }
 
 

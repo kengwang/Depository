@@ -10,7 +10,7 @@ public partial class Depository
     private readonly Dictionary<DependencyDescription, HashSet<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
 
-    public async Task AddRelationAsync(DependencyDescription dependency, DependencyRelation relation)
+    public void AddRelation(DependencyDescription dependency, DependencyRelation relation)
     {
         if (_option.CheckerOption.ImplementIsInheritedFromDependency &&
             dependency.DependencyType.IsAssignableFrom(relation.ImplementType))
@@ -43,10 +43,10 @@ public partial class Depository
 
         // 通知修改
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependency, 1);
+            NotifyDependencyChange(dependency, 1);
     }
 
-    public async Task DeleteRelationAsync(DependencyDescription dependencyType, DependencyRelation relation)
+    public void DeleteRelation(DependencyDescription dependencyType, DependencyRelation relation)
     {
         if (_dependencyRelations.TryGetValue(dependencyType, out var relations))
         {
@@ -54,43 +54,42 @@ public partial class Depository
         }
 
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependencyType);
+            NotifyDependencyChange(dependencyType);
     }
 
-    public Task ClearRelationsAsync(DependencyDescription dependencyType)
+    public void ClearRelations(DependencyDescription dependencyType)
     {
         _dependencyRelations.Remove(dependencyType);
-        return Task.CompletedTask;
     }
 
-    public async Task DisableRelationAsync(DependencyDescription description, DependencyRelation relation)
+    public void DisableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = false;
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(description);
+            NotifyDependencyChange(description);
     }
 
-    public async Task EnableRelationAsync(DependencyDescription description, DependencyRelation relation)
+    public void EnableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = true;
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(description);
+            NotifyDependencyChange(description);
     }
 
 
-    public async Task ChangeFocusingRelationAsync(DependencyDescription dependencyDescription,
+    public void ChangeFocusingRelation(DependencyDescription dependencyDescription,
         DependencyRelation relation)
     {
         _currentFocusing[dependencyDescription] = relation;
         if (_option.AutoNotifyDependencyChange)
-            await NotifyDependencyChange(dependencyDescription, 2);
+            NotifyDependencyChange(dependencyDescription, 2);
     }
 
-    public Task<DependencyRelation> GetRelationAsync(DependencyDescription dependencyDescription,
-        bool includeDisabled = false, string? relationName = null)
+    public DependencyRelation? GetRelation(DependencyDescription dependencyDescription,
+                                           bool includeDisabled = false, string? relationName = null)
     {
         if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled)
-            return Task.FromResult(relation);
+            return relation;
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
@@ -99,7 +98,7 @@ public partial class Depository
                 var resolvedRelation = relations.FirstOrDefault(t => t.Name == relationName);
                 if (resolvedRelation is null)
                     throw new DependencyNotFoundException(dependencyDescription.DependencyType);
-                return Task.FromResult(resolvedRelation);
+                return resolvedRelation;
             }
 
             relation = includeDisabled ? relations.Last() : relations.LastOrDefault(t => t.IsEnabled);
@@ -111,19 +110,18 @@ public partial class Depository
             throw new RelationNotFoundException();
         }
 
-        return Task.FromResult(relation);
+        return relation;
     }
 
-    public Task<List<DependencyRelation>> GetRelationsAsync(DependencyDescription dependencyDescription,
+    public List<DependencyRelation> GetRelations(DependencyDescription dependencyDescription,
         bool includeDisabled = false)
     {
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
-            return Task.FromResult(
+            return
                 includeDisabled
                     ? relations.ToList()
-                    : relations.Where(relation => relation.IsEnabled).ToList()
-            );
+                    : relations.Where(relation => relation.IsEnabled).ToList();
 
-        return Task.FromResult(new List<DependencyRelation>());
+        return new List<DependencyRelation>();
     }
 }

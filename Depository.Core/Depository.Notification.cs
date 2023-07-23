@@ -7,11 +7,11 @@ public partial class Depository
     public async Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new())
     {
         var subscribers =
-            (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification>)))
+            (ResolveDependencies(typeof(INotificationSubscriber<TNotification>)))
             .Select(receiver => (INotificationSubscriber<TNotification>)receiver)
             .ToList();
         var tasks = subscribers
-            .Select(handler => handler.HandleNotification(notification, ctk))
+            .Select(handler => handler.HandleNotificationAsync(notification, ctk))
             .ToArray();
         await Task.WhenAll(tasks);
     }
@@ -20,7 +20,7 @@ public partial class Depository
         TNotification notification,CancellationToken ctk = new())
     {
         var subscribers =
-            (await ResolveDependenciesAsync(typeof(INotificationSubscriber<TNotification, TResult>)))
+            (ResolveDependencies(typeof(INotificationSubscriber<TNotification, TResult>)))
             .Select(receiver => (INotificationSubscriber<TNotification, TResult>)receiver)
             .ToList();
         var results = new List<TResult>();
@@ -28,7 +28,7 @@ public partial class Depository
         {
             try
             {
-                results.Add(await subscriber.HandleNotification(notification, ctk).ConfigureAwait(false));
+                results.Add(await subscriber.HandleNotificationAsync(notification, ctk).ConfigureAwait(false));
             }
             catch (Exception)
             {
