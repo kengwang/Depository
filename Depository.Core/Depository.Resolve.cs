@@ -68,8 +68,9 @@ public partial class Depository
                 // check whether is IEnumerable
                 // and then return the fully Implemented stuff
                 var cachedGenericType = dependency.GenericTypeArguments[0];
-                var resolves = ResolveDependencies(cachedGenericType, option);
                 var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
+                if (!DependencyExist(cachedGenericType)) return impls;
+                var resolves = ResolveDependencies(cachedGenericType, option);
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impl in resolves)
                 {
