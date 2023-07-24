@@ -369,10 +369,50 @@ public class DepositoryResolveTests
         depository.AddSingleton(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
 
         // Action
-        var service = depository.Resolve<IConstructorInjectService>();
+        var service = depository.Resolve<IEnumerable<IConstructorInjectService>>();
 
         // Assert
-        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+        service.Should().AllSatisfy(t=>t.As<ICheckIsNormal>().IsNormal.Should().BeTrue());
+    }
+    
+    [Fact]
+    public async void ResolveIEnumerableConstructorInject_NoRegister_ShouldNotThrow()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+
+        // Action
+        var service = depository.Resolve<IEnumerable<IConstructorInjectService>>();
+
+        // Assert
+        // Nothing
+    }
+    
+    [Fact]
+    public async void ResolveNullableConstructorInject_NoRegister_ShouldNotThrow()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IConstructorInjectService, NullableConstructorInjectService>();
+        
+        // Action
+        var service = depository.Resolve<IConstructorInjectService?>();
+
+        // Assert
+        // Nothing
+    }
+    
+    [Fact]
+    public async void ResolveNullableConstructorInject_Register_ShouldNotThrow()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+
+        // Action
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        var service = depository.Resolve<IGuidGenerator?>();
+        // Assert
+        service.Should().BeAssignableTo<IGuidGenerator>();
     }
 
     [Fact]

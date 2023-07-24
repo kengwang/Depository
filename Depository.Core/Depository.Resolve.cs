@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
@@ -82,6 +83,13 @@ public partial class Depository
                 return impls;
             }
             // ReSharper disable once RedundantIfElseBlock
+            else if (dependency.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                var actualType = dependency.GenericTypeArguments[0];
+                if (!DependencyExist(actualType)) return null!;
+                return ResolveDependency(actualType, option);
+            }
+            // ReSharper disable once RedundantIfElseBlock
             else
             {
                 // normal open-generic type
@@ -94,7 +102,8 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
-        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null)
+            return option.ThrowWhenNotExists ? throw new DependencyNotFoundException(dependency) : null!;
         var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
         return ResolveRelation(dependencyDescription, relation, option);
     }
@@ -124,12 +133,12 @@ public partial class Depository
         if (!dependency.ContainsGenericParameters)
             implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
         return dependencyDescription.Lifetime switch
-        {
-            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-            DependencyLifetime.Transient => ResolveTransient(implementType, option),
-            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+               {
+                   DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+                   DependencyLifetime.Transient => ResolveTransient(implementType, option),
+                   DependencyLifetime.Scoped    => ResolveScoped(implementType, option),
+                   _                            => throw new ArgumentOutOfRangeException()
+               };
     }
 
     private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
@@ -146,12 +155,12 @@ public partial class Depository
             if (!dependency.ContainsGenericParameters)
                 implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
             var impl = dependencyDescription.Lifetime switch
-            {
-                DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-                DependencyLifetime.Transient => ResolveTransient(implementType, option),
-                DependencyLifetime.Scoped => ResolveScoped(implementType, option),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                       {
+                           DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+                           DependencyLifetime.Transient => ResolveTransient(implementType, option),
+                           DependencyLifetime.Scoped    => ResolveScoped(implementType, option),
+                           _                            => throw new ArgumentOutOfRangeException()
+                       };
             results.Add(impl);
         }
 
@@ -164,12 +173,27 @@ public partial class Depository
         // ReSharper disable once ConvertIfStatementToSwitchStatement
         if (constructorInfos.Length == 0)
             throw new DependencyInitializationException($"Cannot initialize {implementType.Name} with no constructor");
-        if (constructorInfos.Length > 1)
-            throw new DependencyInitializationException(
-                $"More than one constructor was founded in {implementType.Name}");
         var constructorInfo = constructorInfos[0];
+        if (constructorInfos.Length > 1)
+        {
+            if (constructorInfos.FirstOrDefault(
+                    c => c.CustomAttributes.Any(
+                        att => att.AttributeType == typeof(DepositoryActivatorConstructorAttribute))
+                ) is { } activatorInfo)
+            {
+                constructorInfo = activatorInfo;
+            }
+            else
+            {
+                throw new DependencyInitializationException(
+                    $"More than one constructor was founded in {implementType.Name}, use DepositoryActivatorConstructorAttribute to define a DI constructor");
+            }
+        }
+
+
         var parameterInfos = constructorInfo.GetParameters();
         var parameters = new List<object>();
+        var previousValue = true;
         foreach (var parameterInfo in parameterInfos)
         {
             if (option?.FatherImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
@@ -178,10 +202,35 @@ public partial class Depository
             }
             else
             {
-                parameters.Add(ResolveDependency(parameterInfo.ParameterType, option));
+                option ??= new DependencyResolveOption();
+                previousValue = option.ThrowWhenNotExists;
+                option.ThrowWhenNotExists = false;
+                var resolveResult = ResolveDependency(parameterInfo.ParameterType, option);
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (resolveResult != null)
+                {
+                    parameters.Add(resolveResult);
+                    continue;
+                }
+
+                if (parameterInfo.HasDefaultValue)
+                {
+                    parameters.Add(parameterInfo.DefaultValue);
+                    continue;
+                }
+
+                if (parameterInfo.IsOptional)
+                {
+                    parameters.Add(null!);
+                }
+
+                throw new DependencyInitializationException(
+                    $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
             }
         }
 
+        if (option is not null)
+            option.ThrowWhenNotExists = previousValue;
         var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
         if (option?.FatherImplementations is { Count: > 0 })
         {
@@ -206,12 +255,12 @@ public partial class Depository
     {
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         return dependencyDescription.Lifetime switch
-        {
-            DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
-            DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
-            DependencyLifetime.Scoped => ResolveScoped(relation.ImplementType, option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+               {
+                   DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
+                   DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
+                   DependencyLifetime.Scoped    => ResolveScoped(relation.ImplementType, option),
+                   _                            => throw new ArgumentOutOfRangeException()
+               };
     }
 
     private object ResolveScoped(Type implementType, DependencyResolveOption? option)

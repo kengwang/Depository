@@ -16,7 +16,7 @@ public partial class Depository : IDepository
         _rootScope = new DepositoryResolveScope(_option.ScopeOption);
         AddSelfToDepository();
     }
-
+    
     private void AddSelfToDepository()
     {
         var description =
