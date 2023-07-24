@@ -48,7 +48,7 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
-        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
@@ -103,7 +103,7 @@ public partial class Depository
 
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null)
-            return option.ThrowWhenNotExists ? throw new DependencyNotFoundException(dependency) : null!;
+            return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
         var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
         return ResolveRelation(dependencyDescription, relation, option);
     }
@@ -125,7 +125,7 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
         var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
         if (relation is null) return null;
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
@@ -145,7 +145,7 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null) throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
         foreach (var relation in relations)
