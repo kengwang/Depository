@@ -22,7 +22,7 @@ public partial class Depository : IDepository
         var description =
             new DependencyDescription(DependencyType: typeof(IDepository), Lifetime: DependencyLifetime.Singleton);
         var relation =
-            new DependencyRelation(ImplementType: typeof(Depository));
+            new DependencyRelation(ImplementType: typeof(Depository), this);
         AddDependency(description);
         AddRelation(description, relation);
     }
