@@ -10,6 +10,13 @@ public static class ResolveExtension
         return (T)depository.ResolveDependency(typeof(T), option);
     }
 
+    public static T ResolveInScope<T>(this IDepositoryResolve depository, IDepositoryResolveScope scope, DependencyResolveOption? option = null)
+    {
+        option ??= new();
+        option.Scope = scope;
+        return (T)depository.ResolveDependency(typeof(T), option);
+    }
+    
     public static T Resolve<T>(this IDepositoryResolve depository, string? relationName = null,
         bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
         Dictionary<Type, object>? fatherImplementations = null, bool checkAsyncConstruct = true)
@@ -36,6 +43,16 @@ public static class ResolveExtension
         return (depository.ResolveDependencies(typeof(T)))
             .Select(o => (T)o)
             .ToList();
+    }
+    
+    public static List<T> ResolveMultipleInScope<T>(this IDepositoryResolve depository, IDepositoryResolveScope scope,
+                                             DependencyResolveOption? option = null)
+    {
+        option ??= new();
+        option.Scope = scope;
+        return (depository.ResolveDependencies(typeof(T)))
+               .Select(o => (T)o)
+               .ToList();
     }
 
     public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
