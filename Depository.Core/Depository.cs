@@ -28,7 +28,7 @@ public partial class Depository : IDepository
                 new DependencyDescription(DependencyType: typeof(IPipeline<TContext, TReturnValue>),
                                           Lifetime: DependencyLifetime.Singleton);
             var relation =
-                new DependencyRelation(ImplementType: typeof(PipelineHub<TContext, TReturnValue>), this);
+                new DependencyRelation(ImplementType: typeof(PipelineHub<TContext, TReturnValue>));
             AddDependency(description);
             AddRelation(description, relation);
         }
@@ -41,7 +41,7 @@ public partial class Depository : IDepository
         var description =
             new DependencyDescription(DependencyType: typeof(INotificationHub), Lifetime: DependencyLifetime.Singleton);
         var relation =
-            new DependencyRelation(ImplementType: typeof(NotificationHub), this);
+            new DependencyRelation(ImplementType: typeof(NotificationHub));
         AddDependency(description);
         AddRelation(description, relation);
     }
