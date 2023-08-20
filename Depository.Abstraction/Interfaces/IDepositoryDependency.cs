@@ -2,7 +2,7 @@
 
 namespace Depository.Abstraction.Interfaces;
 
-public interface IDependencyDepository
+public interface IDepositoryDependency
 {
     /// <summary>
     /// Add dependency description

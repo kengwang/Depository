@@ -1,4 +1,4 @@
-﻿namespace Depository.Abstraction.Interfaces;
+﻿namespace Depository.Abstraction.Interfaces.NotificationHub;
 
 public interface INotificationSubscriber<in TNotification>
 {

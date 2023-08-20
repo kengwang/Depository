@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.NotificationHub;
 using Depository.Benchmarks.Implements;
 using Depository.Benchmarks.Interfaces;
 using Depository.Core;
@@ -15,7 +16,8 @@ public partial class Benchmarks
     {
         var depository = DepositoryFactory.CreateNew();
         depository.AddSingleton<INotificationSubscriber<Notification>, NotificationSubscriber>();
-        await depository.PublishNotificationAsync(new Notification());
+        var hub = depository.Resolve<INotificationHub>();
+        await hub.PublishNotificationAsync(new Notification());
     }
     
     [Benchmark]
@@ -23,7 +25,8 @@ public partial class Benchmarks
     {
         var depository = DepositoryFactory.CreateNew();
         depository.AddSingleton<INotificationSubscriber<Notification,NotificationResult>, NotificationAndResultSubscriber>();
-        await depository.PublishNotificationWithResultAsync<Notification,NotificationResult>(new Notification());
+        var hub = depository.Resolve<INotificationHub>();
+        await hub.PublishNotificationWithResultAsync<Notification,NotificationResult>(new Notification());
     }
 }
 

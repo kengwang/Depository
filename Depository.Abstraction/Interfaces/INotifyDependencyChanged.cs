@@ -2,6 +2,9 @@
 
 public interface INotifyDependencyChanged<in T>
 {
-    // !Notice: marker will always be null!
+    /// <summary>
+    /// Notify when dependency changed
+    /// </summary>
+    /// <param name="alwaysNullMarker">This parameter is ALWAYS NULL, DON'T USE IT</param>
     public void OnDependencyChanged(T? alwaysNullMarker);
 }

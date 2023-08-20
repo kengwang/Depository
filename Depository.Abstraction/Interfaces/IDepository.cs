@@ -3,10 +3,9 @@
 namespace Depository.Abstraction.Interfaces;
 
 public interface IDepository :
-    IDependencyDepository,
+    IDepositoryDependency,
     IRelationDepository,
     IDepositoryResolve,
-    INotificationHub,
     IDepositoryImplementation,
     IDepositoryFamily,
     IDisposable

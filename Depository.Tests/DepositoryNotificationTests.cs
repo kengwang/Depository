@@ -1,4 +1,5 @@
 ﻿using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.NotificationHub;
 using Depository.Abstraction.Models.Options;
 using Depository.Core;
 using Depository.Extensions;
@@ -20,7 +21,8 @@ public class DepositoryNotificationTests
         depository.AddSingleton<INotificationSubscriber<TestNotification>, NormalNotificationSubscriber>();
         
         // Action
-        await depository.PublishNotificationAsync(new TestNotification());
+        var hub = depository.Resolve<INotificationHub>();
+        await hub.PublishNotificationAsync(new TestNotification());
         
 
         // Assert
@@ -41,7 +43,8 @@ public class DepositoryNotificationTests
         depository.AddSingleton<INotificationSubscriber<string>, NotTheNotificationSubscriber>();
         
         // Action
-        await depository.PublishNotificationAsync(new TestNotification());
+        var hub = depository.Resolve<INotificationHub>();
+        await hub.PublishNotificationAsync(new TestNotification());
         
 
         // Assert
@@ -60,7 +63,8 @@ public class DepositoryNotificationTests
         depository.AddSingleton<INotificationSubscriber<TestNotification, string>, ResultedNotificationSubscriber>();
         
         // Action
-        var result = await depository.PublishNotificationWithResultAsync<TestNotification, string>(new TestNotification());
+        var hub = depository.Resolve<INotificationHub>();
+        var result = await hub.PublishNotificationWithResultAsync<TestNotification, string>(new TestNotification());
         
 
         // Assert

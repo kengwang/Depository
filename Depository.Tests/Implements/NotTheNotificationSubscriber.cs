@@ -1,4 +1,5 @@
 ﻿using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.NotificationHub;
 using Depository.Tests.Interfaces;
 
 namespace Depository.Tests.Implements;

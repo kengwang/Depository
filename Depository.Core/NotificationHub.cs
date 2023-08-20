@@ -1,18 +1,27 @@
 ﻿using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.NotificationHub;
 
 namespace Depository.Core;
 
-public partial class Depository
+public class NotificationHub : INotificationHub
 {
+
+    private readonly IDepository _depository;
+    
+    public NotificationHub(IDepository depository)
+    {
+        _depository = depository;
+    }
+    
     public async Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new())
     {
         var subscribers =
-            (ResolveDependencies(typeof(INotificationSubscriber<TNotification>)))
+            (_depository.ResolveDependencies(typeof(INotificationSubscriber<TNotification>)))
             .Select(receiver => (INotificationSubscriber<TNotification>)receiver)
             .ToList();
         var tasks = subscribers
-            .Select(handler => handler.HandleNotificationAsync(notification, ctk))
-            .ToArray();
+                    .Select(handler => handler.HandleNotificationAsync(notification, ctk))
+                    .ToArray();
         await Task.WhenAll(tasks);
     }
 
@@ -20,7 +29,7 @@ public partial class Depository
         TNotification notification,CancellationToken ctk = new())
     {
         var subscribers =
-            (ResolveDependencies(typeof(INotificationSubscriber<TNotification, TResult>)))
+            (_depository.ResolveDependencies(typeof(INotificationSubscriber<TNotification, TResult>)))
             .Select(receiver => (INotificationSubscriber<TNotification, TResult>)receiver)
             .ToList();
         var results = new List<TResult>();

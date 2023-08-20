@@ -1,5 +1,6 @@
 ﻿using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.Pipeline;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
 
@@ -15,8 +16,36 @@ public partial class Depository : IDepository
         option?.Invoke(_option);
         _rootScope = new DepositoryResolveScope(_option.ScopeOption);
         AddSelfToDepository();
+        AddNotificationHubToDepository();
     }
-    
+
+    private IPipeline<TContext, TReturnValue> GetOrCreatePipeline<TContext, TReturnValue>()
+        where TContext : IPipelineContext<TContext, TReturnValue> where TReturnValue : class
+    {
+        if (!DependencyExist(typeof(IPipeline<TContext, TReturnValue>)))
+        {
+            var description =
+                new DependencyDescription(DependencyType: typeof(IPipeline<TContext, TReturnValue>),
+                                          Lifetime: DependencyLifetime.Singleton);
+            var relation =
+                new DependencyRelation(ImplementType: typeof(PipelineHub<TContext, TReturnValue>), this);
+            AddDependency(description);
+            AddRelation(description, relation);
+        }
+
+        return (IPipeline<TContext, TReturnValue>)ResolveDependency(typeof(IPipeline<TContext, TReturnValue>));
+    }
+
+    private void AddNotificationHubToDepository()
+    {
+        var description =
+            new DependencyDescription(DependencyType: typeof(INotificationHub), Lifetime: DependencyLifetime.Singleton);
+        var relation =
+            new DependencyRelation(ImplementType: typeof(NotificationHub), this);
+        AddDependency(description);
+        AddRelation(description, relation);
+    }
+
     private void AddSelfToDepository()
     {
         var description =
