@@ -20,12 +20,12 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -34,7 +34,7 @@ public class DepositoryResolveTests
         // Assert
         guidGenerator.Should().NotBeNull().And.BeOfType<RandomGuidGenerator>();
     }
-    
+
     [Fact]
     public async void ResolveAsyncConstructorService_ShouldBeNormal()
     {
@@ -48,44 +48,44 @@ public class DepositoryResolveTests
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
-    
+
     [Fact]
     public async void ResolveSingleRegisteredService_InScope_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Scoped);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Scoped);
         depository.AddDependency(description);
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
-        
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
+
 
         // Action
         using (var scopeA = DepositoryResolveScope.Create())
         using (var scopeB = DepositoryResolveScope.Create())
         {
             var guidGeneratorA1 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
-            {
-                Scope = scopeA
-            });
-        
+                                                                   {
+                                                                       Scope = scopeA
+                                                                   });
+
             var guidGeneratorA2 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
-            {
-                Scope = scopeA
-            });
-        
+                                                                   {
+                                                                       Scope = scopeA
+                                                                   });
+
             var guidGeneratorB1 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
-            {
-                Scope = scopeB
-            });
-        
+                                                                   {
+                                                                       Scope = scopeB
+                                                                   });
+
             var guidGeneratorB2 = depository.ResolveDependency(typeof(IGuidGenerator), new DependencyResolveOption()
-            {
-                Scope = scopeB
-            });
-            
+                                                                   {
+                                                                       Scope = scopeB
+                                                                   });
+
             // Assert
             guidGeneratorA1.Should().Be(guidGeneratorA2);
             guidGeneratorB1.Should().Be(guidGeneratorB2);
@@ -98,15 +98,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: null));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: null));
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -114,8 +114,8 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<IGuidGenerator>()
-            .And.BeOfType<RandomGuidGenerator>();
+                     .And.BeAssignableTo<IGuidGenerator>()
+                     .And.BeOfType<RandomGuidGenerator>();
     }
 
 
@@ -124,15 +124,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: null));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: null));
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -140,9 +140,9 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.NotBeEmpty()
-            .And.ContainItemsAssignableTo<IGuidGenerator>()
-            .And.HaveCount(2);
+                     .And.NotBeEmpty()
+                     .And.ContainItemsAssignableTo<IGuidGenerator>()
+                     .And.HaveCount(2);
     }
 
     [Fact]
@@ -150,15 +150,15 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: null));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: null));
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null));
 
 
         // Action
@@ -167,8 +167,8 @@ public class DepositoryResolveTests
         // Assert
         var guidGeneratorList = Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(guidGenerator).ToList();
         guidGeneratorList.Should().NotBeEmpty()
-            .And.ContainItemsAssignableTo<IGuidGenerator>()
-            .And.HaveCount(2);
+                         .And.ContainItemsAssignableTo<IGuidGenerator>()
+                         .And.HaveCount(2);
     }
 
     [Fact]
@@ -176,13 +176,13 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: emptyGuidGenerator));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = depository.ResolveDependency(typeof(IGuidGenerator));
@@ -196,17 +196,18 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: emptyGuidGenerator));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: emptyGuidGenerator));
 
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator),
+                                   DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = depository.ResolveDependencies(typeof(IGuidGenerator));
@@ -220,24 +221,25 @@ public class DepositoryResolveTests
     {
         // Arrange
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+                                                    lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         var emptyGuidGenerator = new EmptyGuidGenerator();
         depository.AddRelation(description,
-            new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
-                DefaultImplementation: emptyGuidGenerator));
+                               new DependencyRelation(ImplementType: typeof(EmptyGuidGenerator),
+                                                      DefaultImplementation: emptyGuidGenerator));
 
         depository.AddRelation(description,
-            new DependencyRelation(
-                ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: emptyGuidGenerator));
+                               new DependencyRelation(
+                                   ImplementType: typeof(RandomGuidGenerator),
+                                   DefaultImplementation: emptyGuidGenerator));
 
         // Action
         var resolveGuidGenerator = depository.ResolveDependency(typeof(IEnumerable<IGuidGenerator>));
 
         // Assert
         Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(resolveGuidGenerator).ToList()
-            .Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
+              .Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
 
     // Extensions
@@ -254,7 +256,7 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<IGuidGenerator>();
+                     .And.BeAssignableTo<IGuidGenerator>();
     }
 
     [Fact]
@@ -270,8 +272,8 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<IGuidGenerator>()
-            .And.BeOfType<RandomGuidGenerator>();
+                     .And.BeAssignableTo<IGuidGenerator>()
+                     .And.BeOfType<RandomGuidGenerator>();
     }
 
     [Fact]
@@ -288,9 +290,9 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.NotBeEmpty()
-            .And.ContainItemsAssignableTo<IGuidGenerator>()
-            .And.HaveCount(2);
+                     .And.NotBeEmpty()
+                     .And.ContainItemsAssignableTo<IGuidGenerator>()
+                     .And.HaveCount(2);
     }
 
     [Fact]
@@ -306,9 +308,9 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.NotBeEmpty()
-            .And.ContainItemsAssignableTo<IGuidGenerator>()
-            .And.HaveCount(2);
+                     .And.NotBeEmpty()
+                     .And.ContainItemsAssignableTo<IGuidGenerator>()
+                     .And.HaveCount(2);
     }
 
     [Fact]
@@ -323,8 +325,8 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<ITypeGeneric<string>>()
-            .And.BeOfType<TypeGeneric<string>>();
+                     .And.BeAssignableTo<ITypeGeneric<string>>()
+                     .And.BeOfType<TypeGeneric<string>>();
     }
 
     [Fact]
@@ -339,8 +341,8 @@ public class DepositoryResolveTests
 
         // Assert
         guidGenerator.Should().NotBeNull()
-            .And.BeAssignableTo<ITypeGeneric<string>>()
-            .And.BeOfType<TypeGeneric<string>>();
+                     .And.BeAssignableTo<ITypeGeneric<string>>()
+                     .And.BeOfType<TypeGeneric<string>>();
     }
 
     [Fact]
@@ -364,7 +366,7 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository();
         depository.AddSingleton(typeof(IConstructorInjectService),
-            typeof(ConstructorIEnumerableInjectService));
+                                typeof(ConstructorIEnumerableInjectService));
         depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
         depository.AddSingleton(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
 
@@ -372,9 +374,9 @@ public class DepositoryResolveTests
         var service = depository.Resolve<IEnumerable<IConstructorInjectService>>();
 
         // Assert
-        service.Should().AllSatisfy(t=>t.As<ICheckIsNormal>().IsNormal.Should().BeTrue());
+        service.Should().AllSatisfy(t => t.As<ICheckIsNormal>().IsNormal.Should().BeTrue());
     }
-    
+
     [Fact]
     public async void ResolveIEnumerableConstructorInject_NoRegister_ShouldNotThrow()
     {
@@ -387,21 +389,21 @@ public class DepositoryResolveTests
         // Assert
         // Nothing
     }
-    
+
     [Fact]
     public async void ResolveNullableConstructorInject_NoRegister_ShouldNotThrow()
     {
         // Arrange
         var depository = CreateNewDepository();
         depository.AddSingleton<IConstructorInjectService, NullableConstructorInjectService>();
-        
+
         // Action
         var service = depository.Resolve<IConstructorInjectService?>();
 
         // Assert
         // Nothing
     }
-    
+
     [Fact]
     public async void ResolveNullableConstructorInject_Register_ShouldNotThrow()
     {
@@ -421,9 +423,9 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         depository.AddSingleton(typeof(IConstructorInjectService),
-            typeof(ConstructorInjectNotifiableService));
+                                typeof(ConstructorInjectNotifiableService));
         depository.AddSingleton(typeof(INotifyDependencyChanged<IGuidGenerator>),
-            typeof(ConstructorInjectNotifiableService));
+                                typeof(ConstructorInjectNotifiableService));
         depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
 
 
@@ -442,9 +444,9 @@ public class DepositoryResolveTests
         // Arrange
         var depository = CreateNewDepository(option => option.AutoNotifyDependencyChange = true);
         depository.AddSingleton(typeof(IConstructorInjectService),
-            typeof(ConstructorInjectNotifiableService));
+                                typeof(ConstructorInjectNotifiableService));
         depository.AddSingleton(typeof(INotifyDependencyChanged<IGuidGenerator>),
-            typeof(ConstructorInjectNotifiableService));
+                                typeof(ConstructorInjectNotifiableService));
         depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator));
         depository.AddSingleton(typeof(IGuidGenerator), typeof(EmptyGuidGenerator));
 
@@ -488,9 +490,10 @@ public class DepositoryResolveTests
         // Assert
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
-    
+
     [Fact]
-    public async void ResolveMultipleService_ToDefaultImplement_UsingExtension_IEnumerable_ShouldAllReturnDefaultImplement()
+    public async void
+        ResolveMultipleService_ToDefaultImplement_UsingExtension_IEnumerable_ShouldAllReturnDefaultImplement()
     {
         // Arrange
         var depository = CreateNewDepository();
@@ -505,6 +508,58 @@ public class DepositoryResolveTests
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
 
+
+    [Fact]
+    public async void ResolveDecoration_ToDecorationType_ShouldUseDecorationTypeWithActualType()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.SetDependencyDecoration<IGuidGenerator, GuidDecorationService>();
+
+        // Action
+        var resolved = depository.Resolve<IGuidGenerator>();
+        resolved.GetGuid();
+
+        // Assert
+        resolved.Should().BeAssignableTo<GuidDecorationService>();
+    }
+
+    [Fact]
+    public async void ResolveDecoration_ToDecorationType_ShouldUseDecorationTypeWithMultipleActualType()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.SetDependencyDecoration<IGuidGenerator, MultipleGuidDecorationService>();
+
+        // Action
+        var resolved = depository.Resolve<IGuidGenerator>();
+        resolved.GetGuid();
+
+        // Assert
+        resolved.Should().BeAssignableTo<MultipleGuidDecorationService>();
+    }
+
+    [Fact]
+    public async void ResolveDecoration_ToTypes_ShouldOnlyContainsDecorationType()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        depository.SetDependencyDecoration<IGuidGenerator, MultipleGuidDecorationService>();
+
+        // Action
+        var resolved = depository.Resolve<IEnumerable<IGuidGenerator>>();
+
+        // Assert
+        resolved.Should().HaveCount(1).And.AllSatisfy(t => t.Should().BeAssignableTo<MultipleGuidDecorationService>());
+    }
+
+
     // Actions
-    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => DepositoryFactory.CreateNew(options);
+    private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) =>
+        DepositoryFactory.CreateNew(options);
 }

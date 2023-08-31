@@ -31,6 +31,11 @@ public partial class Depository
         _dependencyDescriptions.Remove(description);
     }
 
+    public void SetDependencyDecoration(DependencyDescription description, DependencyRelation? decorationRelation)
+    {
+        description.DecorationRelation = decorationRelation;
+    }
+
     public void ClearAllDependencies()
     {
         _dependencyDescriptions.Clear();

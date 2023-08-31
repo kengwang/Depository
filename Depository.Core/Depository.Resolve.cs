@@ -48,11 +48,22 @@ public partial class Depository
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
-        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null)
+            return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
+        if (dependencyDescription.DecorationRelation is not null)
+        {
+            if (option?.SkipDecoration is not true)
+            {
+                results.Add(ResolveRelation(dependencyDescription, dependencyDescription.DecorationRelation, option));
+                return results;
+            }
+        }
+
         foreach (var relation in relations)
         {
+            if (relation.IsDecorationRelation) continue;
             var result = ResolveRelation(dependencyDescription, relation, option);
             results.Add(result);
         }
@@ -104,8 +115,16 @@ public partial class Depository
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null)
             return option?.ThrowWhenNotExists is false ? null! : throw new DependencyNotFoundException(dependency);
-        var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
-        return ResolveRelation(dependencyDescription, relation, option);
+        DependencyRelation? relation;
+        if (option?.SkipDecoration is not true && dependencyDescription.DecorationRelation is not null)
+        {
+            relation = dependencyDescription.DecorationRelation;
+        }
+        else
+        {
+            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
+        }
+        return relation is null ? null! : ResolveRelation(dependencyDescription, relation, option);
     }
 
     public void ChangeResolveTarget(Type dependency, object? target)
@@ -121,13 +140,23 @@ public partial class Depository
             NotifyDependencyChange(description);
     }
 
-    private object? ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
+    private object ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? null : throw new DependencyNotFoundException(dependency);
-        var relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
-        if (relation is null) return null;
+        if (dependencyDescription is null)
+            return option?.ThrowWhenNotExists is false ? null! : throw new DependencyNotFoundException(dependency);
+        DependencyRelation? relation;
+        if (option?.SkipDecoration is not true && dependencyDescription.DecorationRelation is not null)
+        {
+            relation = dependencyDescription.DecorationRelation;
+        }
+        else
+        {
+            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
+        }
+
+        if (relation is null) return null!;
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         var implementType = relation.ImplementType;
         if (!dependency.ContainsGenericParameters)
@@ -145,11 +174,22 @@ public partial class Depository
     {
         var genericType = dependency.GetGenericTypeDefinition();
         var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null) return option?.ThrowWhenNotExists is false ? new () : throw new DependencyNotFoundException(dependency);
+        if (dependencyDescription is null)
+            return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
         List<object> results = new();
+        if (relations.FirstOrDefault(t => t.IsDecorationRelation) is { } decorationRelation)
+        {
+            if (option?.SkipDecoration is not true)
+            {
+                results.Add(ResolveRelation(dependencyDescription, decorationRelation, option));
+                return results;
+            }
+        }
+
         foreach (var relation in relations)
         {
+            if (relation.IsDecorationRelation) continue;
             if (relation.DefaultImplementation is not null) results.Add(relation.DefaultImplementation);
             var implementType = relation.ImplementType;
             if (!dependency.ContainsGenericParameters)
@@ -205,6 +245,7 @@ public partial class Depository
                 option ??= new DependencyResolveOption();
                 previousValue = option.ThrowWhenNotExists;
                 option.ThrowWhenNotExists = false;
+                option.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
                 var resolveResult = ResolveDependency(parameterInfo.ParameterType, option);
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (resolveResult != null)

@@ -6,7 +6,8 @@ public record DependencyRelation(
     Type ImplementType,
     object? DefaultImplementation = null,
     string? Name = null,
-    bool IsEnabled = true)
+    bool IsEnabled = true,
+    bool IsDecorationRelation = false)
 {
     public bool IsEnabled { get; set; } = IsEnabled;
 }

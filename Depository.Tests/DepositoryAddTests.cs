@@ -17,8 +17,8 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+            lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
@@ -38,8 +38,8 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Transient);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+            lifetime: DependencyLifetime.Transient);
         depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
@@ -60,8 +60,8 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Scoped);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+            lifetime: DependencyLifetime.Scoped);
         depository.AddDependency(description);
         var relation = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
@@ -82,8 +82,8 @@ public class DepositoryAddTests
     {
         // Init
         var depository = CreateNewDepository();
-        var description = new DependencyDescription(DependencyType: typeof(IGuidGenerator),
-            Lifetime: DependencyLifetime.Singleton);
+        var description = new DependencyDescription(dependencyType: typeof(IGuidGenerator),
+            lifetime: DependencyLifetime.Singleton);
         depository.AddDependency(description);
         var relation1 = new DependencyRelation(
             ImplementType: typeof(RandomGuidGenerator), DefaultImplementation: null);
