@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <Version>1.2.3</Version>
+        <Version>1.3.0</Version>
         <Title>Depository</Title>
         <Authors>Kengwang</Authors>
         <Description>An IoC Container</Description>
