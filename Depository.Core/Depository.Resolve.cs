@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Depository.Abstraction.Attributes;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
@@ -124,6 +125,7 @@ public partial class Depository
         {
             relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
         }
+
         return relation is null ? null! : ResolveRelation(dependencyDescription, relation, option);
     }
 
@@ -246,6 +248,9 @@ public partial class Depository
                 previousValue = option.ThrowWhenNotExists;
                 option.ThrowWhenNotExists = false;
                 option.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
+                if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
+                    FromNamedServiceAttribute fnsa)
+                    option.RelationName = fnsa.Name;
                 var resolveResult = ResolveDependency(parameterInfo.ParameterType, option);
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (resolveResult != null)
