@@ -30,6 +30,7 @@ jobs:
           dotnet pack Depository.Abstraction/Depository.Abstraction.csproj -c Release -o Packages/
           dotnet pack Depository.Core/Depository.Core.csproj -c Release -o Packages/
           dotnet pack Depository.Extensions/Depository.Extensions.csproj -c Release -o Packages/
+          dotnet pack Depository.Extensions.DependencyInjection/Depository.Extensions.DependencyInjection.csproj -c Release -o Packages/
 
       - name: Publish Packages to Artifacts
         uses: actions/upload-artifact@v3.1.1
