@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using BenchmarkDotNet.Attributes;
+using Depository.Abstraction.Models.Options;
 using Depository.Benchmarks.Implements;
 using Depository.Benchmarks.Interfaces;
 using Depository.Core;
@@ -19,6 +20,23 @@ public partial class IoCContainersBenchmarks
     public IGuidGenerator Depository_SingleToDefaultImplementBenchmark()
     {
         var depository = DepositoryFactory.CreateNew();
+        depository.AddSingleton<IGuidGenerator>(new RandomGuidGenerator());
+        return depository.Resolve<IGuidGenerator>();
+    }
+    
+    [Benchmark]
+    public IGuidGenerator Depository_Optimized_SingleToDefaultImplementBenchmark()
+    {
+        var depository = DepositoryFactory.CreateNew();
+        depository.Option.AutoNotifyDependencyChange = false;
+        depository.Option.CheckerOption = new DepositoryCheckerOption
+        {
+            ImplementIsInheritedFromDependency = false,
+            ImplementIsInstantiable = false,
+            AutoConstructor = false,
+            CheckImplementationDuplication = false
+        };
+        depository.Option.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue;
         depository.AddSingleton<IGuidGenerator>(new RandomGuidGenerator());
         return depository.Resolve<IGuidGenerator>();
     }

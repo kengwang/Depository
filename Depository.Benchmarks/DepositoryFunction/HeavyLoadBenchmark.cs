@@ -12,7 +12,7 @@ public partial class Benchmarks
 {
     
     //[Benchmark]
-    [Obsolete("Disable Heavy Load Text")]
+    [Obsolete("Disable Heavy Load Test")]
     public IGuidGenerator HeavyLoad_IEnumerable()
     {
         var depository = DepositoryFactory.CreateNew();
@@ -27,7 +27,7 @@ public partial class Benchmarks
     }
 
     //[Benchmark]
-    [Obsolete("Disable Heavy Load Text")]
+    [Obsolete("Disable Heavy Load Test")]
     public List<IGuidGenerator> HeavyLoad_ResolveMultiple()
     {
         // For Benchmark Purpose only

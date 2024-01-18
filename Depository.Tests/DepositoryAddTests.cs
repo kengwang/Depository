@@ -13,7 +13,7 @@ public class DepositoryAddTests
 {
     // Pure
     [Fact]
-    public async void AddServiceAsSingleton_ShouldBeResolved()
+    public void AddServiceAsSingleton_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -34,7 +34,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceAsTransient_ShouldBeResolved()
+    public void AddServiceAsTransient_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -56,7 +56,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceAsScoped_ShouldBeResolved()
+    public void AddServiceAsScoped_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -78,7 +78,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddMultipleRelationsSingleton_ShouldBeResolvedToLastServices()
+    public void AddMultipleRelationsSingleton_ShouldBeResolvedToLastServices()
     {
         // Init
         var depository = CreateNewDepository();
@@ -105,7 +105,7 @@ public class DepositoryAddTests
     // Extensions
 
     [Fact]
-    public async void AddServiceExtensionSingletonToSelf_ShouldBeResolved()
+    public void AddServiceExtensionSingletonToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddSingleton<RandomGuidGenerator>();
@@ -117,7 +117,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceExtensionTransientToSelf_ShouldBeResolved()
+    public void AddServiceExtensionTransientToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<RandomGuidGenerator>();
@@ -129,7 +129,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceExtensionScopedToSelf_ShouldBeResolved()
+    public void AddServiceExtensionScopedToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddScoped<RandomGuidGenerator>();
@@ -141,7 +141,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceExtensionSingletonToImpl_ShouldBeResolved()
+    public void AddServiceExtensionSingletonToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -153,7 +153,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceExtensionTransientToImpl_ShouldBeResolved()
+    public void AddServiceExtensionTransientToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();
@@ -165,7 +165,7 @@ public class DepositoryAddTests
     }
 
     [Fact]
-    public async void AddServiceExtensionScopedToImpl_ShouldBeResolved()
+    public void AddServiceExtensionScopedToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();

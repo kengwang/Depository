@@ -10,7 +10,7 @@ namespace Depository.Tests;
 public class DepositoryFamilyTests
 {
     [Fact]
-    public async void InjectCustomFather()
+    public void InjectCustomFather()
     {
         // Arrange
         var depository = DepositoryFactory.CreateNew();
@@ -22,11 +22,10 @@ public class DepositoryFamilyTests
             { { typeof(IGuidGenerator), guidGen } });
         var fathers = depository.GetParents(result);
         var children = depository.GetChildren(guidGen);
-        
+
         // Assert
         result.Should().NotBeNull();
         children.Should().OnlyContain(t => t.Equals(result));
         fathers.Should().OnlyContain(t => t.Equals(guidGen));
-
     }
 }
