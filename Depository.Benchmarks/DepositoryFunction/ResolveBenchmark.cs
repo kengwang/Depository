@@ -103,7 +103,7 @@ public partial class Benchmarks
     }
 
     [Benchmark]
-    public async Task ResolveMultipleToMultiple_UsingMultipleResolve_Opt()
+    public void ResolveMultipleToMultiple_UsingMultipleResolve_Opt()
     {
         var depository = DepositoryFactory.CreateNew();
         depository.Option.AutoNotifyDependencyChange = false;
