@@ -66,7 +66,7 @@ public static class AddDependencyExtension
 
     public static void Add(this IDepository depository, Type dependencyType, Type implementType,
                            DependencyLifetime lifetime, object? defaultImplement = null, string? relationName = null,
-                           bool isEnabled = true)
+                           bool isEnabled = true, Func<IDepository, object>? implementationFactory = null)
     {
         var dependencyDescription = depository.GetDependency(dependencyType);
 
@@ -80,7 +80,7 @@ public static class AddDependencyExtension
         depository.AddRelation(dependencyDescription,
                                new DependencyRelation(ImplementType: implementType,
                                                       DefaultImplementation: defaultImplement, Name: relationName,
-                                                      IsEnabled: isEnabled));
+                                                      IsEnabled: isEnabled, ImplementationFactory: implementationFactory));
     }
 
     public static void SetDependencyDecoration<TDependency, TDecoration>(

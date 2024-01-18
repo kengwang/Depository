@@ -8,13 +8,13 @@ namespace Depository.Core;
 
 public partial class Depository : IDepository
 {
-    private readonly DepositoryOption _option = new();
-    private readonly DepositoryResolveScope _rootScope;
+    public readonly DepositoryOption Option = new();
+    public readonly DepositoryResolveScope RootScope;
 
     public Depository(Action<DepositoryOption>? option = null)
     {
-        option?.Invoke(_option);
-        _rootScope = new DepositoryResolveScope(_option.ScopeOption);
+        option?.Invoke(Option);
+        RootScope = new DepositoryResolveScope(Option.ScopeOption);
         AddSelfToDepository();
         AddNotificationHubToDepository();
     }
@@ -60,6 +60,6 @@ public partial class Depository : IDepository
     {
         _dependencyDescriptions.Clear();
         _dependencyRelations.Clear();
-        _rootScope.Dispose();
+        RootScope.Dispose();
     }
 }

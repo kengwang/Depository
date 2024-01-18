@@ -12,10 +12,10 @@ public partial class Depository
 
     public void AddRelation(DependencyDescription dependency, DependencyRelation relation)
     {
-        if (_option.CheckerOption.ImplementIsInheritedFromDependency &&
+        if (Option.CheckerOption.ImplementIsInheritedFromDependency &&
             dependency.DependencyType.IsAssignableFrom(relation.ImplementType))
             throw new ImplementNotInheritedFromDependencyException();
-        if (_option.CheckerOption.ImplementIsInstantiable &&
+        if (Option.CheckerOption.ImplementIsInstantiable &&
             (relation.ImplementType.IsAbstract || relation.ImplementType.IsInterface))
             throw new ImplementNotInstantiableException();
 
@@ -26,23 +26,24 @@ public partial class Depository
             _dependencyRelations.Add(dependency, relations);
         }
 
-        switch (_option.ImplementTypeDuplicatedAction)
-        {
-            case ImplementTypeDuplicatedAction.Throw:
-                if (relations.Any(dependencyRelation => dependencyRelation.ImplementType == relation.ImplementType))
-                    throw new ImplementDuplicatedException();
-                break;
-            case ImplementTypeDuplicatedAction.Ignore:
-                if (relations.Any(dependencyRelation => dependencyRelation.ImplementType == relation.ImplementType))
-                    return;
-                break;
-        }
+        if (Option.CheckerOption.CheckImplementationDuplication)
+            switch (Option.ImplementTypeDuplicatedAction)
+            {
+                case ImplementTypeDuplicatedAction.Throw:
+                    if (relations.Any(dependencyRelation => dependencyRelation == relation))
+                        throw new ImplementDuplicatedException();
+                    break;
+                case ImplementTypeDuplicatedAction.Ignore:
+                    if (relations.Any(dependencyRelation => dependencyRelation == relation))
+                        return;
+                    break;
+            }
 
         relations.Add(relation);
 
 
         // 通知修改
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(dependency, 1);
     }
 
@@ -53,7 +54,7 @@ public partial class Depository
             relations.Remove(relation);
         }
 
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(dependencyType);
     }
 
@@ -65,14 +66,14 @@ public partial class Depository
     public void DisableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = false;
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(description);
     }
 
     public void EnableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = true;
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(description);
     }
 
@@ -81,12 +82,12 @@ public partial class Depository
         DependencyRelation relation)
     {
         _currentFocusing[dependencyDescription] = relation;
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(dependencyDescription, 2);
     }
 
     public DependencyRelation? GetRelation(DependencyDescription dependencyDescription,
-                                           bool includeDisabled = false, string? relationName = null)
+        bool includeDisabled = false, string? relationName = null)
     {
         if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled)
             return relation;

@@ -135,10 +135,10 @@ public partial class Depository
         if (description is null) throw new DependencyNotFoundException(dependency);
         if (description.Lifetime == DependencyLifetime.Singleton)
         {
-            _rootScope.SetImplementation(dependency, target);
+            RootScope.SetImplementation(dependency, target);
         }
 
-        if (_option.AutoNotifyDependencyChange)
+        if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(description);
     }
 
@@ -160,16 +160,17 @@ public partial class Depository
 
         if (relation is null) return null!;
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
+        if (relation.ImplementationFactory is not null) return relation.ImplementationFactory(this);
         var implementType = relation.ImplementType;
         if (!dependency.ContainsGenericParameters)
             implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
         return dependencyDescription.Lifetime switch
-               {
-                   DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-                   DependencyLifetime.Transient => ResolveTransient(implementType, option),
-                   DependencyLifetime.Scoped    => ResolveScoped(implementType, option),
-                   _                            => throw new ArgumentOutOfRangeException()
-               };
+        {
+            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+            DependencyLifetime.Transient => ResolveTransient(implementType, option),
+            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
@@ -193,16 +194,17 @@ public partial class Depository
         {
             if (relation.IsDecorationRelation) continue;
             if (relation.DefaultImplementation is not null) results.Add(relation.DefaultImplementation);
+            if (relation.ImplementationFactory is not null) results.Add(relation.ImplementationFactory(this));
             var implementType = relation.ImplementType;
             if (!dependency.ContainsGenericParameters)
                 implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
             var impl = dependencyDescription.Lifetime switch
-                       {
-                           DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-                           DependencyLifetime.Transient => ResolveTransient(implementType, option),
-                           DependencyLifetime.Scoped    => ResolveScoped(implementType, option),
-                           _                            => throw new ArgumentOutOfRangeException()
-                       };
+            {
+                DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+                DependencyLifetime.Transient => ResolveTransient(implementType, option),
+                DependencyLifetime.Scoped => ResolveScoped(implementType, option),
+                _ => throw new ArgumentOutOfRangeException()
+            };
             results.Add(impl);
         }
 
@@ -227,8 +229,35 @@ public partial class Depository
             }
             else
             {
-                throw new DependencyInitializationException(
-                    $"More than one constructor was founded in {implementType.Name}, use DepositoryActivatorConstructorAttribute to define a DI constructor");
+                if (Option.CheckerOption.AutoConstructor)
+                {
+                    var max = 0;
+                    foreach (var info in constructorInfos)
+                    {
+                        var constructorParamInfos = info.GetParameters();
+                        var count = 0;
+                        foreach (var parameter in constructorParamInfos)
+                        {
+                            if (parameter.IsOptional || parameter.HasDefaultValue || DependencyExist(parameter.ParameterType) || option?.FatherImplementations?.ContainsKey(parameter.ParameterType) is true)
+                            {
+                                count++;
+                            }
+                            else
+                            {
+                                if (parameter.HasDefaultValue) count++;
+                            }
+                        }
+
+                        if (count <= max) continue;
+                        max = count;
+                        constructorInfo = info;
+                    }
+                }
+                else
+                {
+                    throw new DependencyInitializationException(
+                        $"More than one constructor was founded in {implementType.Name}, use DepositoryActivatorConstructorAttribute to define a DI constructor");
+                }
             }
         }
 
@@ -300,13 +329,14 @@ public partial class Depository
         DependencyResolveOption? option = null)
     {
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
+        if (relation.ImplementationFactory is not null) return relation.ImplementationFactory(this);
         return dependencyDescription.Lifetime switch
-               {
-                   DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
-                   DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
-                   DependencyLifetime.Scoped    => ResolveScoped(relation.ImplementType, option),
-                   _                            => throw new ArgumentOutOfRangeException()
-               };
+        {
+            DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
+            DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
+            DependencyLifetime.Scoped => ResolveScoped(relation.ImplementType, option),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private object ResolveScoped(Type implementType, DependencyResolveOption? option)
@@ -331,14 +361,14 @@ public partial class Depository
 
     private object ResolveSingleton(Type implementType, DependencyResolveOption? option)
     {
-        if (_rootScope.Exist(implementType))
+        if (RootScope.Exist(implementType))
         {
-            var ret = _rootScope.GetImplement(implementType);
+            var ret = RootScope.GetImplement(implementType);
             if (ret is not null) return ret;
         }
 
         var impl = ImplementActivator(implementType, option);
-        _rootScope.SetImplementation(implementType, impl);
+        RootScope.SetImplementation(implementType, impl);
         return impl;
     }
 }

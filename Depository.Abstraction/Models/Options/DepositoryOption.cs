@@ -5,7 +5,6 @@ public class DepositoryOption
     public bool AutoNotifyDependencyChange { get; set; } = false;
     public ImplementTypeDuplicatedAction ImplementTypeDuplicatedAction { get; set; } =
         ImplementTypeDuplicatedAction.Ignore;
-    public DependencyResolveOption ResolveOption { get; set; } = new();
     public DepositoryCheckerOption CheckerOption { get; set; } = new();
     public DepositoryResolveScopeOption ScopeOption { get; set; } = new();
 }

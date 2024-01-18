@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Extensions", "De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Benchmarks", "Depository.Benchmarks\Depository.Benchmarks.csproj", "{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depository.Extensions.DependencyInjection", "Depository.Extensions.DependencyInjection\Depository.Extensions.DependencyInjection.csproj", "{4044B4D2-0DB5-4825-BE3D-3D430D47A963}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,5 +47,9 @@ Global
 		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA4C7BA1-F911-4BB7-A966-986AEAD8E031}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4044B4D2-0DB5-4825-BE3D-3D430D47A963}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4044B4D2-0DB5-4825-BE3D-3D430D47A963}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4044B4D2-0DB5-4825-BE3D-3D430D47A963}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4044B4D2-0DB5-4825-BE3D-3D430D47A963}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
