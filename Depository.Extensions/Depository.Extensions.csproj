@@ -7,7 +7,7 @@
         <LangVersion>latest</LangVersion>
         <Authors>Kengwang</Authors>
         <Description>The Extension of Depository</Description>
-        <Copyright>Copyright © Kengwang 2023</Copyright>
+        <Copyright>Copyright © Kengwang 2024</Copyright>
         <PackageProjectUrl>https://github.com/kengwang/Depository</PackageProjectUrl>
         <RepositoryUrl>https://github.com/kengwang/Depository</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
