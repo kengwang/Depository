@@ -574,7 +574,7 @@ public class DepositoryResolveTests
     }
     
     [Fact]
-    public async Task ResolveAsyncConstructorInject_AsNormal_ShouldBeNormal()
+    public void ResolveAsyncConstructorInject_AsNormal_ShouldBeNormal()
     {
         // Arrange
         var depository = CreateNewDepository();
