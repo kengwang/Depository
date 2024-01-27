@@ -559,6 +559,34 @@ public class DepositoryResolveTests
     }
 
 
+    [Fact]
+    public async Task ResolveAsyncConstructorInject_AsTask_ShouldBeNormal()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton(typeof(IAsyncConstructService), typeof(AsyncConstructorService));
+
+        // Action
+        var service = await depository.Resolve<Task<IAsyncConstructService>>();
+
+        // Assert
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async Task ResolveAsyncConstructorInject_AsNormal_ShouldBeNormal()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton(typeof(IAsyncConstructService), typeof(AsyncConstructorService));
+
+        // Action
+        var service = depository.Resolve<IAsyncConstructService>();
+
+        // Assert
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+    }
+    
     // Actions
     private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) =>
         DepositoryFactory.CreateNew(options);

@@ -98,8 +98,38 @@ public partial class Depository
             else if (dependency.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 var actualType = dependency.GenericTypeArguments[0];
-                if (!DependencyExist(actualType)) return null!;
-                return ResolveDependency(actualType, option);
+                if (DependencyExist(actualType)) return ResolveDependency(actualType, option);
+                if (option?.ThrowWhenNotExists is true)
+                    throw new DependencyNotFoundException(actualType);
+                return null!;
+            }
+            else if (dependency.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                var actualType = dependency.GenericTypeArguments[0];
+                if (!DependencyExist(actualType))
+                {
+                    if (option?.ThrowWhenNotExists is true)
+                        throw new DependencyNotFoundException(actualType);
+                    return null!;
+                }
+
+                var previousCheckAsyncConstructor = option?.CheckAsyncConstructor ?? true;
+                var newopt = option ?? new DependencyResolveOption();
+                newopt.CheckAsyncConstructor = false;
+                var result = ResolveDependency(actualType, newopt);
+                if (result is not IAsyncConstructService asyncConstructService)
+                {
+                    return typeof(Task).GetMethod("FromResult")?.MakeGenericMethod(actualType).Invoke(null, new[] { result })!;
+                }
+                if (option is not null)
+                    option.CheckAsyncConstructor = previousCheckAsyncConstructor;
+
+                return Task.Run(async () =>
+                {
+                    await asyncConstructService.InitializeService();
+                    return asyncConstructService;
+                });
+
             }
             // ReSharper disable once RedundantIfElseBlock
             else
