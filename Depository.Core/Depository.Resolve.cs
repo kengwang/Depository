@@ -164,13 +164,7 @@ public partial class Depository
         var implementType = relation.ImplementType;
         if (!dependency.ContainsGenericParameters)
             implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
-        return dependencyDescription.Lifetime switch
-        {
-            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-            DependencyLifetime.Transient => ResolveTransient(implementType, option),
-            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        return ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType, option);
     }
 
     private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
@@ -198,20 +192,15 @@ public partial class Depository
             var implementType = relation.ImplementType;
             if (!dependency.ContainsGenericParameters)
                 implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
-            var impl = dependencyDescription.Lifetime switch
-            {
-                DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-                DependencyLifetime.Transient => ResolveTransient(implementType, option),
-                DependencyLifetime.Scoped => ResolveScoped(implementType, option),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            var impl = ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType,
+                option);
             results.Add(impl);
         }
 
         return results;
     }
 
-    private object ImplementActivator(Type implementType, DependencyResolveOption? option)
+    private object ResolveTypeToObject(Type implementType, DependencyResolveOption? option)
     {
         var constructorInfos = implementType.GetConstructors();
         // ReSharper disable once ConvertIfStatementToSwitchStatement
@@ -238,7 +227,9 @@ public partial class Depository
                         var count = 0;
                         foreach (var parameter in constructorParamInfos)
                         {
-                            if (parameter.IsOptional || parameter.HasDefaultValue || DependencyExist(parameter.ParameterType) || option?.FatherImplementations?.ContainsKey(parameter.ParameterType) is true)
+                            if (parameter.IsOptional || parameter.HasDefaultValue ||
+                                DependencyExist(parameter.ParameterType) ||
+                                option?.FatherImplementations?.ContainsKey(parameter.ParameterType) is true)
                             {
                                 count++;
                             }
@@ -316,9 +307,6 @@ public partial class Depository
             }
         }
 
-        if (option?.CheckAsyncConstructor is not false &&
-            dependencyImpl is IAsyncConstructService asyncConstructService)
-            asyncConstructService.InitializeService().ConfigureAwait(false);
         return dependencyImpl;
     }
 
@@ -330,32 +318,48 @@ public partial class Depository
     {
         if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
         if (relation.ImplementationFactory is not null) return relation.ImplementationFactory(this);
-        return dependencyDescription.Lifetime switch
+        return ResolveDescriptionWithImplementType(dependencyDescription, relation,
+            dependencyDescription.DependencyType, relation.ImplementType, option);
+    }
+
+    private object ResolveDescriptionWithImplementType(DependencyDescription description, DependencyRelation relation,
+        Type inputType, Type implementType, DependencyResolveOption? option)
+    {
+        var impl = description.Lifetime switch
         {
-            DependencyLifetime.Singleton => ResolveSingleton(relation.ImplementType, option),
-            DependencyLifetime.Transient => ResolveTransient(relation.ImplementType, option),
-            DependencyLifetime.Scoped => ResolveScoped(relation.ImplementType, option),
+            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
+            DependencyLifetime.Transient => ResolveTransient(implementType, option),
+            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
             _ => throw new ArgumentOutOfRangeException()
         };
+
+        if (option?.CheckAsyncConstructor is not false &&
+            impl is IAsyncConstructService asyncConstructService)
+        {
+            asyncConstructService.InitializeService().ConfigureAwait(false);
+        }
+
+        return impl;
     }
 
     private object ResolveScoped(Type implementType, DependencyResolveOption? option)
     {
-        if (option?.Scope is null) throw new ScopeNotSetException();
-        if (option.Scope.Exist(implementType))
+        var scope = option?.Scope ?? CurrentScope;
+        if (scope is null) throw new ScopeNotSetException();
+        if (scope.Exist(implementType))
         {
-            var ret = option.Scope.GetImplement(implementType);
+            var ret = scope.GetImplement(implementType);
             if (ret is not null) return ret;
         }
 
-        var impl = ImplementActivator(implementType, option);
-        option.Scope.SetImplementation(implementType, impl);
+        var impl = ResolveTypeToObject(implementType, option);
+        scope.SetImplementation(implementType, impl);
         return impl;
     }
 
     private object ResolveTransient(Type implementType, DependencyResolveOption? option)
     {
-        var impl = ImplementActivator(implementType, option);
+        var impl = ResolveTypeToObject(implementType, option);
         return impl;
     }
 
@@ -367,7 +371,7 @@ public partial class Depository
             if (ret is not null) return ret;
         }
 
-        var impl = ImplementActivator(implementType, option);
+        var impl = ResolveTypeToObject(implementType, option);
         RootScope.SetImplementation(implementType, impl);
         return impl;
     }

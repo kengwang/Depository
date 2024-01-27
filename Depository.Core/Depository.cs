@@ -9,7 +9,6 @@ namespace Depository.Core;
 public partial class Depository : IDepository
 {
     public readonly DepositoryOption Option = new();
-    public readonly DepositoryResolveScope RootScope;
 
     public Depository(Action<DepositoryOption>? option = null)
     {
@@ -62,4 +61,6 @@ public partial class Depository : IDepository
         _dependencyRelations.Clear();
         RootScope.Dispose();
     }
+
+
 }

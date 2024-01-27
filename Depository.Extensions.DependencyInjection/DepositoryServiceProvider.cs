@@ -11,29 +11,23 @@ namespace Depository.Extensions.DependencyInjection
     {
         
         private readonly IDepository _depository;
-        private readonly IDepositoryResolveScope? _resolveScope;
 
-        public DepositoryServiceProvider(IDepository depository, IDepositoryResolveScope? resolveScope = null)
+        public DepositoryServiceProvider(IDepository depository)
         {
             _depository = depository;
-            _resolveScope = resolveScope;
         }
         
         public object GetService(Type serviceType)
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption
             {
-                ThrowWhenNotExists = false,
-                Scope = _resolveScope
+                ThrowWhenNotExists = false
             });
         }
 
         public object GetRequiredService(Type serviceType)
         {
-            return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
-            {
-                Scope = _resolveScope
-            });
+            return _depository.ResolveDependency(serviceType);
         }
 
         public object? GetKeyedService(Type serviceType, object? serviceKey)
@@ -41,7 +35,6 @@ namespace Depository.Extensions.DependencyInjection
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
             {
                 ThrowWhenNotExists = false,
-                Scope = _resolveScope,
                 RelationName = serviceKey?.GetHashCode().ToString()
             });
         }
@@ -50,8 +43,7 @@ namespace Depository.Extensions.DependencyInjection
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
             {
-                RelationName = serviceKey?.GetHashCode().ToString(),
-                Scope = _resolveScope
+                RelationName = serviceKey?.GetHashCode().ToString()
             });
         }
 
