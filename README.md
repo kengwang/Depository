@@ -1,52 +1,33 @@
 # Depository
 
-An IoC Container which can add services anytime.
-
-**Warning**: This project is still improving, the `Abstraction` may not be stable. Temporarily, don't use it in production environment.
+An IoC Container with fantastic feature.
 
 | Unit Tests |                                               NuGet                                               |
 |:----------:|:-------------------------------------------------------------------------------------------------:|
 |[![Depository.Core Unit Tests](https://github.com/kengwang/Depository/actions/workflows/unit-test.yml/badge.svg)](https://github.com/kengwang/Depository/actions/workflows/unit-test.yml) | [![Nuget](https://img.shields.io/nuget/v/Depository)](https://www.nuget.org/packages/Depository/) |
 
-## Get Started
+## Feature
 
-You can easily get `Depository` from `nuget`
+* Mutable Dependency Implementation
+* Notify Implementation Change
+* Async Construct (resolve `Task<T>` or fire-and-forget)
+* Resolve with Constructor has Parameter That Are Not In Container
+* Multiple Resolve Support (not only `IEnumerable<T>` but  `ResolveMultiple`)
+* Nullable Injection
+* Proxy/Decoration Service Support
+* `Microsoft.Extension.Hosting` intergration
+* Notification / Pipeline structure
+* ~~Seemly high perfomance~~
+* ......
 
-```shell
-dotnet add package Depository
-```
-
-Then, you can create a Depository
-
-```csharp
-var depository = DepositoryFactory.CreateNew();
-```
-
-You can add then add Your first dependency
-
-```csharp
-// Just like using Microsoft.Extensnion.DependencyInjection
-depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-```
-
-You don't have to build a container, because `Depository` is a container
-
-You can then resolve `IGuidGenerator`
-
-```csharp
-var generator = depository.Resolve<IGuidGenerator>();
-```
-
-Congratulation, you successfully learned how to use it!
-
-But with further usages, please visit [Wiki](https://github.com/kengwang/Depository/wiki)
+Checkout [Wiki](https://github.com/kengwang/Depository/wiki)
 
 ## Licence
 
 ```
 MIT License
 
-Copyright (c) 2022  Kengwang
+Copyright (c) 2024 Kengwang
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
