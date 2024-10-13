@@ -16,6 +16,11 @@ public partial class Depository
 
     public bool DependencyExist(Type dependencyType)
     {
+        if (dependencyType.IsGenericType)
+        {
+            return _dependencyDescriptions.Any(des => des.DependencyType == dependencyType) || _dependencyDescriptions.Any(des => des.DependencyType == dependencyType.GetGenericTypeDefinition());
+        }
+
         return _dependencyDescriptions.Any(des => des.DependencyType == dependencyType);
     }
 
