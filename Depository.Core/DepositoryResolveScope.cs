@@ -39,10 +39,6 @@ public class DepositoryResolveScope : IDepositoryResolveScope
     
     public bool Exist(Type type, string? key = null)
     {
-        if (type is null)
-        {
-            Console.WriteLine(111);
-        }
         var implKey = GetKey(type, key);
         return _implementations.ContainsKey(implKey);
     }
