@@ -7,6 +7,7 @@ using Depository.Extensions;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Depository.Tests;
@@ -585,6 +586,25 @@ public class DepositoryResolveTests
 
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+    }
+    
+    [Fact]
+    public void ResolveKeyedService_ShouldBeNormal()
+    {
+        // Arrange
+        var depository = CreateNewDepository();
+        depository.AddSingleton(typeof(ConstructorFromNamedService),typeof(ConstructorFromNamedService));
+        var randomGuidGeneratorA = new RandomGuidGenerator();
+        var randomGuidGeneratorB = new RandomGuidGenerator();
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator), relationName: "a", defaultImplement: randomGuidGeneratorA);
+        depository.AddSingleton(typeof(IGuidGenerator), typeof(RandomGuidGenerator), defaultImplement: randomGuidGeneratorB);
+
+        // Action
+        var service = depository.Resolve<ConstructorFromNamedService>();
+
+        // Assert
+        service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
+        service.GuidGenerator.Should().Be(randomGuidGeneratorA);
     }
     
     // Actions

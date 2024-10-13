@@ -153,7 +153,7 @@ public partial class Depository
         }
         else
         {
-            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
+            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true, option?.RelationName);
         }
 
         return relation is null ? null! : ResolveRelation(dependencyDescription, relation, option);
@@ -285,7 +285,7 @@ public partial class Depository
 
         var parameterInfos = constructorInfo.GetParameters();
         var parameters = new List<object>();
-        var previousValue = true;
+        var previousThrowWhenNotExists = true;
         foreach (var parameterInfo in parameterInfos)
         {
             if (option?.FatherImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
@@ -295,9 +295,19 @@ public partial class Depository
             else
             {
                 option ??= new DependencyResolveOption();
-                previousValue = option.ThrowWhenNotExists;
+                previousThrowWhenNotExists = option.ThrowWhenNotExists;
+                var previousRelationName = option.RelationName;
                 option.ThrowWhenNotExists = false;
                 option.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
+                if (Option.MicrosoftDependencyInjectionCompatible)
+                {
+                    var msattr = parameterInfo.GetCustomAttributes().FirstOrDefault(t=>t.GetType().FullName == "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute");
+                    if (msattr is not null)
+                    {
+                        var key = msattr.GetType().GetProperty("Key")?.GetValue(msattr);
+                        option.RelationName = $"{key?.GetType()}:{key?.GetHashCode()}";
+                    }
+                }
                 if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
                     FromNamedServiceAttribute fnsa)
                     option.RelationName = fnsa.Name;
@@ -319,14 +329,17 @@ public partial class Depository
                 {
                     parameters.Add(null!);
                 }
-
+                
+                option.RelationName = previousRelationName;
+                option.ThrowWhenNotExists = previousThrowWhenNotExists;
+                
                 throw new DependencyInitializationException(
                     $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
             }
         }
 
         if (option is not null)
-            option.ThrowWhenNotExists = previousValue;
+            option.ThrowWhenNotExists = previousThrowWhenNotExists;
         var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
         if (option?.FatherImplementations is { Count: > 0 })
         {

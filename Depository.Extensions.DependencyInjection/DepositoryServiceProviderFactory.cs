@@ -20,6 +20,7 @@ namespace Depository.Extensions.DependencyInjection
         public IDepository CreateBuilder(IServiceCollection services)
         {
             var depository = DepositoryFactory.CreateNew(_options);
+            depository.Option.MicrosoftDependencyInjectionCompatible = true;
             foreach (var serviceDescriptor in services)
             {
                 if (serviceDescriptor.ImplementationType is null &&

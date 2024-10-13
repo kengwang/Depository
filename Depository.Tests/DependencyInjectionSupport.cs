@@ -71,4 +71,25 @@ public class DependencyInjectionSupport
         guidGeneratorA.Should().AllSatisfy(t=>t.Should().NotBeSameAs(guidGeneratorB));
 
     }
+    
+    [Fact]
+    public void ResolveNamedGuidGenerator_ShouldNotBeSame()
+    {
+        // Arrange
+        
+        var randomGuidGeneratorA = new RandomGuidGenerator();
+        var randomGuidGeneratorB = new RandomGuidGenerator();
+        
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("a", (_, _) => randomGuidGeneratorA );
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("b", (_, _) => randomGuidGeneratorB);
+        _host.Services.AddSingleton<ConstructorFromKeyedService>();
+        var app = _host.Build();
+        
+        // Action
+        var service = app.Services.GetRequiredService<ConstructorFromKeyedService>();
+        
+        // Assert
+        service.GuidGenerator.Should().NotBeNull();
+        service.GuidGenerator.Should().Be(randomGuidGeneratorB);
+    }
 }
