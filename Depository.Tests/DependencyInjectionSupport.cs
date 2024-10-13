@@ -1,4 +1,5 @@
-﻿using Depository.Extensions.DependencyInjection;
+﻿using System.Collections.Specialized;
+using Depository.Extensions.DependencyInjection;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
@@ -49,5 +50,25 @@ public class DependencyInjectionSupport
 
         // Assert
         guid1.Should().Be(guid2);
+    }
+
+    [Fact]
+    public void ResolveKeyedGuidGenerator_ShouldNotBeSame()
+    {
+        // Arrange
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("a");
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("a");
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("b");
+        
+        var app = _host.Build();
+        
+        // Action
+        var guidGeneratorA = app.Services.GetKeyedService<IEnumerable<IGuidGenerator>>("a")?.ToList();
+        var guidGeneratorB = app.Services.GetKeyedService<IGuidGenerator>("b");
+        
+        // Assert
+        guidGeneratorA.Should().HaveCount(2);
+        guidGeneratorA.Should().AllSatisfy(t=>t.Should().NotBeSameAs(guidGeneratorB));
+
     }
 }

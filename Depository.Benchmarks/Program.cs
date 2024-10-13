@@ -23,5 +23,5 @@ This Benchmark is just for fun, don't over-interpret it!
 If in doubt, use another IoC container! Depository is garbage
 ");
 
-BenchmarkRunner.Run<Benchmarks>();
+// BenchmarkRunner.Run<Benchmarks>();
 BenchmarkRunner.Run<IoCContainersBenchmarks>();

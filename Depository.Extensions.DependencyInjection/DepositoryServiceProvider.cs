@@ -35,7 +35,7 @@ namespace Depository.Extensions.DependencyInjection
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
             {
                 ThrowWhenNotExists = false,
-                RelationName = serviceKey?.GetHashCode().ToString()
+                RelationName = $"{serviceKey?.GetType()}:{serviceKey?.GetHashCode()}"
             });
         }
 

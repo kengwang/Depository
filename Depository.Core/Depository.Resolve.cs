@@ -395,14 +395,14 @@ public partial class Depository
 
     private object ResolveSingleton(Type implementType, DependencyResolveOption? option)
     {
-        if (RootScope.Exist(implementType))
+        if (RootScope.Exist(implementType, option?.RelationName))
         {
-            var ret = RootScope.GetImplement(implementType);
+            var ret = RootScope.GetImplement(implementType, option?.RelationName);
             if (ret is not null) return ret;
         }
 
         var impl = ResolveTypeToObject(implementType, option);
-        RootScope.SetImplementation(implementType, impl);
+        RootScope.SetImplementation(implementType, impl, option?.RelationName);
         return impl;
     }
 }

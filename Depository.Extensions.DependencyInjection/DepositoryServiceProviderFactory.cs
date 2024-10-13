@@ -25,7 +25,9 @@ namespace Depository.Extensions.DependencyInjection
                 if (serviceDescriptor.ImplementationType is null &&
                     serviceDescriptor.ImplementationInstance is null &&
                     serviceDescriptor.ImplementationFactory is null &&
-                    serviceDescriptor.KeyedImplementationFactory is null)
+                    serviceDescriptor.KeyedImplementationFactory is null &&
+                    serviceDescriptor.KeyedImplementationInstance is null &&
+                    serviceDescriptor.KeyedImplementationType is null)
                     continue;
                 var dependency = depository.GetDependency(serviceDescriptor.ServiceType);
                 if (dependency is null)
@@ -41,24 +43,35 @@ namespace Depository.Extensions.DependencyInjection
                     depository.AddDependency(dependency);
                 }
 
-                var relation = new DependencyRelation(serviceDescriptor.ImplementationType!)
+                DependencyRelation relation;
+                if (serviceDescriptor.IsKeyedService)
                 {
-                    DefaultImplementation = serviceDescriptor.ImplementationInstance,
-                    Name = serviceDescriptor.ServiceKey?.GetHashCode().ToString(),
-                };
-                if (serviceDescriptor.ImplementationFactory is not null)
-                {
-                    relation.ImplementationFactory = (resolvingDepository) =>
-                        serviceDescriptor.ImplementationFactory.Invoke(
-                            new DepositoryServiceProvider(resolvingDepository));
+                    var key =
+                        $"{serviceDescriptor.ServiceKey?.GetType()}:{serviceDescriptor.ServiceKey?.GetHashCode()}";
+                    relation = new DependencyRelation(serviceDescriptor.KeyedImplementationType!)
+                    {
+                        DefaultImplementation = serviceDescriptor.KeyedImplementationInstance,
+                        Name = key
+                    };
+                    if (serviceDescriptor.KeyedImplementationFactory is not null)
+                    {
+                        relation.ImplementationFactory = (resolvingDepository) =>
+                            serviceDescriptor.KeyedImplementationFactory.Invoke(
+                                new DepositoryServiceProvider(resolvingDepository), serviceDescriptor.ServiceKey);
+                    }
                 }
-
-                if (serviceDescriptor is { IsKeyedService: true, KeyedImplementationFactory: not null })
+                else
                 {
-                    // TODO: Support Keyed Implementation Factory to pass down the key
-                    relation.ImplementationFactory = (resolvingDepository) =>
-                        serviceDescriptor.KeyedImplementationFactory.Invoke(
-                            new DepositoryServiceProvider(resolvingDepository), null);
+                    relation = new DependencyRelation(serviceDescriptor.ImplementationType!)
+                    {
+                        DefaultImplementation = serviceDescriptor.ImplementationInstance
+                    };
+                    if (serviceDescriptor.ImplementationFactory is not null)
+                    {
+                        relation.ImplementationFactory = (resolvingDepository) =>
+                            serviceDescriptor.ImplementationFactory.Invoke(
+                                new DepositoryServiceProvider(resolvingDepository));
+                    }
                 }
                 
                 depository.AddRelation(dependency, relation);

@@ -2,22 +2,13 @@
 
 public partial class Depository
 {
-    public void AddImplementation(Type implementType, object implement)
+    public void RemoveImplementation(Type implementType, string? key = null)
     {
-        RootScope.AddImplement(implementType, implement);
+        RootScope.RemoveImplement(implementType, key);
     }
 
-    public void RemoveImplementation(Type implementType, object implement)
-    {
-        RootScope.RemoveImplement(implementType, implement);
-    }
 
-    public void RemoveAllImplementation(Type implementType)
-    {
-        RootScope.RemoveAllImplements(implementType);
-    }
-
-    public void SetImplementation(Type implementType, object implement)
+    public void SetImplementation(Type implementType, object implement, string? key = null)
     {
         RootScope.SetImplementation(implementType, implement);
     }
