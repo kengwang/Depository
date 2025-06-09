@@ -1,8 +1,11 @@
-﻿using Depository.Abstraction.Enums;
+﻿using System.Runtime.CompilerServices;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Interfaces.Pipeline;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
+
+[assembly:InternalsVisibleTo("Depository.Extensions.DependencyInjection")]
 
 namespace Depository.Core;
 

@@ -284,8 +284,25 @@ public partial class Depository
 
 
         var parameterInfos = constructorInfo.GetParameters();
-        var parameters = new List<object>();
+        var parameters = ResolveParameterInfos(implementType, parameterInfos, option);
+        
+        var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
+        if (option?.FatherImplementations is { Count: > 0 })
+        {
+            foreach (var kvp in option.FatherImplementations)
+            {
+                _fatherToChildRelation.GetOrCreateValue(kvp.Value).Add(new WeakReference(dependencyImpl));
+                _childToFatherRelation.GetOrCreateValue(dependencyImpl).Add(new WeakReference(kvp.Value));
+            }
+        }
+        
+        return dependencyImpl;
+    }
+
+    public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos, DependencyResolveOption? option)
+    {
         var previousThrowWhenNotExists = true;
+        var parameters = new List<object>();
         foreach (var parameterInfo in parameterInfos)
         {
             if (option?.FatherImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
@@ -305,7 +322,7 @@ public partial class Depository
                     if (msattr is not null)
                     {
                         var key = msattr.GetType().GetProperty("Key")?.GetValue(msattr);
-                        option.RelationName = $"{key?.GetType()}:{key?.GetHashCode()}";
+                        option.RelationName = SafeToString(key);
                     }
                 }
                 if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
@@ -337,20 +354,9 @@ public partial class Depository
                     $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
             }
         }
-
         if (option is not null)
             option.ThrowWhenNotExists = previousThrowWhenNotExists;
-        var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
-        if (option?.FatherImplementations is { Count: > 0 })
-        {
-            foreach (var kvp in option.FatherImplementations)
-            {
-                _fatherToChildRelation.GetOrCreateValue(kvp.Value).Add(new WeakReference(dependencyImpl));
-                _childToFatherRelation.GetOrCreateValue(dependencyImpl).Add(new WeakReference(kvp.Value));
-            }
-        }
-
-        return dependencyImpl;
+        return parameters;
     }
 
 
@@ -417,5 +423,24 @@ public partial class Depository
         var impl = ResolveTypeToObject(implementType, option);
         RootScope.SetImplementation(implementType, impl, option?.RelationName);
         return impl;
+    }
+    
+    internal static string SafeToString(object? obj)
+    {
+        if (obj == null)
+            return "null";
+
+        var type = obj.GetType();
+        var toStringMethod = type.GetMethod("ToString", Type.EmptyTypes);
+
+        // 检查是否在当前类型中重写了 ToString（排除继承自 object 的）
+        if (toStringMethod != null && toStringMethod.DeclaringType != typeof(object))
+        {
+            return obj.ToString();
+        }
+        else
+        {
+            return $"{type.FullName}@{obj.GetHashCode():X}";
+        }
     }
 }

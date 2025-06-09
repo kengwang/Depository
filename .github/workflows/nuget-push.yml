@@ -33,7 +33,7 @@ jobs:
           dotnet pack Depository.Extensions.DependencyInjection/Depository.Extensions.DependencyInjection.csproj -c Release -o Packages/
 
       - name: Publish Packages to Artifacts
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4
         with:
           name: packages
           path: Packages
