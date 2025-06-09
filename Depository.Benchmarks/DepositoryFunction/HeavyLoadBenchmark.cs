@@ -11,7 +11,7 @@ namespace Depository.Benchmarks;
 public partial class Benchmarks
 {
     
-    //[Benchmark]
+    [Benchmark]
     [Obsolete("Disable Heavy Load Test")]
     public IGuidGenerator HeavyLoad_IEnumerable()
     {
@@ -26,7 +26,7 @@ public partial class Benchmarks
         return guidGenerators.First();
     }
 
-    //[Benchmark]
+    [Benchmark]
     [Obsolete("Disable Heavy Load Test")]
     public List<IGuidGenerator> HeavyLoad_ResolveMultiple()
     {

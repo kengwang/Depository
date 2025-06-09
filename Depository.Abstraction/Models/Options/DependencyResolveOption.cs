@@ -10,5 +10,5 @@ public class DependencyResolveOption
     public string? RelationName { get; set; } = null;
     public bool CheckAsyncConstructor { get; set; } = true;
     public bool ThrowWhenNotExists { get; set; } = true;
-    public Dictionary<Type,object>? FatherImplementations { get; set; } = null;
+    public Dictionary<Type,Dictionary<string,object>>? FixedImplementations { get; set; } = null;
 }

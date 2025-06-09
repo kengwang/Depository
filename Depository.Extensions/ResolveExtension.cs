@@ -19,16 +19,16 @@ public static class ResolveExtension
     
     public static T Resolve<T>(this IDepositoryResolve depository, string? relationName = null,
         bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
-        Dictionary<Type, object>? fatherImplementations = null, bool checkAsyncConstruct = true)
+        Dictionary<Type, Dictionary<string, object>>? fixedImplementations = null, bool checkAsyncConstruct = true)
     {
-        if (relationName != null || includeDisabled == true || scope != null || fatherImplementations != null || checkAsyncConstruct == false)
+        if (relationName != null || includeDisabled == true || scope != null || fixedImplementations != null || checkAsyncConstruct == false)
         {
             var option = new DependencyResolveOption
             {
                 Scope = scope,
                 IncludeDisabled = includeDisabled is true,
                 RelationName = relationName,
-                FatherImplementations = fatherImplementations,
+                FixedImplementations = fixedImplementations,
                 CheckAsyncConstructor = checkAsyncConstruct
             };
             return (T)depository.ResolveDependency(typeof(T), option);
@@ -57,9 +57,9 @@ public static class ResolveExtension
 
     public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         string? relationName = null, bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
-        Dictionary<Type, object>? fatherImplementations = null, bool checkAsyncConstruct = true)
+        Dictionary<Type, Dictionary<string,object>>? fixedImplementations = null, bool checkAsyncConstruct = true)
     {
-        if (relationName != null || includeDisabled == true || scope != null || fatherImplementations != null ||
+        if (relationName != null || includeDisabled == true || scope != null || fixedImplementations != null ||
             checkAsyncConstruct == false)
         {
             var option = new DependencyResolveOption
@@ -67,7 +67,7 @@ public static class ResolveExtension
                 Scope = scope,
                 IncludeDisabled = includeDisabled is true,
                 RelationName = relationName,
-                FatherImplementations = fatherImplementations,
+                FixedImplementations = fixedImplementations,
                 CheckAsyncConstructor = checkAsyncConstruct
             };
             return (depository.ResolveDependencies(typeof(T), option))

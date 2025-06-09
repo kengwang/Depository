@@ -7,7 +7,6 @@ public interface IDepository :
     IRelationDepository,
     IDepositoryResolve,
     IDepositoryImplementation,
-    IDepositoryFamily,
     IScopeDepository,
     IDisposable
 {

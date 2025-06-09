@@ -119,8 +119,10 @@ public partial class Depository
                 var result = ResolveDependency(actualType, newopt);
                 if (result is not IAsyncConstructService asyncConstructService)
                 {
-                    return typeof(Task).GetMethod("FromResult")?.MakeGenericMethod(actualType).Invoke(null, new[] { result })!;
+                    return typeof(Task).GetMethod("FromResult")?.MakeGenericMethod(actualType)
+                        .Invoke(null, new[] { result })!;
                 }
+
                 if (option is not null)
                     option.CheckAsyncConstructor = previousCheckAsyncConstructor;
 
@@ -129,7 +131,6 @@ public partial class Depository
                     await asyncConstructService.InitializeService();
                     return asyncConstructService;
                 });
-
             }
             // ReSharper disable once RedundantIfElseBlock
             else
@@ -239,9 +240,8 @@ public partial class Depository
         var constructorInfo = constructorInfos[0];
         if (constructorInfos.Length > 1)
         {
-            if (constructorInfos.FirstOrDefault(
-                    c => c.CustomAttributes.Any(
-                        att => att.AttributeType == typeof(DepositoryActivatorConstructorAttribute))
+            if (constructorInfos.FirstOrDefault(c =>
+                    c.CustomAttributes.Any(att => att.AttributeType == typeof(DepositoryActivatorConstructorAttribute))
                 ) is { } activatorInfo)
             {
                 constructorInfo = activatorInfo;
@@ -259,7 +259,7 @@ public partial class Depository
                         {
                             if (parameter.IsOptional || parameter.HasDefaultValue ||
                                 DependencyExist(parameter.ParameterType) ||
-                                option?.FatherImplementations?.ContainsKey(parameter.ParameterType) is true)
+                                option?.FixedImplementations?.ContainsKey(parameter.ParameterType) is true)
                             {
                                 count++;
                             }
@@ -285,78 +285,93 @@ public partial class Depository
 
         var parameterInfos = constructorInfo.GetParameters();
         var parameters = ResolveParameterInfos(implementType, parameterInfos, option);
-        
         var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
-        if (option?.FatherImplementations is { Count: > 0 })
-        {
-            foreach (var kvp in option.FatherImplementations)
-            {
-                _fatherToChildRelation.GetOrCreateValue(kvp.Value).Add(new WeakReference(dependencyImpl));
-                _childToFatherRelation.GetOrCreateValue(dependencyImpl).Add(new WeakReference(kvp.Value));
-            }
-        }
-        
         return dependencyImpl;
     }
 
-    public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos, DependencyResolveOption? option)
+    public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos,
+        DependencyResolveOption? option)
     {
-        var previousThrowWhenNotExists = true;
         var parameters = new List<object>();
         foreach (var parameterInfo in parameterInfos)
         {
-            if (option?.FatherImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
+            var relationName = GetParameterServiceKey(parameterInfo);
+            object? resolveResult = null;
+            if (option?.FixedImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
             {
-                parameters.Add(impl);
+                if (relationName is not null)
+                {
+                    if (impl.TryGetValue(relationName, out var value))
+                    {
+                        resolveResult = (value);
+                    }
+                }
+
+                if (impl.TryGetValue(string.Empty, out var defaultValue))
+                {
+                    resolveResult = (defaultValue);
+                }
             }
             else
             {
                 option ??= new DependencyResolveOption();
-                previousThrowWhenNotExists = option.ThrowWhenNotExists;
-                var previousRelationName = option.RelationName;
-                option.ThrowWhenNotExists = false;
-                option.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
-                if (Option.MicrosoftDependencyInjectionCompatible)
+                var tempOption = new DependencyResolveOption
                 {
-                    var msattr = parameterInfo.GetCustomAttributes().FirstOrDefault(t=>t.GetType().FullName == "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute");
-                    if (msattr is not null)
-                    {
-                        var key = msattr.GetType().GetProperty("Key")?.GetValue(msattr);
-                        option.RelationName = SafeToString(key);
-                    }
-                }
-                if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
-                    FromNamedServiceAttribute fnsa)
-                    option.RelationName = fnsa.Name;
-                var resolveResult = ResolveDependency(parameterInfo.ParameterType, option);
+                    Scope = option.Scope,
+                    IncludeDisabled = option.IncludeDisabled,
+                    SkipDecoration = false,
+                    RelationName = relationName,
+                    CheckAsyncConstructor = option.CheckAsyncConstructor,
+                    ThrowWhenNotExists = false,
+                    FixedImplementations = option.FixedImplementations
+                };
+                tempOption.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
+
+                resolveResult = ResolveDependency(parameterInfo.ParameterType, tempOption);
+
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (resolveResult != null)
                 {
-                    parameters.Add(resolveResult);
-                    continue;
                 }
-
-                if (parameterInfo.HasDefaultValue)
+                else if (parameterInfo.HasDefaultValue)
                 {
-                    parameters.Add(parameterInfo.DefaultValue);
-                    continue;
+                    resolveResult = (parameterInfo.DefaultValue);
                 }
-
-                if (parameterInfo.IsOptional)
+                else if (parameterInfo.IsOptional)
                 {
-                    parameters.Add(null!);
+                    resolveResult = null;
                 }
-                
-                option.RelationName = previousRelationName;
-                option.ThrowWhenNotExists = previousThrowWhenNotExists;
-                
-                throw new DependencyInitializationException(
-                    $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
+                else
+                {
+                    throw new DependencyInitializationException(
+                        $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
+                }
+            }
+
+            parameters.Add(resolveResult!);
+        }
+
+        return parameters;
+    }
+
+    private string? GetParameterServiceKey(ParameterInfo parameterInfo)
+    {
+        if (Option.MicrosoftDependencyInjectionCompatible)
+        {
+            var msattr = parameterInfo.GetCustomAttributes().FirstOrDefault(t =>
+                t.GetType().FullName == "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute");
+            if (msattr is not null)
+            {
+                var key = msattr.GetType().GetProperty("Key")?.GetValue(msattr);
+                return SafeToString(key);
             }
         }
-        if (option is not null)
-            option.ThrowWhenNotExists = previousThrowWhenNotExists;
-        return parameters;
+
+        if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
+            FromNamedServiceAttribute fnsa)
+            return fnsa.Name;
+
+        return null;
     }
 
 
@@ -424,7 +439,7 @@ public partial class Depository
         RootScope.SetImplementation(implementType, impl, option?.RelationName);
         return impl;
     }
-    
+
     internal static string SafeToString(object? obj)
     {
         if (obj == null)

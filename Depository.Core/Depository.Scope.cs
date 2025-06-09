@@ -22,8 +22,6 @@ public partial class Depository
         _dependencyDescriptions = depository._dependencyDescriptions;
         _dependencyRelations = depository._dependencyRelations;
         _currentFocusing = depository._currentFocusing;
-        _childToFatherRelation = depository._childToFatherRelation;
-        _fatherToChildRelation = depository._fatherToChildRelation;
         RootScope = depository.RootScope;
         Option = depository.Option;
         CurrentScope = scope;
