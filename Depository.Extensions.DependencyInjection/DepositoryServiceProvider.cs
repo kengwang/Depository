@@ -35,7 +35,7 @@ namespace Depository.Extensions.DependencyInjection
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
             {
                 ThrowWhenNotExists = false,
-                RelationName = $"{serviceKey?.GetType()}:{serviceKey?.GetHashCode()}"
+                RelationName = DepositoryServiceProviderFactory.SafeToString(serviceKey)
             });
         }
 
@@ -43,7 +43,7 @@ namespace Depository.Extensions.DependencyInjection
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
             {
-                RelationName = serviceKey?.GetHashCode().ToString()
+                RelationName = DepositoryServiceProviderFactory.SafeToString(serviceKey)
             });
         }
 
@@ -55,7 +55,7 @@ namespace Depository.Extensions.DependencyInjection
         public bool IsKeyedService(Type serviceType, object? serviceKey)
         {
             var dependency = _depository.GetDependency(serviceType);
-            return dependency is not null && _depository.GetRelations(dependency).Any(t=>t.Name == serviceKey?.GetHashCode().ToString());
+            return dependency is not null && _depository.GetRelations(dependency).Any(t=>t.Name == DepositoryServiceProviderFactory.SafeToString(serviceKey));
         }
 
         public IServiceScope CreateScope()

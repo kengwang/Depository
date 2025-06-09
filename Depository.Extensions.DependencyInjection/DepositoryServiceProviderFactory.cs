@@ -47,12 +47,10 @@ namespace Depository.Extensions.DependencyInjection
                 DependencyRelation relation;
                 if (serviceDescriptor.IsKeyedService)
                 {
-                    var key =
-                        $"{serviceDescriptor.ServiceKey?.GetType()}:{serviceDescriptor.ServiceKey?.GetHashCode()}";
                     relation = new DependencyRelation(serviceDescriptor.KeyedImplementationType!)
                     {
                         DefaultImplementation = serviceDescriptor.KeyedImplementationInstance,
-                        Name = key
+                        Name = SafeToString(serviceDescriptor.ServiceKey)
                     };
                     if (serviceDescriptor.KeyedImplementationFactory is not null)
                     {
@@ -74,7 +72,7 @@ namespace Depository.Extensions.DependencyInjection
                                 new DepositoryServiceProvider(resolvingDepository));
                     }
                 }
-                
+
                 depository.AddRelation(dependency, relation);
             }
 
@@ -100,6 +98,25 @@ namespace Depository.Extensions.DependencyInjection
             depository.AddDependency(dependency);
             var relation = new DependencyRelation(typeof(TImplement), sp);
             depository.AddRelation(dependency, relation);
+        }
+        
+        public static string SafeToString(object? obj)
+        {
+            if (obj == null)
+                return "null";
+
+            var type = obj.GetType();
+            var toStringMethod = type.GetMethod("ToString", Type.EmptyTypes);
+
+            // 检查是否在当前类型中重写了 ToString（排除继承自 object 的）
+            if (toStringMethod != null && toStringMethod.DeclaringType != typeof(object))
+            {
+                return obj.ToString();
+            }
+            else
+            {
+                return $"{type.FullName}@{obj.GetHashCode():X}";
+            }
         }
     }
 }
