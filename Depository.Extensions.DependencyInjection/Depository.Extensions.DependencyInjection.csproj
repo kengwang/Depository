@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
         <Authors>Kengwang</Authors>
         <Description>Use Depository with Microsoft.Extensions.DependencyInjection</Description>
         <Copyright>Copyright © Kengwang 2024</Copyright>

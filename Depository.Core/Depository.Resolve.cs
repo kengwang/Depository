@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Depository.Abstraction.Attributes;
@@ -41,6 +41,8 @@ public partial class Depository
         }
     }
 
+    [RequiresDynamicCode("Depository uses reflection to resolve dependencies and create instances.")]
+    [RequiresUnreferencedCode("Depository uses reflection to resolve dependencies. Types and their members may be trimmed.")]
     public List<object> ResolveDependencies(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType && _dependencyDescriptions.All(t => t.DependencyType != dependency))
@@ -72,6 +74,8 @@ public partial class Depository
         return results;
     }
 
+    [RequiresDynamicCode("Depository uses reflection to resolve dependencies and create instances.")]
+    [RequiresUnreferencedCode("Depository uses reflection to resolve dependencies. Types and their members may be trimmed.")]
     public object ResolveDependency(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType)
@@ -81,17 +85,21 @@ public partial class Depository
                 // check whether is IEnumerable
                 // and then return the fully Implemented stuff
                 var cachedGenericType = dependency.GenericTypeArguments[0];
-                var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
-                if (!DependencyExist(cachedGenericType)) return impls;
+                if (!DependencyExist(cachedGenericType))
+                    return Array.CreateInstance(cachedGenericType, 0);
                 var resolves = ResolveDependencies(cachedGenericType, option);
+                var tempItems = new List<object>(resolves.Count);
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impl in resolves)
                 {
                     if (impl is null) continue;
                     if (cachedGenericType.IsInstanceOfType(impl))
-                        impls.Add(impl);
+                        tempItems.Add(impl);
                 }
 
+                var impls = Array.CreateInstance(cachedGenericType, tempItems.Count);
+                for (var i = 0; i < tempItems.Count; i++)
+                    impls.SetValue(tempItems[i], i);
                 return impls;
             }
             // ReSharper disable once RedundantIfElseBlock
@@ -289,6 +297,8 @@ public partial class Depository
         return dependencyImpl;
     }
 
+    [RequiresDynamicCode("Depository uses reflection to resolve dependencies and create instances.")]
+    [RequiresUnreferencedCode("Depository uses reflection to resolve dependencies. Types and their members may be trimmed.")]
     public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos,
         DependencyResolveOption? option)
     {

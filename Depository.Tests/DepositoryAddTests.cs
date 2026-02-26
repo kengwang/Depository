@@ -5,15 +5,14 @@ using Depository.Extensions;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
-using Xunit;
 
 namespace Depository.Tests;
 
 public class DepositoryAddTests
 {
     // Pure
-    [Fact]
-    public void AddServiceAsSingleton_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceAsSingleton_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -33,8 +32,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceAsTransient_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceAsTransient_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -55,8 +54,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceAsScoped_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceAsScoped_ShouldBeResolved()
     {
         // Init
         var depository = CreateNewDepository();
@@ -77,8 +76,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddMultipleRelationsSingleton_ShouldBeResolvedToLastServices()
+    [Test]
+    public async Task AddMultipleRelationsSingleton_ShouldBeResolvedToLastServices()
     {
         // Init
         var depository = CreateNewDepository();
@@ -104,8 +103,8 @@ public class DepositoryAddTests
 
     // Extensions
 
-    [Fact]
-    public void AddServiceExtensionSingletonToSelf_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionSingletonToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddSingleton<RandomGuidGenerator>();
@@ -116,8 +115,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceExtensionTransientToSelf_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionTransientToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<RandomGuidGenerator>();
@@ -128,8 +127,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceExtensionScopedToSelf_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionScopedToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddScoped<RandomGuidGenerator>();
@@ -140,8 +139,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceExtensionSingletonToImpl_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionSingletonToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -152,8 +151,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceExtensionTransientToImpl_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionTransientToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();
@@ -164,8 +163,8 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
-    public void AddServiceExtensionScopedToImpl_ShouldBeResolved()
+    [Test]
+    public async Task AddServiceExtensionScopedToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
         depository.AddTransient<IGuidGenerator, RandomGuidGenerator>();
