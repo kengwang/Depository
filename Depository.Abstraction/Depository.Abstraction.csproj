@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Authors>Kengwang</Authors>
         <Description>The Abstraction of Depository</Description>

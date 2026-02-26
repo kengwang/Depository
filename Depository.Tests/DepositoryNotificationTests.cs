@@ -6,15 +6,15 @@ using Depository.Extensions;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
-using Xunit;
+
 
 namespace Depository.Tests;
 
 public class DepositoryNotificationTests
 {
 
-    [Fact]
-    public async void PublishNotification_ToSingle_ShouldReceive()
+    [Test]
+    public async Task PublishNotification_ToSingle_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();
@@ -33,8 +33,8 @@ public class DepositoryNotificationTests
     }
     
    
-    [Fact]
-    public async void PublishNotification_ToMultiple_ShouldReceive()
+    [Test]
+    public async Task PublishNotification_ToMultiple_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();
@@ -55,8 +55,8 @@ public class DepositoryNotificationTests
             .And.AllSatisfy(t => t.IsNormal.Should().BeTrue());
     }
     
-    [Fact]
-    public async void PublishResultedNotification_ToSingle_ShouldReceive()
+    [Test]
+    public async Task PublishResultedNotification_ToSingle_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();

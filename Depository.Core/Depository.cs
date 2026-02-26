@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Interfaces.Pipeline;
@@ -13,6 +14,7 @@ public partial class Depository : IDepository
 {
     public readonly DepositoryOption Option = new();
 
+    [RequiresDynamicCode("Initialising Depository registers internal services using AddRelation.")]
     public Depository(Action<DepositoryOption>? option = null)
     {
         option?.Invoke(Option);
@@ -21,6 +23,7 @@ public partial class Depository : IDepository
         AddNotificationHubToDepository();
     }
 
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     private IPipeline<TContext, TReturnValue> GetOrCreatePipeline<TContext, TReturnValue>()
         where TContext : IPipelineContext<TContext, TReturnValue> where TReturnValue : class
     {
@@ -38,6 +41,7 @@ public partial class Depository : IDepository
         return (IPipeline<TContext, TReturnValue>)ResolveDependency(typeof(IPipeline<TContext, TReturnValue>));
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     private void AddNotificationHubToDepository()
     {
         var description =
@@ -48,6 +52,7 @@ public partial class Depository : IDepository
         AddRelation(description, relation);
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     private void AddSelfToDepository()
     {
         var description =

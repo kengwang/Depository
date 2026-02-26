@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
@@ -10,6 +11,7 @@ public partial class Depository
     private readonly Dictionary<DependencyDescription, HashSet<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void AddRelation(DependencyDescription dependency, DependencyRelation relation)
     {
         if (Option.CheckerOption.ImplementIsInheritedFromDependency &&
@@ -47,6 +49,7 @@ public partial class Depository
             NotifyDependencyChange(dependency, 1);
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void DeleteRelation(DependencyDescription dependencyType, DependencyRelation relation)
     {
         if (_dependencyRelations.TryGetValue(dependencyType, out var relations))
@@ -63,6 +66,7 @@ public partial class Depository
         _dependencyRelations.Remove(dependencyType);
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void DisableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = false;
@@ -70,6 +74,7 @@ public partial class Depository
             NotifyDependencyChange(description);
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void EnableRelation(DependencyDescription description, DependencyRelation relation)
     {
         relation.IsEnabled = true;
@@ -78,6 +83,7 @@ public partial class Depository
     }
 
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void ChangeFocusingRelation(DependencyDescription dependencyDescription,
         DependencyRelation relation)
     {

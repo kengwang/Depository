@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
@@ -17,6 +18,7 @@ namespace Depository.Extensions.DependencyInjection
             _options = options;
         }
 
+        [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
         public IDepository CreateBuilder(IServiceCollection services)
         {
             var depository = DepositoryFactory.CreateNew(_options);
@@ -79,6 +81,7 @@ namespace Depository.Extensions.DependencyInjection
             return depository;
         }
 
+        [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
         public IServiceProvider CreateServiceProvider(IDepository containerBuilder)
         {
             var sp = new DepositoryServiceProvider(containerBuilder);
@@ -92,6 +95,7 @@ namespace Depository.Extensions.DependencyInjection
             return sp;
         }
 
+        [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
         private static void QuickAddSingleton<TService, TImplement>(IDepository depository, TService sp)
         {
             var dependency = new DependencyDescription(typeof(TService), DependencyLifetime.Singleton);

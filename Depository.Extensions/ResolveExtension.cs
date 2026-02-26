@@ -1,22 +1,26 @@
-﻿using Depository.Abstraction.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
 
 namespace Depository.Extensions;
 
 public static class ResolveExtension
 {
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static T Resolve<T>(this IDepositoryResolve depository, DependencyResolveOption? option)
     {
         return (T)depository.ResolveDependency(typeof(T), option);
     }
 
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static T ResolveInScope<T>(this IDepositoryResolve depository, IDepositoryResolveScope scope, DependencyResolveOption? option = null)
     {
         option ??= new();
         option.Scope = scope;
         return (T)depository.ResolveDependency(typeof(T), option);
     }
-    
+
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static T Resolve<T>(this IDepositoryResolve depository, string? relationName = null,
         bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
         Dictionary<Type, Dictionary<string, object>>? fixedImplementations = null, bool checkAsyncConstruct = true)
@@ -37,6 +41,7 @@ public static class ResolveExtension
         return (T)depository.ResolveDependency(typeof(T));
     }
 
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         DependencyResolveOption? option)
     {
@@ -44,7 +49,8 @@ public static class ResolveExtension
             .Select(o => (T)o)
             .ToList();
     }
-    
+
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static List<T> ResolveMultipleInScope<T>(this IDepositoryResolve depository, IDepositoryResolveScope scope,
                                              DependencyResolveOption? option = null)
     {
@@ -55,6 +61,7 @@ public static class ResolveExtension
                .ToList();
     }
 
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         string? relationName = null, bool? includeDisabled = false, IDepositoryResolveScope? scope = null,
         Dictionary<Type, Dictionary<string,object>>? fixedImplementations = null, bool checkAsyncConstruct = true)

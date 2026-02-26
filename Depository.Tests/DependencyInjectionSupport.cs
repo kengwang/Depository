@@ -1,11 +1,10 @@
-﻿using System.Collections.Specialized;
-using Depository.Extensions.DependencyInjection;
+﻿using Depository.Extensions.DependencyInjection;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xunit;
+
 
 namespace Depository.Tests;
 
@@ -19,8 +18,8 @@ public class DependencyInjectionSupport
         _host.ConfigureContainer(new DepositoryServiceProviderFactory());
     }
 
-    [Fact]
-    public void ResolveGuidGenerator_ShouldBeRandom()
+    [Test]
+    public async Task ResolveGuidGenerator_ShouldBeRandom()
     {
         // Init
         _host.Services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -36,8 +35,8 @@ public class DependencyInjectionSupport
         guid1.Should().Be(guid2);
     }
 
-    [Fact]
-    public void ResolveGuidGenerator_InScope_ShouldBeRandom()
+    [Test]
+    public async Task ResolveGuidGenerator_InScope_ShouldBeRandom()
     {
         // Init
         _host.Services.AddScoped<IGuidGenerator, RandomGuidGenerator>();
@@ -52,8 +51,8 @@ public class DependencyInjectionSupport
         guid1.Should().Be(guid2);
     }
 
-    [Fact]
-    public void ResolveKeyedGuidGenerator_ShouldNotBeSame()
+    [Test]
+    public async Task ResolveKeyedGuidGenerator_ShouldNotBeSame()
     {
         // Arrange
         _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("a");
@@ -72,8 +71,8 @@ public class DependencyInjectionSupport
 
     }
     
-    [Fact]
-    public void ResolveNamedGuidGenerator_ShouldNotBeSame()
+    [Test]
+    public async Task ResolveNamedGuidGenerator_ShouldNotBeSame()
     {
         // Arrange
         

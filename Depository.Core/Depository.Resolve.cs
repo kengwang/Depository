@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Depository.Abstraction.Attributes;
@@ -12,6 +12,7 @@ namespace Depository.Core;
 
 public partial class Depository
 {
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     private void NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
     {
         if (mode is 0 or 1)
@@ -28,6 +29,8 @@ public partial class Depository
         }
     }
 
+    // MakeGenericType is required here to construct the INotifyDependencyChanged<T> notification type.
+    [RequiresDynamicCode("Constructing INotifyDependencyChanged<T> at runtime requires MakeGenericType.")]
     private void PostTypeChangeNotification(Type type)
     {
         var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(type);
@@ -41,7 +44,10 @@ public partial class Depository
         }
     }
 
-    public List<object> ResolveDependencies(Type dependency, DependencyResolveOption? option = null)
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
+    public List<object> ResolveDependencies(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type dependency,
+        DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType && _dependencyDescriptions.All(t => t.DependencyType != dependency))
         {
@@ -72,7 +78,10 @@ public partial class Depository
         return results;
     }
 
-    public object ResolveDependency(Type dependency, DependencyResolveOption? option = null)
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
+    public object ResolveDependency(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type dependency,
+        DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType)
         {
@@ -81,17 +90,21 @@ public partial class Depository
                 // check whether is IEnumerable
                 // and then return the fully Implemented stuff
                 var cachedGenericType = dependency.GenericTypeArguments[0];
-                var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
-                if (!DependencyExist(cachedGenericType)) return impls;
+                if (!DependencyExist(cachedGenericType))
+                    return Array.CreateInstance(cachedGenericType, 0);
                 var resolves = ResolveDependencies(cachedGenericType, option);
+                var tempItems = new List<object>(resolves.Count);
                 // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var impl in resolves)
                 {
                     if (impl is null) continue;
                     if (cachedGenericType.IsInstanceOfType(impl))
-                        impls.Add(impl);
+                        tempItems.Add(impl);
                 }
 
+                var impls = Array.CreateInstance(cachedGenericType, tempItems.Count);
+                for (var i = 0; i < tempItems.Count; i++)
+                    impls.SetValue(tempItems[i], i);
                 return impls;
             }
             // ReSharper disable once RedundantIfElseBlock
@@ -119,6 +132,7 @@ public partial class Depository
                 var result = ResolveDependency(actualType, newopt);
                 if (result is not IAsyncConstructService asyncConstructService)
                 {
+                    // MakeGenericMethod requires dynamic code; we are inside a [RequiresDynamicCode] context.
                     return typeof(Task).GetMethod("FromResult")?.MakeGenericMethod(actualType)
                         .Invoke(null, new[] { result })!;
                 }
@@ -160,6 +174,7 @@ public partial class Depository
         return relation is null ? null! : ResolveRelation(dependencyDescription, relation, option);
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public void ChangeResolveTarget(Type dependency, object? target)
     {
         var description = GetDependencyDescription(dependency);
@@ -173,6 +188,8 @@ public partial class Depository
             NotifyDependencyChange(description);
     }
 
+    // MakeGenericType is required to instantiate the open-generic implement type.
+    [RequiresDynamicCode("Resolving open-generic dependencies requires MakeGenericType at runtime.")]
     private object ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
@@ -198,6 +215,8 @@ public partial class Depository
         return ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType, option);
     }
 
+    // MakeGenericType is required to instantiate open-generic implement types.
+    [RequiresDynamicCode("Resolving open-generic dependencies requires MakeGenericType at runtime.")]
     private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
@@ -231,7 +250,11 @@ public partial class Depository
         return results;
     }
 
-    private object ResolveTypeToObject(Type implementType, DependencyResolveOption? option)
+    // GetConstructors() is called on implementType; the DynamicallyAccessedMembers annotation
+    // ensures the trimmer preserves public constructors for all registered implementation types.
+    private object ResolveTypeToObject(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var constructorInfos = implementType.GetConstructors();
         // ReSharper disable once ConvertIfStatementToSwitchStatement
@@ -289,7 +312,10 @@ public partial class Depository
         return dependencyImpl;
     }
 
-    public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos,
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
+    public List<object> ResolveParameterInfos(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        ParameterInfo[] parameterInfos,
         DependencyResolveOption? option)
     {
         var parameters = new List<object>();
@@ -354,6 +380,11 @@ public partial class Depository
         return parameters;
     }
 
+    // The FromKeyedServicesAttribute type is accessed by name to avoid a hard dependency on
+    // Microsoft.Extensions.DependencyInjection. GetProperty("Key") on the runtime attribute type
+    // is intentional and cannot be annotated statically.
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Accessing 'Key' property of FromKeyedServicesAttribute by name intentionally to avoid a hard assembly dependency.")]
     private string? GetParameterServiceKey(ParameterInfo parameterInfo)
     {
         if (Option.MicrosoftDependencyInjectionCompatible)
@@ -386,8 +417,12 @@ public partial class Depository
             dependencyDescription.DependencyType, relation.ImplementType, option);
     }
 
-    private object ResolveDescriptionWithImplementType(DependencyDescription description, DependencyRelation relation,
-        Type inputType, Type implementType, DependencyResolveOption? option)
+    private object ResolveDescriptionWithImplementType(
+        DependencyDescription description,
+        DependencyRelation relation,
+        Type inputType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var impl = description.Lifetime switch
         {
@@ -406,7 +441,9 @@ public partial class Depository
         return impl;
     }
 
-    private object ResolveScoped(Type implementType, DependencyResolveOption? option)
+    private object ResolveScoped(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var scope = option?.Scope ?? CurrentScope;
         if (scope is null) throw new ScopeNotSetException();
@@ -421,13 +458,17 @@ public partial class Depository
         return impl;
     }
 
-    private object ResolveTransient(Type implementType, DependencyResolveOption? option)
+    private object ResolveTransient(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var impl = ResolveTypeToObject(implementType, option);
         return impl;
     }
 
-    private object ResolveSingleton(Type implementType, DependencyResolveOption? option)
+    private object ResolveSingleton(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         if (RootScope.Exist(implementType, option?.RelationName))
         {
@@ -440,6 +481,10 @@ public partial class Depository
         return impl;
     }
 
+    // GetMethod("ToString") is called on a runtime type obtained from obj.GetType(), which cannot
+    // carry a static DynamicallyAccessedMembers annotation. The suppression is intentional.
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Checking whether ToString is overridden at runtime; the method may not be preserved by the trimmer but falling back to the default format is acceptable.")]
     internal static string SafeToString(object? obj)
     {
         if (obj == null)
