@@ -1,5 +1,4 @@
-// Polyfill AOT-related attributes for netstandard2.0 targets so that
-// annotations like [RequiresDynamicCode] can be applied consistently.
+// Polyfill AOT-related attributes for netstandard2.0 targets.
 #if !NET5_0_OR_GREATER
 namespace System.Diagnostics.CodeAnalysis
 {

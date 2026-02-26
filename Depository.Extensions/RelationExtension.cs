@@ -1,9 +1,11 @@
-﻿using Depository.Abstraction.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Interfaces;
 
 namespace Depository.Extensions;
 
 public static class RelationExtension
 {
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void ChangeFocusingRelation<TDependency, TImplement>(this IDepository depository)
     {
         var depDes = depository.GetDependency(typeof(TDependency));
@@ -12,6 +14,7 @@ public static class RelationExtension
             relations.First(relation => relation.ImplementType == typeof(TImplement)));
     }
 
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void RemoveRelation<TDependency, TImplement>(this IDepository depository)
     {
         var depDes = depository.GetDependency(typeof(TDependency));
@@ -20,7 +23,8 @@ public static class RelationExtension
                 rel.ImplementType == typeof(TImplement));
         depository.DeleteRelation(depDes!, relation!);
     }
-    
+
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void DisableRelation<TDependency, TImplement>(this IDepository depository)
     {
         var depDes = depository.GetDependency(typeof(TDependency));
@@ -29,7 +33,8 @@ public static class RelationExtension
                 rel.ImplementType == typeof(TImplement));
         depository.DisableRelation(depDes!, relation!);
     }
-    
+
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void DisableRelation<TDependency>(this IDepository depository, string relationName)
     {
         var depDes = depository.GetDependency(typeof(TDependency));
@@ -38,7 +43,8 @@ public static class RelationExtension
                 rel.Name == relationName);
         depository.DisableRelation(depDes!, relation!);
     }
-    
+
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void EnableRelation<TDependency>(this IDepository depository, string relationName)
     {
         var depDes = depository.GetDependency(typeof(TDependency));
@@ -47,7 +53,8 @@ public static class RelationExtension
                 rel.Name == relationName);
         depository.EnableRelation(depDes!, relation!);
     }
-    
+
+    [RequiresDynamicCode("Dispatching dependency-change notifications uses MakeGenericType at runtime.")]
     public static void EnableRelation<TDependency, TImplement>(this IDepository depository)
     {
         var depDes = depository.GetDependency(typeof(TDependency));

@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Interfaces.NotificationHub;
 
 namespace Depository.Core;
@@ -12,7 +13,8 @@ public class NotificationHub : INotificationHub
     {
         _depository = depository;
     }
-    
+
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public async Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new())
     {
         var subscribers =
@@ -25,6 +27,7 @@ public class NotificationHub : INotificationHub
         await Task.WhenAll(tasks);
     }
 
+    [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
     public async Task<List<TResult>> PublishNotificationWithResultAsync<TNotification, TResult>(
         TNotification notification,CancellationToken ctk = new())
     {

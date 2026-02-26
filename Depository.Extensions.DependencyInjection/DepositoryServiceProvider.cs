@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
@@ -16,7 +17,8 @@ namespace Depository.Extensions.DependencyInjection
         {
             _depository = depository;
         }
-        
+
+        [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
         public object GetService(Type serviceType)
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption
@@ -25,11 +27,13 @@ namespace Depository.Extensions.DependencyInjection
             });
         }
 
+        [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
         public object GetRequiredService(Type serviceType)
         {
             return _depository.ResolveDependency(serviceType);
         }
 
+        [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
         public object? GetKeyedService(Type serviceType, object? serviceKey)
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
@@ -39,6 +43,7 @@ namespace Depository.Extensions.DependencyInjection
             });
         }
 
+        [RequiresDynamicCode("Open-generic type resolution uses MakeGenericType at runtime.")]
         public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
         {
             return _depository.ResolveDependency(serviceType, new DependencyResolveOption()
