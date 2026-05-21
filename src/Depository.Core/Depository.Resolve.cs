@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Depository.Abstraction.Attributes;
@@ -7,11 +8,13 @@ using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Depository.Core;
 
 public partial class Depository
 {
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     private void NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
     {
         if (mode is 0 or 1)
@@ -28,6 +31,7 @@ public partial class Depository
         }
     }
 
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     private void PostTypeChangeNotification(Type type)
     {
         var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(type);
@@ -37,7 +41,8 @@ public partial class Depository
         foreach (var relation in relations)
         {
             var result = ResolveRelation(description, relation);
-            notificationType.GetMethods()[0].Invoke(result, new object?[] { null });
+            notificationType.GetMethod(nameof(INotifyDependencyChanged<object>.OnDependencyChanged))!
+                .Invoke(result, new object?[] { null });
         }
     }
 
@@ -52,7 +57,7 @@ public partial class Depository
         if (dependencyDescription is null)
             return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
-        if (option?.RelationName is not null && !Option.MicrosoftDependencyInjectionCompatible)
+        if (option?.RelationName is not null)
         {
             relations = relations.Where(relation => relation.Name == option.RelationName).ToList();
         }
@@ -76,6 +81,7 @@ public partial class Depository
         return results;
     }
 
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     public object ResolveDependency(Type dependency, DependencyResolveOption? option = null)
     {
         if (dependency.IsGenericType)
@@ -177,6 +183,7 @@ public partial class Depository
             NotifyDependencyChange(description);
     }
 
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     private object ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
@@ -202,6 +209,7 @@ public partial class Depository
         return ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType, option);
     }
 
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
     {
         var genericType = dependency.GetGenericTypeDefinition();
@@ -247,7 +255,9 @@ public partial class Depository
         return results;
     }
 
-    private object ResolveTypeToObject(Type implementType, DependencyResolveOption? option)
+    private object ResolveTypeToObject(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var constructorInfos = implementType.GetConstructors();
         // ReSharper disable once ConvertIfStatementToSwitchStatement
@@ -305,7 +315,9 @@ public partial class Depository
         return dependencyImpl;
     }
 
-    public List<object> ResolveParameterInfos(Type implementType, ParameterInfo[] parameterInfos,
+    public List<object> ResolveParameterInfos(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        ParameterInfo[] parameterInfos,
         DependencyResolveOption? option)
     {
         var parameters = new List<object>();
@@ -319,7 +331,9 @@ public partial class Depository
                 {
                     if (impl.TryGetValue(relationName, out var value))
                     {
-                        resolveResult = (value);
+                        resolveResult = value;
+                        parameters.Add(resolveResult);
+                        continue;
                     }
                 }
 
@@ -374,12 +388,10 @@ public partial class Depository
     {
         if (Option.MicrosoftDependencyInjectionCompatible)
         {
-            var msattr = parameterInfo.GetCustomAttributes().FirstOrDefault(t =>
-                t.GetType().FullName == "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute");
-            if (msattr is not null)
+            var fromKeyedServicesAttribute = parameterInfo.GetCustomAttribute<FromKeyedServicesAttribute>();
+            if (fromKeyedServicesAttribute is not null)
             {
-                var key = msattr.GetType().GetProperty("Key")?.GetValue(msattr);
-                return SafeToString(key);
+                return SafeToString(fromKeyedServicesAttribute.Key);
             }
         }
 
@@ -403,7 +415,9 @@ public partial class Depository
     }
 
     private object ResolveDescriptionWithImplementType(DependencyDescription description, DependencyRelation relation,
-        Type inputType, Type implementType, DependencyResolveOption? option)
+        Type inputType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var impl = description.Lifetime switch
         {
@@ -416,13 +430,15 @@ public partial class Depository
         if (option?.CheckAsyncConstructor is not false &&
             impl is IAsyncConstructService asyncConstructService)
         {
-            asyncConstructService.InitializeService().ConfigureAwait(false);
+            _ = asyncConstructService.InitializeService();
         }
 
         return impl;
     }
 
-    private object ResolveScoped(Type implementType, DependencyResolveOption? option)
+    private object ResolveScoped(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var scope = option?.Scope ?? CurrentScope;
         if (scope is null) throw new ScopeNotSetException();
@@ -437,13 +453,17 @@ public partial class Depository
         return impl;
     }
 
-    private object ResolveTransient(Type implementType, DependencyResolveOption? option)
+    private object ResolveTransient(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         var impl = ResolveTypeToObject(implementType, option);
         return impl;
     }
 
-    private object ResolveSingleton(Type implementType, DependencyResolveOption? option)
+    private object ResolveSingleton(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        DependencyResolveOption? option)
     {
         if (RootScope.Exist(implementType, option?.RelationName))
         {
@@ -460,6 +480,9 @@ public partial class Depository
     {
         if (obj == null)
             return "null";
+
+        if (obj is string value)
+            return value;
 
         var type = obj.GetType();
         var toStringMethod = type.GetMethod("ToString", Type.EmptyTypes);

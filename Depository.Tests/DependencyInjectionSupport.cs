@@ -71,6 +71,20 @@ public class DependencyInjectionSupport
         guidGeneratorA.Should().AllSatisfy(t=>t.Should().NotBeSameAs(guidGeneratorB));
 
     }
+
+    [Test]
+    public void ResolveKeyedEnumerable_ShouldReturnOnlyMatchingKeyedServices()
+    {
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("a");
+        _host.Services.AddKeyedSingleton<IGuidGenerator, EmptyGuidGenerator>("b");
+
+        var app = _host.Build();
+
+        var guidGenerators = app.Services.GetKeyedService<IEnumerable<IGuidGenerator>>("a")?.ToList();
+
+        guidGenerators.Should().ContainSingle();
+        guidGenerators![0].Should().BeOfType<RandomGuidGenerator>();
+    }
     
     [Test]
     public void ResolveNamedGuidGenerator_ShouldNotBeSame()
@@ -101,6 +115,32 @@ public class DependencyInjectionSupport
         var app = _host.Build();
 
         var resolvedGenerator = app.Services.GetRequiredService<IGuidGenerator>();
+
+        resolvedGenerator.Should().BeSameAs(randomGuidGenerator);
+    }
+
+    [Test]
+    public void ResolveInstanceGuidGenerator_ShouldUseRegisteredInstance()
+    {
+        var randomGuidGenerator = new RandomGuidGenerator();
+        _host.Services.AddSingleton<IGuidGenerator>(randomGuidGenerator);
+
+        var app = _host.Build();
+
+        var resolvedGenerator = app.Services.GetRequiredService<IGuidGenerator>();
+
+        resolvedGenerator.Should().BeSameAs(randomGuidGenerator);
+    }
+
+    [Test]
+    public void ResolveKeyedInstanceGuidGenerator_ShouldUseRegisteredInstance()
+    {
+        var randomGuidGenerator = new RandomGuidGenerator();
+        _host.Services.AddKeyedSingleton<IGuidGenerator>("a", randomGuidGenerator);
+
+        var app = _host.Build();
+
+        var resolvedGenerator = app.Services.GetRequiredKeyedService<IGuidGenerator>("a");
 
         resolvedGenerator.Should().BeSameAs(randomGuidGenerator);
     }

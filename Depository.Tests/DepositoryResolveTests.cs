@@ -37,6 +37,21 @@ public class DepositoryResolveTests
     }
 
     [Test]
+    public void ResolveSingleton_AfterGarbageCollection_ShouldReturnSameInstance()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+
+        var firstGenerator = depository.Resolve<IGuidGenerator>();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        var secondGenerator = depository.Resolve<IGuidGenerator>();
+
+        secondGenerator.Should().BeSameAs(firstGenerator);
+    }
+
+    [Test]
     public void ResolveConstructorService_ShouldBeNormal()
     {
         // Arrange
@@ -92,6 +107,22 @@ public class DepositoryResolveTests
             guidGeneratorB1.Should().Be(guidGeneratorB2);
             guidGeneratorA1.Should().NotBe(guidGeneratorB1);
         }
+    }
+
+    [Test]
+    public void ResolveScoped_AfterGarbageCollection_ShouldReturnSameInstanceWithinScope()
+    {
+        var depository = CreateNewDepository();
+        depository.AddScoped<IGuidGenerator, RandomGuidGenerator>();
+
+        using var scope = DepositoryResolveScope.Create();
+        var firstGenerator = depository.ResolveInScope<IGuidGenerator>(scope);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        var secondGenerator = depository.ResolveInScope<IGuidGenerator>(scope);
+
+        secondGenerator.Should().BeSameAs(firstGenerator);
     }
 
     [Test]
@@ -589,6 +620,18 @@ public class DepositoryResolveTests
         // Assert
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
+
+    [Test]
+    public async Task ResolveAsyncConstructorInject_AsNormal_ShouldStartFireAndForgetInitialization()
+    {
+        var depository = CreateNewDepository();
+        depository.AddTransient<DelayedAsyncConstructService>();
+
+        var service = depository.Resolve<DelayedAsyncConstructService>();
+        await service.Initialized.Task.WaitAsync(TimeSpan.FromSeconds(1));
+
+        service.IsNormal.Should().BeTrue();
+    }
     
     [Test]
     public void ResolveKeyedService_ShouldBeNormal()
@@ -612,4 +655,18 @@ public class DepositoryResolveTests
     // Actions
     private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) =>
         DepositoryFactory.CreateNew(options);
+
+    private sealed class DelayedAsyncConstructService : IAsyncConstructService, ICheckIsNormal
+    {
+        public TaskCompletionSource<bool> Initialized { get; } = new();
+
+        public bool IsNormal { get; set; }
+
+        public async Task InitializeService()
+        {
+            await Task.Yield();
+            IsNormal = true;
+            Initialized.TrySetResult(true);
+        }
+    }
 }

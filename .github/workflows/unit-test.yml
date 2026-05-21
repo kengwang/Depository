@@ -1,32 +1,40 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: Depository.Core Unit Tests
 
 on:
   push:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
   pull_request:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
 
 jobs:
-  build:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        mode: [jit]
+        include:
+          - os: windows-latest
+            mode: aot
+            rid: win-x64
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: Restore dependencies
+    - name: Restore
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    - name: Test (JIT)
+      if: matrix.mode == 'jit'
+      run: dotnet test Depository.Tests/Depository.Tests.csproj -c Release --verbosity normal
+    - name: Publish (AOT)
+      if: matrix.mode == 'aot'
+      run: dotnet publish Depository.Tests/Depository.Tests.csproj -c Release -r ${{ matrix.rid }} -o ${{ github.workspace }}/out/aot
+    - name: Run (AOT)
+      if: matrix.mode == 'aot'
+      run: ${{ github.workspace }}/out/aot/Depository.Tests.exe

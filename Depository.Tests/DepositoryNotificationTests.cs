@@ -74,7 +74,27 @@ public class DepositoryNotificationTests
             .IsNormal.Should().BeTrue();
         result.Should().Contain("Received");
     }
+
+    [Test]
+    public async Task PublishResultedNotification_WhenSubscriberThrows_ShouldPropagateException()
+    {
+        var depository = CreateNewDepository();
+        depository.AddTransient<INotificationSubscriber<TestNotification, string>, ThrowingResultedNotificationSubscriber>();
+
+        var hub = depository.Resolve<INotificationHub>();
+        var action = async () => await hub.PublishNotificationWithResultAsync<TestNotification, string>(new TestNotification());
+
+        await action.Should().ThrowAsync<InvalidOperationException>();
+    }
     
     // Actions
     private static Core.Depository CreateNewDepository(Action<DepositoryOption>? options = null) => DepositoryFactory.CreateNew(options);
+
+    private sealed class ThrowingResultedNotificationSubscriber : INotificationSubscriber<TestNotification, string>
+    {
+        public Task<string> HandleNotificationAsync(TestNotification notification, CancellationToken ctk = default)
+        {
+            throw new InvalidOperationException("Subscriber failed.");
+        }
+    }
 }

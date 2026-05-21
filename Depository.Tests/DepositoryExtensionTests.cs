@@ -27,6 +27,21 @@ public class DepositoryExtensionTests
     }
 
     [Test]
+    public void Resolve_WithRelationName_ShouldIgnoreFocusedRelation()
+    {
+        var randomGuidGenerator = new RandomGuidGenerator();
+        var emptyGuidGenerator = new EmptyGuidGenerator();
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>(randomGuidGenerator, "random");
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(emptyGuidGenerator, "empty");
+        depository.ChangeFocusingRelation<IGuidGenerator, RandomGuidGenerator>();
+
+        var resolvedGenerator = depository.Resolve<IGuidGenerator>(relationName: "empty");
+
+        resolvedGenerator.Should().BeSameAs(emptyGuidGenerator);
+    }
+
+    [Test]
     public void Resolve_WithIncludeDisabledTrue_ShouldResolveDisabledRelation()
     {
         var emptyGuidGenerator = new EmptyGuidGenerator();
@@ -55,6 +70,27 @@ public class DepositoryExtensionTests
         var service = depository.Resolve<IConstructorInjectService>(fixedImplementations: fixedImplementations);
 
         service.Should().BeOfType<ConstructorInjectService>();
+    }
+
+    [Test]
+    public void Resolve_WithNamedFixedImplementation_ShouldPreferNamedValueOverDefaultValue()
+    {
+        var namedGenerator = new RandomGuidGenerator();
+        var defaultGenerator = new EmptyGuidGenerator();
+        var fixedImplementations = new Dictionary<Type, Dictionary<string, object>>
+        {
+            [typeof(IGuidGenerator)] = new()
+            {
+                ["a"] = namedGenerator,
+                [string.Empty] = defaultGenerator
+            }
+        };
+        var depository = CreateNewDepository();
+        depository.AddTransient<ConstructorFromNamedService>();
+
+        var service = depository.Resolve<ConstructorFromNamedService>(fixedImplementations: fixedImplementations);
+
+        service.GuidGenerator.Should().BeSameAs(namedGenerator);
     }
 
     [Test]

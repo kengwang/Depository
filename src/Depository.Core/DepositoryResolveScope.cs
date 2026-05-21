@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
@@ -15,7 +15,7 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         return new DepositoryResolveScope(option);
     }
 
-    private readonly Dictionary<string, WeakReference> _implementations = new();
+    private readonly Dictionary<string, object?> _implementations = new();
 
     public DepositoryResolveScope(DepositoryResolveScopeOption? option = null)
     {
@@ -27,14 +27,14 @@ public class DepositoryResolveScope : IDepositoryResolveScope
     public void SetImplementation(Type type, object? impl, string? key = null)
     {
         var implKey = GetKey(type, key);
-        _implementations[implKey] = new WeakReference(impl);
+        _implementations[implKey] = impl;
     }
 
     public object? GetImplement(Type type, string? key = null)
     {
         var implKey = GetKey(type, key);
         _implementations.TryGetValue(implKey, out var impl);
-        return impl?.Target;
+        return impl;
     }
     
     public bool Exist(Type type, string? key = null)
@@ -54,9 +54,9 @@ public class DepositoryResolveScope : IDepositoryResolveScope
     public void Dispose()
     {
         if (_option?.AutoDisposeWhenRemoved is true)
-            foreach (var weakReference in _implementations.Values.ToList())
+            foreach (var implementation in _implementations.Values.ToList())
             {
-                if (weakReference.IsAlive && weakReference.Target is IDisposable disposable)
+                if (implementation is IDisposable disposable)
                     disposable.Dispose();
             }
 

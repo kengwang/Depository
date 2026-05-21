@@ -1,4 +1,4 @@
-﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
@@ -7,13 +7,13 @@ namespace Depository.Core;
 
 public partial class Depository
 {
-    private readonly Dictionary<DependencyDescription, HashSet<DependencyRelation>> _dependencyRelations = new();
+    private readonly Dictionary<DependencyDescription, List<DependencyRelation>> _dependencyRelations = new();
     private readonly Dictionary<DependencyDescription, DependencyRelation> _currentFocusing = new();
 
     public void AddRelation(DependencyDescription dependency, DependencyRelation relation)
     {
         if (Option.CheckerOption.ImplementIsInheritedFromDependency &&
-            dependency.DependencyType.IsAssignableFrom(relation.ImplementType))
+            !dependency.DependencyType.IsAssignableFrom(relation.ImplementType))
             throw new ImplementNotInheritedFromDependencyException();
         if (Option.CheckerOption.ImplementIsInstantiable &&
             (relation.ImplementType.IsAbstract || relation.ImplementType.IsInterface))
@@ -22,7 +22,7 @@ public partial class Depository
 
         if (!_dependencyRelations.TryGetValue(dependency, out var relations))
         {
-            relations = new HashSet<DependencyRelation>();
+            relations = new List<DependencyRelation>();
             _dependencyRelations.Add(dependency, relations);
         }
 
@@ -89,8 +89,7 @@ public partial class Depository
     public DependencyRelation? GetRelation(DependencyDescription dependencyDescription,
         bool includeDisabled = false, string? relationName = null)
     {
-        if (_currentFocusing.TryGetValue(dependencyDescription, out var relation) && relation.IsEnabled)
-            return relation;
+        DependencyRelation? relation = null;
         if (_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
         {
             if (relations.Count == 0) throw new RelationNotFoundException();
@@ -101,6 +100,9 @@ public partial class Depository
                     throw new DependencyNotFoundException(dependencyDescription.DependencyType);
                 return resolvedRelation;
             }
+
+            if (_currentFocusing.TryGetValue(dependencyDescription, out var focusedRelation) && focusedRelation.IsEnabled)
+                return focusedRelation;
 
             relation = includeDisabled ? relations.Last() : relations.LastOrDefault(t => t.IsEnabled);
             if (!includeDisabled)

@@ -35,14 +35,7 @@ public class NotificationHub : INotificationHub
         var results = new List<TResult>();
         foreach (var subscriber in subscribers)
         {
-            try
-            {
-                results.Add(await subscriber.HandleNotificationAsync(notification, ctk).ConfigureAwait(false));
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
+            results.Add(await subscriber.HandleNotificationAsync(notification, ctk).ConfigureAwait(false));
         }
 
         return results;

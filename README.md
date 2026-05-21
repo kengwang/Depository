@@ -22,6 +22,40 @@ An IoC Container with fantastic feature.
 
 Checkout [Wiki](https://github.com/kengwang/Depository/wiki)
 
+## NativeAOT Support
+
+Depository is NativeAOT compatible. All 130 tests pass under both JIT and AOT on `win-x64`.
+
+The source libraries target `netstandard2.0` for broad compatibility. AOT validation runs through a `net9.0` test host with `PublishAot=true`.
+
+### Local Commands
+
+Run tests under JIT:
+
+```bash
+dotnet test Depository.Tests/Depository.Tests.csproj -c Release --verbosity normal
+```
+
+Publish and run tests under NativeAOT:
+
+```bash
+dotnet publish Depository.Tests/Depository.Tests.csproj -c Release -r win-x64 -o out/aot
+./out/aot/Depository.Tests.exe
+```
+
+### Verified Platform
+
+AOT is currently verified on `win-x64` only. Cross-platform AOT is not claimed.
+
+### CI Behavior
+
+* `unit-test.yml` runs a matrix: JIT on `ubuntu-latest` and `windows-latest`, plus AOT on `windows-latest` (`win-x64`).
+* `nuget-push.yml` gates NuGet publishing on the `test-aot` job, which runs both JIT tests and AOT publish/run on `win-x64`.
+
+### Analyzer Warning Policy
+
+Fix trim and AOT analyzer warnings at the source. Narrow suppressions are acceptable when justified. Blanket suppressions are not allowed.
+
 ## Licence
 
 ```

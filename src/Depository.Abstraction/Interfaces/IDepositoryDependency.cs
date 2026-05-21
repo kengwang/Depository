@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Models;
 
 namespace Depository.Abstraction.Interfaces;
 
@@ -16,14 +17,14 @@ public interface IDepositoryDependency
     /// </summary>
     /// <param name="dependencyType"></param>
     /// <returns></returns>
-    public bool DependencyExist(Type dependencyType);
+    public bool DependencyExist([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependencyType);
 
     /// <summary>
     /// Get Dependency
     /// </summary>
     /// <param name="dependencyType">Dependency Type</param>
     /// <returns>Dependency Description, null for not found</returns>
-    public DependencyDescription? GetDependency(Type dependencyType);
+    public DependencyDescription? GetDependency([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependencyType);
 
     /// <summary>
     /// Delete Dependency

@@ -16,10 +16,27 @@ namespace Depository.Tests;
 public class DepositoryRelationAndProviderEdgeTests
 {
     [Test]
-    public void AddRelation_WithInheritanceCheckerEnabledAndAssignableImplementation_ShouldThrow()
+    public void AddRelation_WithInheritanceCheckerEnabledAndAssignableImplementation_ShouldNotThrow()
     {
-        var action = () => CreateNewDepository(option =>
+        var depository = CreateNewDepository(option =>
             option.CheckerOption.ImplementIsInheritedFromDependency = true);
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+
+        var action = () => depository.AddRelation(description, new DependencyRelation(typeof(RandomGuidGenerator)));
+
+        action.Should().NotThrow();
+    }
+
+    [Test]
+    public void AddRelation_WithInheritanceCheckerEnabledAndUnassignableImplementation_ShouldThrow()
+    {
+        var depository = CreateNewDepository(option =>
+            option.CheckerOption.ImplementIsInheritedFromDependency = true);
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+
+        var action = () => depository.AddRelation(description, new DependencyRelation(typeof(ConstructorInjectService)));
 
         action.Should().Throw<ImplementNotInheritedFromDependencyException>();
     }
@@ -127,6 +144,16 @@ public class DepositoryRelationAndProviderEdgeTests
         var provider = new DepositoryServiceProvider(depository);
 
         provider.IsKeyedService(typeof(IGuidGenerator), "missing").Should().BeFalse();
+    }
+
+    [Test]
+    public void RelationExtension_WhenDependencyMissing_ShouldThrowDependencyNotFoundException()
+    {
+        var depository = CreateNewDepository();
+
+        var action = () => depository.DisableRelation<IGuidGenerator, RandomGuidGenerator>();
+
+        action.Should().Throw<DependencyNotFoundException>();
     }
 
     [Test]

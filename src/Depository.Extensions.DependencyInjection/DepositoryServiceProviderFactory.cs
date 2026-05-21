@@ -21,6 +21,7 @@ namespace Depository.Extensions.DependencyInjection
         {
             var depository = DepositoryFactory.CreateNew(_options);
             depository.Option.MicrosoftDependencyInjectionCompatible = true;
+            depository.Option.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue;
             foreach (var serviceDescriptor in services)
             {
                 if (serviceDescriptor.ImplementationType is null &&
@@ -47,7 +48,9 @@ namespace Depository.Extensions.DependencyInjection
                 DependencyRelation relation;
                 if (serviceDescriptor.IsKeyedService)
                 {
-                    relation = new DependencyRelation(serviceDescriptor.KeyedImplementationType!)
+                    relation = new DependencyRelation(serviceDescriptor.KeyedImplementationType ??
+                                                      serviceDescriptor.KeyedImplementationInstance?.GetType() ??
+                                                      serviceDescriptor.ServiceType)
                     {
                         DefaultImplementation = serviceDescriptor.KeyedImplementationInstance,
                         Name = Core.Depository.SafeToString(serviceDescriptor.ServiceKey)
@@ -61,7 +64,9 @@ namespace Depository.Extensions.DependencyInjection
                 }
                 else
                 {
-                    relation = new DependencyRelation(serviceDescriptor.ImplementationType!)
+                    relation = new DependencyRelation(serviceDescriptor.ImplementationType ??
+                                                      serviceDescriptor.ImplementationInstance?.GetType() ??
+                                                      serviceDescriptor.ServiceType)
                     {
                         DefaultImplementation = serviceDescriptor.ImplementationInstance
                     };
