@@ -1,0 +1,223 @@
+using Depository.Abstraction.Enums;
+using Depository.Abstraction.Exceptions;
+using Depository.Abstraction.Models;
+using Depository.Abstraction.Models.Options;
+using Depository.Core;
+using Depository.Extensions;
+using Depository.Tests.Implements;
+using Depository.Tests.Interfaces;
+using FluentAssertions;
+using TUnit.Core;
+
+namespace Depository.Tests;
+
+public class DepositoryResolveEdgeTests
+{
+    [Test]
+    public void ResolveDependencies_ForOpenGeneric_ShouldResolveClosedImplementations()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
+        depository.AddSingleton(typeof(ITypeGeneric<>), typeof(StringTypeGeneric));
+
+        var services = depository.ResolveDependencies(typeof(ITypeGeneric<string>));
+
+        services.Should().HaveCount(2);
+        services.Should().AllSatisfy(service => service.Should().BeAssignableTo<ITypeGeneric<string>>());
+        services.Should().Contain(service => service is TypeGeneric<string>);
+        services.Should().Contain(service => service is StringTypeGeneric);
+    }
+
+    [Test]
+    public void ResolveDependencies_ForMissingOpenGenericWithNoThrow_ShouldReturnEmptyList()
+    {
+        var depository = CreateNewDepository();
+
+        var services = depository.ResolveDependencies(typeof(ITypeGeneric<int>), new DependencyResolveOption
+        {
+            ThrowWhenNotExists = false
+        });
+
+        services.Should().BeEmpty();
+    }
+
+    [Test]
+    public void ResolveDependency_ForMissingNullableWithNoThrow_ShouldReturnNull()
+    {
+        var depository = CreateNewDepository();
+
+        var service = depository.ResolveDependency(typeof(Nullable<int>), new DependencyResolveOption
+        {
+            ThrowWhenNotExists = false
+        });
+
+        service.Should().BeNull();
+    }
+
+    [Test]
+    public void ResolveDependency_ForMissingTaskWithNoThrow_ShouldReturnNull()
+    {
+        var depository = CreateNewDepository();
+
+        var service = depository.ResolveDependency(typeof(Task<IGuidGenerator>), new DependencyResolveOption
+        {
+            ThrowWhenNotExists = false
+        });
+
+        service.Should().BeNull();
+    }
+
+    [Test]
+    public void ResolveDependency_ForMissingTaskWithThrow_ShouldThrowDependencyNotFoundException()
+    {
+        var depository = CreateNewDepository();
+
+        var action = () => depository.ResolveDependency(typeof(Task<IGuidGenerator>), new DependencyResolveOption
+        {
+            ThrowWhenNotExists = true
+        });
+
+        action.Should().Throw<DependencyNotFoundException>();
+    }
+
+    [Test]
+    public async Task ResolveDependency_ForTaskOfNormalService_ShouldReturnCompletedTask()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+
+        var task = depository.Resolve<Task<IGuidGenerator>>();
+        var service = await task;
+
+        service.Should().BeOfType<EmptyGuidGenerator>();
+    }
+
+    [Test]
+    public void ResolveDependency_WithSkipDecoration_ShouldResolveOriginalRelation()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.SetDependencyDecoration<IGuidGenerator, GuidDecorationService>();
+
+        var service = depository.Resolve<IGuidGenerator>(new DependencyResolveOption
+        {
+            SkipDecoration = true
+        });
+
+        service.Should().BeOfType<EmptyGuidGenerator>();
+    }
+
+    [Test]
+    public void ResolveDependencies_WithSkipDecoration_ShouldResolveOriginalRelations()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        depository.SetDependencyDecoration<IGuidGenerator, GuidDecorationService>();
+
+        var services = depository.ResolveDependencies(typeof(IGuidGenerator), new DependencyResolveOption
+        {
+            SkipDecoration = true
+        });
+
+        services.Should().ContainSingle()
+            .Which.Should().BeOfType<EmptyGuidGenerator>();
+    }
+
+    [Test]
+    public void ResolveParameterInfos_WithDefaultValue_ShouldUseDefaultParameterValue()
+    {
+        var depository = CreateNewDepository();
+        var constructor = typeof(DefaultValueConstructorService).GetConstructors().Single();
+
+        var parameters = depository.ResolveParameterInfos(
+            typeof(DefaultValueConstructorService),
+            constructor.GetParameters(),
+            null);
+
+        parameters.Should().ContainSingle()
+            .Which.Should().Be("default-value");
+    }
+
+    [Test]
+    public void ResolveParameterInfos_WithOptionalReference_ShouldUseNullValue()
+    {
+        var depository = CreateNewDepository();
+        var constructor = typeof(OptionalReferenceConstructorService).GetConstructors().Single();
+
+        var parameters = depository.ResolveParameterInfos(
+            typeof(OptionalReferenceConstructorService),
+            constructor.GetParameters(),
+            null);
+
+        parameters.Should().ContainSingle()
+            .Which.Should().BeNull();
+    }
+
+    [Test]
+    public void ResolveParameterInfos_WithUnresolvableRequiredParameter_ShouldThrowInitializationException()
+    {
+        var depository = CreateNewDepository();
+        var constructor = typeof(ConstructorInjectService).GetConstructors().Single();
+
+        var action = () => depository.ResolveParameterInfos(
+            typeof(ConstructorInjectService),
+            constructor.GetParameters(),
+            null);
+
+        action.Should().Throw<DependencyInitializationException>();
+    }
+
+    [Test]
+    public void ResolveDependencies_ForGenericDefaultImplementation_ShouldReturnDefaultImplementation()
+    {
+        var depository = CreateNewDepository();
+        var defaultImplementation = new TypeGeneric<string>();
+        var description = new DependencyDescription(typeof(ITypeGeneric<>), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+        depository.AddRelation(description, new DependencyRelation(typeof(TypeGeneric<>), defaultImplementation));
+
+        var services = depository.ResolveDependencies(typeof(ITypeGeneric<string>));
+
+        services.Should().ContainSingle()
+            .Which.Should().BeSameAs(defaultImplementation);
+    }
+
+    [Test]
+    public void ResolveDependencies_ForGenericImplementationFactory_ShouldReturnFactoryResult()
+    {
+        var depository = CreateNewDepository();
+        var factoryImplementation = new TypeGeneric<string>();
+        var description = new DependencyDescription(typeof(ITypeGeneric<>), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+        depository.AddRelation(description, new DependencyRelation(
+            typeof(TypeGeneric<>),
+            ImplementationFactory: _ => factoryImplementation));
+
+        var services = depository.ResolveDependencies(typeof(ITypeGeneric<string>));
+
+        services.Should().ContainSingle()
+            .Which.Should().BeSameAs(factoryImplementation);
+    }
+
+    private static Core.Depository CreateNewDepository() => DepositoryFactory.CreateNew();
+
+    private sealed class DefaultValueConstructorService
+    {
+        public DefaultValueConstructorService(string value = "default-value")
+        {
+            Value = value;
+        }
+
+        public string Value { get; }
+    }
+
+    private sealed class OptionalReferenceConstructorService
+    {
+        public OptionalReferenceConstructorService(object? value = null)
+        {
+            Value = value;
+        }
+
+        public object? Value { get; }
+    }
+}
