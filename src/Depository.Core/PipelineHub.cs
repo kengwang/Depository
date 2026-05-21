@@ -11,9 +11,7 @@ public class PipelineHub<TContext, TReturnValue> : IPipeline<TContext, TReturnVa
     {
         context.Middlewares = Middlewares;
         context.CurrentIndex = -1;
-        if (Middlewares.Count == 0)
-            return null;
-        return await Middlewares[0].InvokeAsync(context, InvokeNextMiddleware, cancellationToken);
+        return await InvokeNextMiddleware(context, cancellationToken);
     }
 
     public async Task<TReturnValue?> InvokeNextMiddleware(TContext context,

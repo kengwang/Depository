@@ -52,6 +52,10 @@ public partial class Depository
         if (dependencyDescription is null)
             return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
         var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
+        if (option?.RelationName is not null && !Option.MicrosoftDependencyInjectionCompatible)
+        {
+            relations = relations.Where(relation => relation.Name == option.RelationName).ToList();
+        }
         List<object> results = new();
         if (dependencyDescription.DecorationRelation is not null)
         {
@@ -218,11 +222,23 @@ public partial class Depository
         foreach (var relation in relations)
         {
             if (relation.IsDecorationRelation) continue;
-            if (relation.DefaultImplementation is not null) results.Add(relation.DefaultImplementation);
-            if (relation.ImplementationFactory is not null) results.Add(relation.ImplementationFactory(this));
+            if (relation.DefaultImplementation is not null)
+            {
+                results.Add(relation.DefaultImplementation);
+                continue;
+            }
+
+            if (relation.ImplementationFactory is not null)
+            {
+                results.Add(relation.ImplementationFactory(this));
+                continue;
+            }
+
             var implementType = relation.ImplementType;
-            if (!dependency.ContainsGenericParameters)
+            if (!dependency.ContainsGenericParameters && implementType.IsGenericTypeDefinition)
+            {
                 implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
+            }
             var impl = ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType,
                 option);
             results.Add(impl);

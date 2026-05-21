@@ -40,7 +40,7 @@ public static class ResolveExtension
     public static List<T> ResolveMultiple<T>(this IDepositoryResolve depository,
         DependencyResolveOption? option)
     {
-        return (depository.ResolveDependencies(typeof(T)))
+        return (depository.ResolveDependencies(typeof(T), option))
             .Select(o => (T)o)
             .ToList();
     }
@@ -50,7 +50,7 @@ public static class ResolveExtension
     {
         option ??= new();
         option.Scope = scope;
-        return (depository.ResolveDependencies(typeof(T)))
+        return (depository.ResolveDependencies(typeof(T), option))
                .Select(o => (T)o)
                .ToList();
     }
