@@ -1,11 +1,11 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 using Depository.Extensions.DependencyInjection;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xunit;
+using TUnit.Core;
 
 namespace Depository.Tests;
 
@@ -19,7 +19,7 @@ public class DependencyInjectionSupport
         _host.ConfigureContainer(new DepositoryServiceProviderFactory());
     }
 
-    [Fact]
+    [Test]
     public void ResolveGuidGenerator_ShouldBeRandom()
     {
         // Init
@@ -36,7 +36,7 @@ public class DependencyInjectionSupport
         guid1.Should().Be(guid2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveGuidGenerator_InScope_ShouldBeRandom()
     {
         // Init
@@ -52,7 +52,7 @@ public class DependencyInjectionSupport
         guid1.Should().Be(guid2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveKeyedGuidGenerator_ShouldNotBeSame()
     {
         // Arrange
@@ -72,7 +72,7 @@ public class DependencyInjectionSupport
 
     }
     
-    [Fact]
+    [Test]
     public void ResolveNamedGuidGenerator_ShouldNotBeSame()
     {
         // Arrange
@@ -93,7 +93,7 @@ public class DependencyInjectionSupport
         service.GuidGenerator.Should().Be(randomGuidGeneratorB);
     }
 
-    [Fact]
+    [Test]
     public void ResolveFactoryGuidGenerator_ShouldUseRegisteredFactory()
     {
         var randomGuidGenerator = new RandomGuidGenerator();
@@ -105,7 +105,7 @@ public class DependencyInjectionSupport
         resolvedGenerator.Should().BeSameAs(randomGuidGenerator);
     }
 
-    [Fact]
+    [Test]
     public void GetOptionalService_WhenMissing_ShouldReturnNull()
     {
         var app = _host.Build();
@@ -115,7 +115,7 @@ public class DependencyInjectionSupport
         service.Should().BeNull();
     }
 
-    [Fact]
+    [Test]
     public void ServiceProviderIsService_ShouldReportRegisteredServices()
     {
         _host.Services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
@@ -127,7 +127,7 @@ public class DependencyInjectionSupport
         serviceChecker.IsService(typeof(IConstructorInjectService)).Should().BeFalse();
     }
 
-    [Fact]
+    [Test]
     public void ServiceProviderIsKeyedService_ShouldReportRegisteredKeyedServices()
     {
         _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("known");

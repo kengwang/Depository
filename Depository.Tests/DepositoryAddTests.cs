@@ -1,4 +1,4 @@
-﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
 using Depository.Core;
@@ -6,14 +6,14 @@ using Depository.Extensions;
 using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
-using Xunit;
+using TUnit.Core;
 
 namespace Depository.Tests;
 
 public class DepositoryAddTests
 {
     // Pure
-    [Fact]
+    [Test]
     public void AddServiceAsSingleton_ShouldBeResolved()
     {
         // Init
@@ -34,7 +34,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceAsTransient_ShouldBeResolved()
     {
         // Init
@@ -56,7 +56,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceAsScoped_ShouldBeResolved()
     {
         // Init
@@ -78,7 +78,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddMultipleRelationsSingleton_ShouldBeResolvedToLastServices()
     {
         // Init
@@ -105,7 +105,7 @@ public class DepositoryAddTests
 
     // Extensions
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionSingletonToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -117,7 +117,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionTransientToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -129,7 +129,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionScopedToSelf_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -141,7 +141,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionSingletonToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -153,7 +153,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionTransientToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -165,7 +165,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void AddServiceExtensionScopedToImpl_ShouldBeResolved()
     {
         var depository = CreateNewDepository();
@@ -177,7 +177,7 @@ public class DepositoryAddTests
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
     }
 
-    [Fact]
+    [Test]
     public void DeleteRelation_ShouldRemoveOnlyTargetRelation()
     {
         var depository = CreateNewDepository();
@@ -194,7 +194,7 @@ public class DepositoryAddTests
             .Which.Should().Be(emptyRelation);
     }
 
-    [Fact]
+    [Test]
     public void ClearRelations_ShouldRemoveAllRelations()
     {
         var depository = CreateNewDepository();
@@ -209,7 +209,7 @@ public class DepositoryAddTests
         action.Should().Throw<RelationNotFoundException>();
     }
 
-    [Fact]
+    [Test]
     public void DisableAndEnableRelation_ShouldRespectIncludeDisabledOption()
     {
         var depository = CreateNewDepository();
@@ -230,7 +230,7 @@ public class DepositoryAddTests
             .Which.Should().Be(relation);
     }
 
-    [Fact]
+    [Test]
     public void ChangeFocusingRelation_ShouldResolveFocusedRelation()
     {
         var depository = CreateNewDepository();
@@ -246,7 +246,7 @@ public class DepositoryAddTests
         depository.GetRelation(description).Should().Be(randomRelation);
     }
 
-    [Fact]
+    [Test]
     public void GetRelation_WithUnknownName_ShouldThrowDependencyNotFoundException()
     {
         var depository = CreateNewDepository();

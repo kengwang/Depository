@@ -1,4 +1,4 @@
-﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
@@ -8,7 +8,7 @@ using Depository.Tests.Implements;
 using Depository.Tests.Interfaces;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using TUnit.Core;
 
 namespace Depository.Tests;
 
@@ -16,7 +16,7 @@ public class DepositoryResolveTests
 {
     // Pure
 
-    [Fact]
+    [Test]
     public void ResolveSingleRegisteredService_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
         // Arrange
@@ -36,7 +36,7 @@ public class DepositoryResolveTests
         guidGenerator.Should().NotBeNull().And.BeOfType<RandomGuidGenerator>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveConstructorService_ShouldBeNormal()
     {
         // Arrange
@@ -50,7 +50,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ResolveSingleRegisteredService_InScope_ToSingleResolve_ShouldReturnEmptyGuidGenerator()
     {
         // Arrange
@@ -94,7 +94,7 @@ public class DepositoryResolveTests
         }
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleRegisteredService_ToSingleResolve_ShouldReturnRandomGuidGenerator()
     {
         // Arrange
@@ -120,7 +120,7 @@ public class DepositoryResolveTests
     }
 
 
-    [Fact]
+    [Test]
     public void ResolveMultipleRegisteredService_ToMultipleResolves_ShouldReturnMultipleGuidGenerators()
     {
         // Arrange
@@ -146,7 +146,7 @@ public class DepositoryResolveTests
             .And.HaveCount(2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleRegisteredService_ToIEnumerable_ShouldReturnMultipleGuidGenerators()
     {
         // Arrange
@@ -166,13 +166,14 @@ public class DepositoryResolveTests
         var guidGenerator = depository.ResolveDependency(typeof(IEnumerable<IGuidGenerator>));
 
         // Assert
-        var guidGeneratorList = Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(guidGenerator).ToList();
+        var guidGeneratorList = guidGenerator.Should().BeAssignableTo<IEnumerable<IGuidGenerator>>()
+            .Subject.ToList();
         guidGeneratorList.Should().NotBeEmpty()
             .And.ContainItemsAssignableTo<IGuidGenerator>()
             .And.HaveCount(2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveService_ToDefaultImplement_ShouldReturnDefaultImplement()
     {
         // Arrange
@@ -192,7 +193,7 @@ public class DepositoryResolveTests
         resolveGuidGenerator.Should().Be(emptyGuidGenerator);
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleService_ToDefaultImplements_UsingResolves_ShouldAllReturnDefaultImplement()
     {
         // Arrange
@@ -217,7 +218,7 @@ public class DepositoryResolveTests
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleService_ToDefaultImplement_UsingIEnumerable_ShouldAllReturnDefaultImplement()
     {
         // Arrange
@@ -239,13 +240,14 @@ public class DepositoryResolveTests
         var resolveGuidGenerator = depository.ResolveDependency(typeof(IEnumerable<IGuidGenerator>));
 
         // Assert
-        Assert.IsAssignableFrom<IEnumerable<IGuidGenerator>>(resolveGuidGenerator).ToList()
+        resolveGuidGenerator.Should().BeAssignableTo<IEnumerable<IGuidGenerator>>()
+            .Subject.ToList()
             .Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
 
     // Extensions
 
-    [Fact]
+    [Test]
     public void ResolveSingleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnEmptyGuidGenerator()
     {
         // Arrange
@@ -260,7 +262,7 @@ public class DepositoryResolveTests
             .And.BeAssignableTo<IGuidGenerator>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleRegisteredService_ToSingleResolve_UsingExtension_ShouldReturnRandomGuidGenerator()
     {
         // Arrange
@@ -277,7 +279,7 @@ public class DepositoryResolveTests
             .And.BeOfType<RandomGuidGenerator>();
     }
 
-    [Fact]
+    [Test]
     public void
         ResolveMultipleRegisteredService_ToMultipleResolves_UsingExtension_ShouldReturnMultipleGuidGenerators()
     {
@@ -296,7 +298,7 @@ public class DepositoryResolveTests
             .And.HaveCount(2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleRegisteredService_ToIEnumerable_UsingExtension_ShouldReturnMultipleGuidGenerators()
     {
         // Arrange
@@ -314,7 +316,7 @@ public class DepositoryResolveTests
             .And.HaveCount(2);
     }
 
-    [Fact]
+    [Test]
     public void ResolveGeneric_ToNormalType_ShouldReturnNormalType()
     {
         // Arrange
@@ -330,7 +332,7 @@ public class DepositoryResolveTests
             .And.BeOfType<TypeGeneric<string>>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveGeneric_ToNormalType_ShouldReturnGenericType()
     {
         // Arrange
@@ -346,7 +348,7 @@ public class DepositoryResolveTests
             .And.BeOfType<TypeGeneric<string>>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveConstructorInject_ShouldBeNormal()
     {
         // Arrange
@@ -361,7 +363,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ResolveIEnumerableConstructorInject_ShouldBeNormal()
     {
         // Arrange
@@ -378,7 +380,7 @@ public class DepositoryResolveTests
         service.Should().AllSatisfy(t => t.As<ICheckIsNormal>().IsNormal.Should().BeTrue());
     }
 
-    [Fact]
+    [Test]
     public void ResolveIEnumerableConstructorInject_NoRegister_ShouldNotThrow()
     {
         // Arrange
@@ -391,7 +393,7 @@ public class DepositoryResolveTests
         // Nothing
     }
 
-    [Fact]
+    [Test]
     public void ResolveNullableConstructorInject_NoRegister_ShouldNotThrow()
     {
         // Arrange
@@ -405,7 +407,7 @@ public class DepositoryResolveTests
         // Nothing
     }
 
-    [Fact]
+    [Test]
     public void ResolveNullableConstructorInject_Register_ShouldNotThrow()
     {
         // Arrange
@@ -418,7 +420,7 @@ public class DepositoryResolveTests
         service.Should().BeAssignableTo<IGuidGenerator>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveConstructorNotification_ShouldBeNormal()
     {
         // Arrange
@@ -439,7 +441,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ResolveIEnumerableConstructorNotification_ShouldBeNormal()
     {
         // Arrange
@@ -461,7 +463,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public void ResolveService_ToDefaultImplement_UsingExtension_ShouldReturnDefaultImplement()
     {
         // Arrange
@@ -476,7 +478,7 @@ public class DepositoryResolveTests
         resolveGuidGenerator.Should().Be(emptyGuidGenerator);
     }
 
-    [Fact]
+    [Test]
     public void ResolveMultipleService_ToDefaultImplement_UsingExtension_ShouldAllReturnDefaultImplement()
     {
         // Arrange
@@ -492,7 +494,7 @@ public class DepositoryResolveTests
         resolveGuidGenerator.Should().AllSatisfy(item => item.Should().Be(emptyGuidGenerator));
     }
 
-    [Fact]
+    [Test]
     public void
         ResolveMultipleService_ToDefaultImplement_UsingExtension_IEnumerable_ShouldAllReturnDefaultImplement()
     {
@@ -510,7 +512,7 @@ public class DepositoryResolveTests
     }
 
 
-    [Fact]
+    [Test]
     public void ResolveDecoration_ToDecorationType_ShouldUseDecorationTypeWithActualType()
     {
         // Arrange
@@ -526,7 +528,7 @@ public class DepositoryResolveTests
         resolved.Should().BeAssignableTo<GuidDecorationService>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveDecoration_ToDecorationType_ShouldUseDecorationTypeWithMultipleActualType()
     {
         // Arrange
@@ -543,7 +545,7 @@ public class DepositoryResolveTests
         resolved.Should().BeAssignableTo<MultipleGuidDecorationService>();
     }
 
-    [Fact]
+    [Test]
     public void ResolveDecoration_ToTypes_ShouldOnlyContainsDecorationType()
     {
         // Arrange
@@ -560,7 +562,7 @@ public class DepositoryResolveTests
     }
 
 
-    [Fact]
+    [Test]
     public async Task ResolveAsyncConstructorInject_AsTask_ShouldBeNormal()
     {
         // Arrange
@@ -574,7 +576,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
     
-    [Fact]
+    [Test]
     public void ResolveAsyncConstructorInject_AsNormal_ShouldBeNormal()
     {
         // Arrange
@@ -588,7 +590,7 @@ public class DepositoryResolveTests
         service.As<ICheckIsNormal>().IsNormal.Should().BeTrue();
     }
     
-    [Fact]
+    [Test]
     public void ResolveKeyedService_ShouldBeNormal()
     {
         // Arrange
