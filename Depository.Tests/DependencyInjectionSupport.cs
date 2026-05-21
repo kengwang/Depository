@@ -92,4 +92,50 @@ public class DependencyInjectionSupport
         service.GuidGenerator.Should().NotBeNull();
         service.GuidGenerator.Should().Be(randomGuidGeneratorB);
     }
+
+    [Fact]
+    public void ResolveFactoryGuidGenerator_ShouldUseRegisteredFactory()
+    {
+        var randomGuidGenerator = new RandomGuidGenerator();
+        _host.Services.AddSingleton<IGuidGenerator>(_ => randomGuidGenerator);
+        var app = _host.Build();
+
+        var resolvedGenerator = app.Services.GetRequiredService<IGuidGenerator>();
+
+        resolvedGenerator.Should().BeSameAs(randomGuidGenerator);
+    }
+
+    [Fact]
+    public void GetOptionalService_WhenMissing_ShouldReturnNull()
+    {
+        var app = _host.Build();
+
+        var service = app.Services.GetService<IConstructorInjectService>();
+
+        service.Should().BeNull();
+    }
+
+    [Fact]
+    public void ServiceProviderIsService_ShouldReportRegisteredServices()
+    {
+        _host.Services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        var app = _host.Build();
+
+        var serviceChecker = app.Services.GetRequiredService<IServiceProviderIsService>();
+
+        serviceChecker.IsService(typeof(IGuidGenerator)).Should().BeTrue();
+        serviceChecker.IsService(typeof(IConstructorInjectService)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ServiceProviderIsKeyedService_ShouldReportRegisteredKeyedServices()
+    {
+        _host.Services.AddKeyedSingleton<IGuidGenerator, RandomGuidGenerator>("known");
+        var app = _host.Build();
+
+        var serviceChecker = app.Services.GetRequiredService<IServiceProviderIsKeyedService>();
+
+        serviceChecker.IsKeyedService(typeof(IGuidGenerator), "known").Should().BeTrue();
+        serviceChecker.IsKeyedService(typeof(IGuidGenerator), "missing").Should().BeFalse();
+    }
 }

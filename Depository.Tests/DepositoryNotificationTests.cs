@@ -14,7 +14,7 @@ public class DepositoryNotificationTests
 {
 
     [Fact]
-    public async void PublishNotification_ToSingle_ShouldReceive()
+    public async Task PublishNotification_ToSingle_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();
@@ -34,7 +34,7 @@ public class DepositoryNotificationTests
     
    
     [Fact]
-    public async void PublishNotification_ToMultiple_ShouldReceive()
+    public async Task PublishNotification_ToMultiple_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();
@@ -56,7 +56,7 @@ public class DepositoryNotificationTests
     }
     
     [Fact]
-    public async void PublishResultedNotification_ToSingle_ShouldReceive()
+    public async Task PublishResultedNotification_ToSingle_ShouldReceive()
     {
         // Init
         var depository = CreateNewDepository();

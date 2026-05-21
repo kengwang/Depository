@@ -1,4 +1,5 @@
 ﻿using Depository.Abstraction.Enums;
+using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
 using Depository.Core;
 using Depository.Extensions;
@@ -174,6 +175,88 @@ public class DepositoryAddTests
         AssertDepDescIfMatch(resolvedDependency, typeof(IGuidGenerator),
             DependencyLifetime.Transient);
         AssertDepRelationIfMatch(resolvedRelation, typeof(RandomGuidGenerator), null!);
+    }
+
+    [Fact]
+    public void DeleteRelation_ShouldRemoveOnlyTargetRelation()
+    {
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        var randomRelation = new DependencyRelation(typeof(RandomGuidGenerator));
+        var emptyRelation = new DependencyRelation(typeof(EmptyGuidGenerator));
+        depository.AddDependency(description);
+        depository.AddRelation(description, randomRelation);
+        depository.AddRelation(description, emptyRelation);
+
+        depository.DeleteRelation(description, randomRelation);
+
+        depository.GetRelations(description).Should().ContainSingle()
+            .Which.Should().Be(emptyRelation);
+    }
+
+    [Fact]
+    public void ClearRelations_ShouldRemoveAllRelations()
+    {
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+        depository.AddRelation(description, new DependencyRelation(typeof(RandomGuidGenerator)));
+
+        depository.ClearRelations(description);
+
+        depository.GetRelations(description).Should().BeEmpty();
+        var action = () => depository.GetRelation(description);
+        action.Should().Throw<RelationNotFoundException>();
+    }
+
+    [Fact]
+    public void DisableAndEnableRelation_ShouldRespectIncludeDisabledOption()
+    {
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        var relation = new DependencyRelation(typeof(RandomGuidGenerator));
+        depository.AddDependency(description);
+        depository.AddRelation(description, relation);
+
+        depository.DisableRelation(description, relation);
+
+        depository.GetRelations(description).Should().BeEmpty();
+        depository.GetRelations(description, includeDisabled: true).Should().ContainSingle()
+            .Which.Should().Be(relation);
+
+        depository.EnableRelation(description, relation);
+
+        depository.GetRelations(description).Should().ContainSingle()
+            .Which.Should().Be(relation);
+    }
+
+    [Fact]
+    public void ChangeFocusingRelation_ShouldResolveFocusedRelation()
+    {
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        var randomRelation = new DependencyRelation(typeof(RandomGuidGenerator));
+        var emptyRelation = new DependencyRelation(typeof(EmptyGuidGenerator));
+        depository.AddDependency(description);
+        depository.AddRelation(description, randomRelation);
+        depository.AddRelation(description, emptyRelation);
+
+        depository.ChangeFocusingRelation(description, randomRelation);
+
+        depository.GetRelation(description).Should().Be(randomRelation);
+    }
+
+    [Fact]
+    public void GetRelation_WithUnknownName_ShouldThrowDependencyNotFoundException()
+    {
+        var depository = CreateNewDepository();
+        var description = new DependencyDescription(typeof(IGuidGenerator), DependencyLifetime.Singleton);
+        depository.AddDependency(description);
+        depository.AddRelation(description, new DependencyRelation(typeof(RandomGuidGenerator), Name: "known"));
+
+        var action = () => depository.GetRelation(description, relationName: "missing");
+
+        action.Should().Throw<DependencyNotFoundException>();
     }
 
 
