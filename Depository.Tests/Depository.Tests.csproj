@@ -9,12 +9,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Depository.Extensions.DependencyInjection\Depository.Extensions.DependencyInjection.csproj" />
-      <ProjectReference Include="..\Depository\Depository.csproj" />
+      <ProjectReference Include="..\src\Depository.Extensions.DependencyInjection\Depository.Extensions.DependencyInjection.csproj" />
+      <ProjectReference Include="..\src\Depository\Depository.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="FluentAssertions" Version="6.12.1" />
+      <PackageReference Include="coverlet.collector" Version="10.0.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
       <PackageReference Include="xunit" Version="2.9.2" />
