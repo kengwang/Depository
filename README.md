@@ -24,9 +24,9 @@ Checkout [Wiki](https://github.com/kengwang/Depository/wiki)
 
 ## NativeAOT Support
 
-Depository is NativeAOT compatible. All 130 tests pass under both JIT and AOT on `win-x64`.
+Depository is validated with NativeAOT on `win-x64`: the test suite passes under both JIT and an AOT-published test host.
 
-The source libraries target `netstandard2.0` for broad compatibility. AOT validation runs through a `net9.0` test host with `PublishAot=true`.
+The source libraries target `netstandard2.0` for broad compatibility. AOT validation runs through a `net9.0` test host with `PublishAot=true`. APIs that resolve from a runtime `Type` can still surface `IL3050` warnings because open-generic construction, `IEnumerable<T>` list creation, and notification type construction require dynamic generic instantiation. Prefer the generic extension methods when the service type is statically known, and treat the `Type`-based APIs as dynamic-code paths.
 
 ### Local Commands
 
