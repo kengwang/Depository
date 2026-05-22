@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models.Options;
 
@@ -15,40 +13,37 @@ public class DepositoryResolveScope : IDepositoryResolveScope
         return new DepositoryResolveScope(option);
     }
 
-    private readonly Dictionary<string, object?> _implementations = new();
+    private readonly Dictionary<ImplementationKey, object?> _implementations = new();
 
     public DepositoryResolveScope(DepositoryResolveScopeOption? option = null)
     {
         _option = option;
     }
 
-    private static string GetKey(Type type, string? key) => $"{type.FullName}:{key ?? ""}";
-    
     public void SetImplementation(Type type, object? impl, string? key = null)
     {
-        var implKey = GetKey(type, key);
-        _implementations[implKey] = impl;
+        _implementations[new ImplementationKey(type, key)] = impl;
     }
 
     public object? GetImplement(Type type, string? key = null)
     {
-        var implKey = GetKey(type, key);
-        _implementations.TryGetValue(implKey, out var impl);
+        _implementations.TryGetValue(new ImplementationKey(type, key), out var impl);
         return impl;
     }
-    
+
+    internal bool TryGetImplement(Type type, string? key, out object? impl)
+    {
+        return _implementations.TryGetValue(new ImplementationKey(type, key), out impl);
+    }
+
     public bool Exist(Type type, string? key = null)
     {
-        var implKey = GetKey(type, key);
-        return _implementations.ContainsKey(implKey);
+        return _implementations.ContainsKey(new ImplementationKey(type, key));
     }
 
     public void RemoveImplement(Type type, string? key = null)
     {
-        var implKey = GetKey(type, key);
-        _implementations.TryGetValue(implKey, out var impl);
-        if (impl is null) return;
-        _implementations.Remove(implKey);
+        _implementations.Remove(new ImplementationKey(type, key));
     }
 
     public void Dispose()
@@ -61,5 +56,35 @@ public class DepositoryResolveScope : IDepositoryResolveScope
             }
 
         _implementations.Clear();
+    }
+
+    private readonly struct ImplementationKey : IEquatable<ImplementationKey>
+    {
+        public ImplementationKey(Type type, string? key)
+        {
+            Type = type;
+            Key = key;
+        }
+
+        private Type Type { get; }
+        private string? Key { get; }
+
+        public bool Equals(ImplementationKey other)
+        {
+            return Type == other.Type && string.Equals(Key, other.Key, StringComparison.Ordinal);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is ImplementationKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Type.GetHashCode() * 397) ^ (Key is null ? 0 : StringComparer.Ordinal.GetHashCode(Key));
+            }
+        }
     }
 }

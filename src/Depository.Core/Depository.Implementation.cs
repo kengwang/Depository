@@ -2,13 +2,18 @@
 
 public partial class Depository
 {
-    public void RemoveImplementation(Type implementType, string? key = null)
+    public void RemoveImplementation(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        string? key = null)
     {
         RootScope.RemoveImplement(implementType, key);
     }
 
 
-    public void SetImplementation(Type implementType, object implement, string? key = null)
+    public void SetImplementation(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
+        object implement,
+        string? key = null)
     {
         RootScope.SetImplementation(implementType, implement);
     }

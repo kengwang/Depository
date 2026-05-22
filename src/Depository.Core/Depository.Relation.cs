@@ -95,7 +95,8 @@ public partial class Depository
             if (relations.Count == 0) throw new RelationNotFoundException();
             if (relationName is not null)
             {
-                var resolvedRelation = relations.FirstOrDefault(t => t.Name == relationName);
+                var resolvedRelation = relations.FirstOrDefault(t =>
+                    t.Name == relationName && (includeDisabled || t.IsEnabled));
                 if (resolvedRelation is null)
                     throw new DependencyNotFoundException(dependencyDescription.DependencyType);
                 return resolvedRelation;

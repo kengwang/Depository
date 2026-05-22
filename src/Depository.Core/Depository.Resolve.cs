@@ -1,176 +1,182 @@
-﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using Depository.Abstraction.Attributes;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Depository.Core;
 
 public partial class Depository
 {
-    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
-    private void NotifyDependencyChange(DependencyDescription dependencyDescription, int mode = 0)
+    public List<object> ResolveDependencies(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency,
+        DependencyResolveOption? option = null)
     {
-        if (mode is 0 or 1)
-        {
-            // Notify List
-            PostTypeChangeNotification(
-                typeof(IEnumerable<>).MakeGenericType(dependencyDescription.DependencyType));
-        }
-
-        if (mode is 0 or 2)
-        {
-            // Notify Single
-            PostTypeChangeNotification(dependencyDescription.DependencyType);
-        }
+        return ResolveDependencies(dependency, ResolveContext.From(option));
     }
 
-    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
-    private void PostTypeChangeNotification(Type type)
+    private List<object> ResolveDependencies(Type dependency, ResolveContext context)
     {
-        var notificationType = typeof(INotifyDependencyChanged<>).MakeGenericType(type);
-        var description = GetDependencyDescription(notificationType);
-        if (description is null) return;
-        var relations = GetRelations(description);
-        foreach (var relation in relations)
+        if (dependency.IsGenericType && !_dependencyDescriptionsByType.ContainsKey(dependency))
         {
-            var result = ResolveRelation(description, relation);
-            notificationType.GetMethod(nameof(INotifyDependencyChanged<object>.OnDependencyChanged))!
-                .Invoke(result, new object?[] { null });
-        }
-    }
-
-    public List<object> ResolveDependencies(Type dependency, DependencyResolveOption? option = null)
-    {
-        if (dependency.IsGenericType && _dependencyDescriptions.All(t => t.DependencyType != dependency))
-        {
-            return ResolveGenericDependencies(dependency, option);
+            return ResolveGenericDependencies(dependency, context);
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null)
-            return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
-        var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
-        if (option?.RelationName is not null)
+            return context.ThrowWhenNotExists ? throw new DependencyNotFoundException(dependency) : new List<object>();
+
+        if (!_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
+            return new List<object>();
+
+        var results = new List<object>(relations.Count);
+        if (dependencyDescription.DecorationRelation is not null && !context.SkipDecoration)
         {
-            relations = relations.Where(relation => relation.Name == option.RelationName).ToList();
-        }
-        List<object> results = new();
-        if (dependencyDescription.DecorationRelation is not null)
-        {
-            if (option?.SkipDecoration is not true)
-            {
-                results.Add(ResolveRelation(dependencyDescription, dependencyDescription.DecorationRelation, option));
-                return results;
-            }
+            results.Add(ResolveRelation(dependencyDescription, dependencyDescription.DecorationRelation, dependency, context));
+            return results;
         }
 
         foreach (var relation in relations)
         {
+            if (!ShouldResolveRelation(relation, context)) continue;
             if (relation.IsDecorationRelation) continue;
-            var result = ResolveRelation(dependencyDescription, relation, option);
-            results.Add(result);
+            results.Add(ResolveRelation(dependencyDescription, relation, dependency, context));
+        }
+
+        return results;
+    }
+
+    public List<T> ResolveDependencies<T>(DependencyResolveOption? option = null)
+    {
+        return ResolveTypedDependencies<T>(ResolveContext.From(option));
+    }
+
+    private List<T> ResolveTypedDependencies<T>(ResolveContext context)
+    {
+        var dependency = typeof(T);
+        if (dependency.IsGenericType && !_dependencyDescriptionsByType.ContainsKey(dependency))
+        {
+            return ResolveGenericTypedDependencies<T>(dependency, context);
+        }
+
+        var dependencyDescription = GetDependencyDescription(dependency);
+        if (dependencyDescription is null)
+            return context.ThrowWhenNotExists ? throw new DependencyNotFoundException(dependency) : new List<T>();
+
+        if (!_dependencyRelations.TryGetValue(dependencyDescription, out var relations))
+            return new List<T>();
+
+        var results = new List<T>(relations.Count);
+        if (dependencyDescription.DecorationRelation is not null && !context.SkipDecoration)
+        {
+            var decorated = ResolveRelation(dependencyDescription, dependencyDescription.DecorationRelation, dependency, context);
+            if (decorated is T typedDecorated) results.Add(typedDecorated);
+            return results;
+        }
+
+        foreach (var relation in relations)
+        {
+            if (!ShouldResolveRelation(relation, context)) continue;
+            if (relation.IsDecorationRelation) continue;
+            var result = ResolveRelation(dependencyDescription, relation, dependency, context);
+            if (result is T typedResult) results.Add(typedResult);
         }
 
         return results;
     }
 
     [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
-    public object ResolveDependency(Type dependency, DependencyResolveOption? option = null)
+    public object ResolveDependency(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency,
+        DependencyResolveOption? option = null)
+    {
+        return ResolveDependency(dependency, ResolveContext.From(option));
+    }
+
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
+    private object ResolveDependency(Type dependency, ResolveContext context)
     {
         if (dependency.IsGenericType)
         {
-            if (dependency.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            var genericTypeDefinition = dependency.GetGenericTypeDefinition();
+            if (genericTypeDefinition == typeof(IEnumerable<>))
             {
-                // check whether is IEnumerable
-                // and then return the fully Implemented stuff
-                var cachedGenericType = dependency.GenericTypeArguments[0];
-                var impls = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(cachedGenericType));
-                if (!DependencyExist(cachedGenericType)) return impls;
-                var resolves = ResolveDependencies(cachedGenericType, option);
-                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-                foreach (var impl in resolves)
+                var itemType = dependency.GenericTypeArguments[0];
+                if (!DependencyExist(itemType)) return Array.CreateInstance(itemType, 0);
+
+                var resolvedImplementations = ResolveDependencies(itemType, context);
+                var count = 0;
+                foreach (var implementation in resolvedImplementations)
                 {
-                    if (impl is null) continue;
-                    if (cachedGenericType.IsInstanceOfType(impl))
-                        impls.Add(impl);
+                    if (implementation is not null && itemType.IsInstanceOfType(implementation))
+                        count++;
                 }
 
-                return impls;
+                var implementations = Array.CreateInstance(itemType, count);
+                var index = 0;
+                foreach (var implementation in resolvedImplementations)
+                {
+                    if (implementation is not null && itemType.IsInstanceOfType(implementation))
+                        implementations.SetValue(implementation, index++);
+                }
+
+                return implementations;
             }
-            // ReSharper disable once RedundantIfElseBlock
-            else if (dependency.GetGenericTypeDefinition() == typeof(Nullable<>))
+
+            if (genericTypeDefinition == typeof(Nullable<>))
             {
                 var actualType = dependency.GenericTypeArguments[0];
-                if (DependencyExist(actualType)) return ResolveDependency(actualType, option);
-                if (option?.ThrowWhenNotExists is true)
-                    throw new DependencyNotFoundException(actualType);
-                return null!;
+                if (DependencyExist(actualType)) return ResolveDependency(actualType, context);
+                return context.ThrowWhenNotExists ? throw new DependencyNotFoundException(actualType) : null!;
             }
-            else if (dependency.GetGenericTypeDefinition() == typeof(Task<>))
+
+            if (genericTypeDefinition == typeof(Task<>))
             {
-                var actualType = dependency.GenericTypeArguments[0];
-                if (!DependencyExist(actualType))
-                {
-                    if (option?.ThrowWhenNotExists is true)
-                        throw new DependencyNotFoundException(actualType);
-                    return null!;
-                }
-
-                var previousCheckAsyncConstructor = option?.CheckAsyncConstructor ?? true;
-                var newopt = option ?? new DependencyResolveOption();
-                newopt.CheckAsyncConstructor = false;
-                var result = ResolveDependency(actualType, newopt);
-                if (result is not IAsyncConstructService asyncConstructService)
-                {
-                    return typeof(Task).GetMethod("FromResult")?.MakeGenericMethod(actualType)
-                        .Invoke(null, new[] { result })!;
-                }
-
-                if (option is not null)
-                    option.CheckAsyncConstructor = previousCheckAsyncConstructor;
-
-                return Task.Run(async () =>
-                {
-                    await asyncConstructService.InitializeService();
-                    return asyncConstructService;
-                });
+                return ResolveTaskDependency(dependency, context);
             }
-            // ReSharper disable once RedundantIfElseBlock
-            else
+
+            if (!_dependencyDescriptionsByType.ContainsKey(dependency))
             {
-                // normal open-generic type
-                // check if is implemented as an existed generic
-                if (_dependencyDescriptions.All(t => t.DependencyType != dependency))
-                {
-                    return ResolveGenericDependency(dependency, option);
-                }
+                return ResolveGenericDependency(dependency, context);
             }
         }
 
         var dependencyDescription = GetDependencyDescription(dependency);
         if (dependencyDescription is null)
-            return option?.ThrowWhenNotExists is false ? null! : throw new DependencyNotFoundException(dependency);
-        DependencyRelation? relation;
-        if (option?.SkipDecoration is not true && dependencyDescription.DecorationRelation is not null)
-        {
-            relation = dependencyDescription.DecorationRelation;
-        }
-        else
-        {
-            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true, option?.RelationName);
-        }
+            return context.ThrowWhenNotExists ? throw new DependencyNotFoundException(dependency) : null!;
 
-        return relation is null ? null! : ResolveRelation(dependencyDescription, relation, option);
+        var relation = SelectRelation(dependencyDescription, context);
+        return relation is null ? null! : ResolveRelation(dependencyDescription, relation, dependency, context);
     }
 
-    public void ChangeResolveTarget(Type dependency, object? target)
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
+    private object ResolveTaskDependency(Type dependency, ResolveContext context)
+    {
+        var actualType = dependency.GenericTypeArguments[0];
+        if (!DependencyExist(actualType))
+        {
+            return context.ThrowWhenNotExists ? throw new DependencyNotFoundException(actualType) : null!;
+        }
+
+        var result = ResolveDependency(actualType, context.WithCheckAsyncConstructor(false));
+        if (result is not IAsyncConstructService asyncConstructService)
+        {
+            return typeof(Task).GetMethod(nameof(Task.FromResult))?.MakeGenericMethod(actualType)
+                .Invoke(null, new[] { result })!;
+        }
+
+        return Task.Run(async () =>
+        {
+            await asyncConstructService.InitializeService();
+            return asyncConstructService;
+        });
+    }
+
+    public void ChangeResolveTarget(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency,
+        object? target)
     {
         var description = GetDependencyDescription(dependency);
         if (description is null) throw new DependencyNotFoundException(dependency);
@@ -181,320 +187,5 @@ public partial class Depository
 
         if (Option.AutoNotifyDependencyChange)
             NotifyDependencyChange(description);
-    }
-
-    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
-    private object ResolveGenericDependency(Type dependency, DependencyResolveOption? option)
-    {
-        var genericType = dependency.GetGenericTypeDefinition();
-        var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null)
-            return option?.ThrowWhenNotExists is false ? null! : throw new DependencyNotFoundException(dependency);
-        DependencyRelation? relation;
-        if (option?.SkipDecoration is not true && dependencyDescription.DecorationRelation is not null)
-        {
-            relation = dependencyDescription.DecorationRelation;
-        }
-        else
-        {
-            relation = GetRelation(dependencyDescription, option?.IncludeDisabled is true);
-        }
-
-        if (relation is null) return null!;
-        if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
-        if (relation.ImplementationFactory is not null) return relation.ImplementationFactory(this);
-        var implementType = relation.ImplementType;
-        if (!dependency.ContainsGenericParameters)
-            implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
-        return ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType, option);
-    }
-
-    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
-    private List<object> ResolveGenericDependencies(Type dependency, DependencyResolveOption? option)
-    {
-        var genericType = dependency.GetGenericTypeDefinition();
-        var dependencyDescription = GetDependencyDescription(genericType);
-        if (dependencyDescription is null)
-            return option?.ThrowWhenNotExists is false ? new() : throw new DependencyNotFoundException(dependency);
-        var relations = GetRelations(dependencyDescription, option?.IncludeDisabled is true);
-        List<object> results = new();
-        if (relations.FirstOrDefault(t => t.IsDecorationRelation) is { } decorationRelation)
-        {
-            if (option?.SkipDecoration is not true)
-            {
-                results.Add(ResolveRelation(dependencyDescription, decorationRelation, option));
-                return results;
-            }
-        }
-
-        foreach (var relation in relations)
-        {
-            if (relation.IsDecorationRelation) continue;
-            if (relation.DefaultImplementation is not null)
-            {
-                results.Add(relation.DefaultImplementation);
-                continue;
-            }
-
-            if (relation.ImplementationFactory is not null)
-            {
-                results.Add(relation.ImplementationFactory(this));
-                continue;
-            }
-
-            var implementType = relation.ImplementType;
-            if (!dependency.ContainsGenericParameters && implementType.IsGenericTypeDefinition)
-            {
-                implementType = relation.ImplementType.MakeGenericType(dependency.GenericTypeArguments);
-            }
-            var impl = ResolveDescriptionWithImplementType(dependencyDescription, relation, dependency, implementType,
-                option);
-            results.Add(impl);
-        }
-
-        return results;
-    }
-
-    private object ResolveTypeToObject(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        DependencyResolveOption? option)
-    {
-        var constructorInfos = implementType.GetConstructors();
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if (constructorInfos.Length == 0)
-            throw new DependencyInitializationException($"Cannot initialize {implementType.Name} with no constructor");
-        var constructorInfo = constructorInfos[0];
-        if (constructorInfos.Length > 1)
-        {
-            if (constructorInfos.FirstOrDefault(c =>
-                    c.CustomAttributes.Any(att => att.AttributeType == typeof(DepositoryActivatorConstructorAttribute))
-                ) is { } activatorInfo)
-            {
-                constructorInfo = activatorInfo;
-            }
-            else
-            {
-                if (Option.CheckerOption.AutoConstructor)
-                {
-                    var max = 0;
-                    foreach (var info in constructorInfos)
-                    {
-                        var constructorParamInfos = info.GetParameters();
-                        var count = 0;
-                        foreach (var parameter in constructorParamInfos)
-                        {
-                            if (parameter.IsOptional || parameter.HasDefaultValue ||
-                                DependencyExist(parameter.ParameterType) ||
-                                option?.FixedImplementations?.ContainsKey(parameter.ParameterType) is true)
-                            {
-                                count++;
-                            }
-                            else
-                            {
-                                if (parameter.HasDefaultValue) count++;
-                            }
-                        }
-
-                        if (count <= max) continue;
-                        max = count;
-                        constructorInfo = info;
-                    }
-                }
-                else
-                {
-                    throw new DependencyInitializationException(
-                        $"More than one constructor was founded in {implementType.Name}, use DepositoryActivatorConstructorAttribute to define a DI constructor");
-                }
-            }
-        }
-
-
-        var parameterInfos = constructorInfo.GetParameters();
-        var parameters = ResolveParameterInfos(implementType, parameterInfos, option);
-        var dependencyImpl = constructorInfo.Invoke(parameters.ToArray());
-        return dependencyImpl;
-    }
-
-    public List<object> ResolveParameterInfos(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        ParameterInfo[] parameterInfos,
-        DependencyResolveOption? option)
-    {
-        var parameters = new List<object>();
-        foreach (var parameterInfo in parameterInfos)
-        {
-            var relationName = GetParameterServiceKey(parameterInfo);
-            object? resolveResult = null;
-            if (option?.FixedImplementations?.TryGetValue(parameterInfo.ParameterType, out var impl) is true)
-            {
-                if (relationName is not null)
-                {
-                    if (impl.TryGetValue(relationName, out var value))
-                    {
-                        resolveResult = value;
-                        parameters.Add(resolveResult);
-                        continue;
-                    }
-                }
-
-                if (impl.TryGetValue(string.Empty, out var defaultValue))
-                {
-                    resolveResult = (defaultValue);
-                }
-            }
-            else
-            {
-                option ??= new DependencyResolveOption();
-                var tempOption = new DependencyResolveOption
-                {
-                    Scope = option.Scope,
-                    IncludeDisabled = option.IncludeDisabled,
-                    SkipDecoration = false,
-                    RelationName = relationName,
-                    CheckAsyncConstructor = option.CheckAsyncConstructor,
-                    ThrowWhenNotExists = false,
-                    FixedImplementations = option.FixedImplementations
-                };
-                tempOption.SkipDecoration = typeof(IDecorationService).IsAssignableFrom(implementType);
-
-                resolveResult = ResolveDependency(parameterInfo.ParameterType, tempOption);
-
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (resolveResult != null)
-                {
-                }
-                else if (parameterInfo.HasDefaultValue)
-                {
-                    resolveResult = (parameterInfo.DefaultValue);
-                }
-                else if (parameterInfo.IsOptional)
-                {
-                    resolveResult = null;
-                }
-                else
-                {
-                    throw new DependencyInitializationException(
-                        $"The constructor of {implementType.Name} contains a parameter called {parameterInfo.Name} ({parameterInfo.Position}) which cannot resolved");
-                }
-            }
-
-            parameters.Add(resolveResult!);
-        }
-
-        return parameters;
-    }
-
-    private string? GetParameterServiceKey(ParameterInfo parameterInfo)
-    {
-        if (Option.MicrosoftDependencyInjectionCompatible)
-        {
-            var fromKeyedServicesAttribute = parameterInfo.GetCustomAttribute<FromKeyedServicesAttribute>();
-            if (fromKeyedServicesAttribute is not null)
-            {
-                return SafeToString(fromKeyedServicesAttribute.Key);
-            }
-        }
-
-        if (parameterInfo.GetCustomAttributes().FirstOrDefault(t => t is FromNamedServiceAttribute) is
-            FromNamedServiceAttribute fnsa)
-            return fnsa.Name;
-
-        return null;
-    }
-
-
-    private object ResolveRelation(
-        DependencyDescription dependencyDescription,
-        DependencyRelation relation,
-        DependencyResolveOption? option = null)
-    {
-        if (relation.DefaultImplementation is not null) return relation.DefaultImplementation;
-        if (relation.ImplementationFactory is not null) return relation.ImplementationFactory(this);
-        return ResolveDescriptionWithImplementType(dependencyDescription, relation,
-            dependencyDescription.DependencyType, relation.ImplementType, option);
-    }
-
-    private object ResolveDescriptionWithImplementType(DependencyDescription description, DependencyRelation relation,
-        Type inputType,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        DependencyResolveOption? option)
-    {
-        var impl = description.Lifetime switch
-        {
-            DependencyLifetime.Singleton => ResolveSingleton(implementType, option),
-            DependencyLifetime.Transient => ResolveTransient(implementType, option),
-            DependencyLifetime.Scoped => ResolveScoped(implementType, option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        if (option?.CheckAsyncConstructor is not false &&
-            impl is IAsyncConstructService asyncConstructService)
-        {
-            _ = asyncConstructService.InitializeService();
-        }
-
-        return impl;
-    }
-
-    private object ResolveScoped(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        DependencyResolveOption? option)
-    {
-        var scope = option?.Scope ?? CurrentScope;
-        if (scope is null) throw new ScopeNotSetException();
-        if (scope.Exist(implementType))
-        {
-            var ret = scope.GetImplement(implementType);
-            if (ret is not null) return ret;
-        }
-
-        var impl = ResolveTypeToObject(implementType, option);
-        scope.SetImplementation(implementType, impl);
-        return impl;
-    }
-
-    private object ResolveTransient(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        DependencyResolveOption? option)
-    {
-        var impl = ResolveTypeToObject(implementType, option);
-        return impl;
-    }
-
-    private object ResolveSingleton(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type implementType,
-        DependencyResolveOption? option)
-    {
-        if (RootScope.Exist(implementType, option?.RelationName))
-        {
-            var ret = RootScope.GetImplement(implementType, option?.RelationName);
-            if (ret is not null) return ret;
-        }
-
-        var impl = ResolveTypeToObject(implementType, option);
-        RootScope.SetImplementation(implementType, impl, option?.RelationName);
-        return impl;
-    }
-
-    internal static string SafeToString(object? obj)
-    {
-        if (obj == null)
-            return "null";
-
-        if (obj is string value)
-            return value;
-
-        var type = obj.GetType();
-        var toStringMethod = type.GetMethod("ToString", Type.EmptyTypes);
-
-        // 检查是否在当前类型中重写了 ToString（排除继承自 object 的）
-        if (toStringMethod != null && toStringMethod.DeclaringType != typeof(object))
-        {
-            return obj.ToString();
-        }
-        else
-        {
-            return $"{type.FullName}@{obj.GetHashCode():X}";
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Depository.Abstraction.Exceptions;
+using System.Diagnostics.CodeAnalysis;
+using Depository.Abstraction.Exceptions;
 using Depository.Abstraction.Models;
 
 namespace Depository.Core;
@@ -6,34 +7,39 @@ namespace Depository.Core;
 public partial class Depository
 {
     private readonly HashSet<DependencyDescription> _dependencyDescriptions = new();
+    private readonly Dictionary<Type, DependencyDescription> _dependencyDescriptionsByType = new();
 
     public void AddDependency(DependencyDescription description)
     {
-        _dependencyDescriptions.RemoveWhere(t => t.DependencyType == description.DependencyType);
+        if (_dependencyDescriptionsByType.TryGetValue(description.DependencyType, out var existing))
+        {
+            _dependencyDescriptions.Remove(existing);
+        }
+
+        _dependencyDescriptionsByType[description.DependencyType] = description;
         _dependencyDescriptions.Add(description);
     }
 
-
-    public bool DependencyExist(Type dependencyType)
+    public bool DependencyExist(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependencyType)
     {
-        if (dependencyType.IsGenericType)
-        {
-            return _dependencyDescriptions.Any(des => des.DependencyType == dependencyType) || _dependencyDescriptions.Any(des => des.DependencyType == dependencyType.GetGenericTypeDefinition());
-        }
-
-        return _dependencyDescriptions.Any(des => des.DependencyType == dependencyType);
+        if (_dependencyDescriptionsByType.ContainsKey(dependencyType)) return true;
+        return dependencyType.IsGenericType &&
+               _dependencyDescriptionsByType.ContainsKey(dependencyType.GetGenericTypeDefinition());
     }
 
-    public DependencyDescription? GetDependency(Type dependencyType)
+    public DependencyDescription? GetDependency(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependencyType)
     {
-        return _dependencyDescriptions.FirstOrDefault(dep => dep.DependencyType == dependencyType) ??
-                               null;
+        _dependencyDescriptionsByType.TryGetValue(dependencyType, out var dependency);
+        return dependency;
     }
 
     public void DeleteDependency(DependencyDescription description)
     {
         _dependencyRelations.Remove(description);
         _dependencyDescriptions.Remove(description);
+        _dependencyDescriptionsByType.Remove(description.DependencyType);
     }
 
     public void SetDependencyDecoration(DependencyDescription description, DependencyRelation? decorationRelation)
@@ -44,12 +50,14 @@ public partial class Depository
     public void ClearAllDependencies()
     {
         _dependencyDescriptions.Clear();
+        _dependencyDescriptionsByType.Clear();
         _dependencyRelations.Clear();
     }
-    
-    private DependencyDescription? GetDependencyDescription(Type dependency)
+
+    private DependencyDescription? GetDependencyDescription(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency)
     {
-        var dependencyDescription = _dependencyDescriptions.FirstOrDefault(t => t.DependencyType == dependency);
+        _dependencyDescriptionsByType.TryGetValue(dependency, out var dependencyDescription);
         return dependencyDescription;
     }
 }

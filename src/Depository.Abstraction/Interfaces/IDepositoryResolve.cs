@@ -20,6 +20,7 @@ public interface IDepositoryResolve
     /// <param name="dependency">Dependency Type</param>
     /// <param name="option"></param>
     /// <returns></returns>
+    [RequiresDynamicCode("Creating generic type instances dynamically is not compatible with NativeAOT when the instantiation cannot be statically analyzed")]
     public object ResolveDependency([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency, DependencyResolveOption? option = null);
 
     public void ChangeResolveTarget([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type dependency, object? target);
