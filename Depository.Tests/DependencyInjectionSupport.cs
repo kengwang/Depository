@@ -87,6 +87,22 @@ public class DependencyInjectionSupport
     }
     
     [Test]
+    public void ResolveKeyedScoped_WithSameImplementationType_ShouldKeepSeparateKeyedInstances()
+    {
+        _host.Services.AddKeyedScoped<IGuidGenerator, RandomGuidGenerator>("a");
+        _host.Services.AddKeyedScoped<IGuidGenerator, RandomGuidGenerator>("b");
+        var app = _host.Build();
+
+        using var scope = app.Services.CreateScope();
+        var firstA = scope.ServiceProvider.GetRequiredKeyedService<IGuidGenerator>("a");
+        var secondA = scope.ServiceProvider.GetRequiredKeyedService<IGuidGenerator>("a");
+        var firstB = scope.ServiceProvider.GetRequiredKeyedService<IGuidGenerator>("b");
+
+        secondA.Should().BeSameAs(firstA);
+        firstB.Should().NotBeSameAs(firstA);
+    }
+
+    [Test]
     public void ResolveNamedGuidGenerator_ShouldNotBeSame()
     {
         // Arrange

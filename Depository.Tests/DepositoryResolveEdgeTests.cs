@@ -1,5 +1,6 @@
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Exceptions;
+using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using Depository.Abstraction.Models.Options;
 using Depository.Core;
@@ -199,7 +200,121 @@ public class DepositoryResolveEdgeTests
             .Which.Should().BeSameAs(factoryImplementation);
     }
 
+
+    [Test]
+    public void ResolveInScope_WithExistingOption_ShouldNotMutateOptionScope()
+    {
+        var depository = CreateNewDepository();
+        depository.AddScoped<IGuidGenerator, EmptyGuidGenerator>();
+        using var scope = DepositoryResolveScope.Create();
+        var option = new DependencyResolveOption();
+
+        depository.ResolveInScope<IGuidGenerator>(scope, option);
+
+        option.Scope.Should().BeNull();
+    }
+
+    [Test]
+    public void ResolveScoped_WithNamedRelationsUsingSameImplementation_ShouldKeepSeparateScopedInstances()
+    {
+        var depository = CreateNewDepository();
+        depository.AddScoped<IGuidGenerator, RandomGuidGenerator>("a");
+        depository.AddScoped<IGuidGenerator, RandomGuidGenerator>("b");
+        using var scope = DepositoryResolveScope.Create();
+
+        var firstA = depository.ResolveInScope<IGuidGenerator>(scope,
+            new DependencyResolveOption { RelationName = "a" });
+        var secondA = depository.ResolveInScope<IGuidGenerator>(scope,
+            new DependencyResolveOption { RelationName = "a" });
+        var firstB = depository.ResolveInScope<IGuidGenerator>(scope,
+            new DependencyResolveOption { RelationName = "b" });
+
+        secondA.Should().BeSameAs(firstA);
+        firstB.Should().NotBeSameAs(firstA);
+    }
+
+    [Test]
+    public void ResolveDependency_WithRelationName_ShouldIgnoreFocusedRelation()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(relationName: "empty");
+        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>(relationName: "random");
+        depository.ChangeFocusingRelation<IGuidGenerator, RandomGuidGenerator>();
+
+        var service = depository.Resolve<IGuidGenerator>(new DependencyResolveOption { RelationName = "empty" });
+
+        service.Should().BeOfType<EmptyGuidGenerator>();
+    }
+
+    [Test]
+    public void ResolveDependency_ForOpenGenericDecoration_ShouldCloseDecoratorImplementation()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton(typeof(ITypeGeneric<>), typeof(TypeGeneric<>));
+        var description = depository.GetDependency(typeof(ITypeGeneric<>))!;
+        depository.SetDependencyDecoration(description, new DependencyRelation(
+            typeof(GenericDecorationService<>),
+            IsDecorationRelation: true));
+
+        var service = depository.Resolve<ITypeGeneric<string>>();
+
+        service.Should().BeOfType<GenericDecorationService<string>>();
+        service.GetGenericType().Should().Be(typeof(string));
+    }
+
+
+
+    [Test]
+    public void ResolveTaskDependency_WithExistingOption_ShouldNotMutateCheckAsyncConstructor()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
+        var option = new DependencyResolveOption
+        {
+            CheckAsyncConstructor = true
+        };
+
+        depository.Resolve<Task<IGuidGenerator>>(option);
+
+        option.CheckAsyncConstructor.Should().BeTrue();
+    }
+
+    [Test]
+    public void ResolveDependency_WithDisabledRelationName_ShouldRespectIncludeDisabled()
+    {
+        var depository = CreateNewDepository();
+        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>(relationName: "disabled", isEnabled: false);
+
+        var resolveEnabledOnly = () => depository.Resolve<IGuidGenerator>(new DependencyResolveOption
+        {
+            RelationName = "disabled"
+        });
+        var resolvedDisabled = depository.Resolve<IGuidGenerator>(new DependencyResolveOption
+        {
+            RelationName = "disabled",
+            IncludeDisabled = true
+        });
+
+        resolveEnabledOnly.Should().Throw<DependencyNotFoundException>();
+        resolvedDisabled.Should().BeOfType<EmptyGuidGenerator>();
+    }
+
     private static Core.Depository CreateNewDepository() => DepositoryFactory.CreateNew();
+
+    private sealed class GenericDecorationService<T> : ITypeGeneric<T>, IDecorationService
+    {
+        private readonly ITypeGeneric<T> _inner;
+
+        public GenericDecorationService(ITypeGeneric<T> inner)
+        {
+            _inner = inner;
+        }
+
+        public Type GetGenericType()
+        {
+            return _inner.GetGenericType();
+        }
+    }
 
     private sealed class DefaultValueConstructorService
     {

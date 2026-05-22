@@ -275,5 +275,20 @@ public class DepositoryExtensionTests
         depository.Resolve<IGuidGenerator>().Should().BeOfType<RandomGuidGenerator>();
     }
 
+
+
+    [Test]
+    public void ResolveMultipleInScope_WithExistingOption_ShouldNotMutateOptionScope()
+    {
+        var depository = CreateNewDepository();
+        depository.AddScoped<IGuidGenerator, EmptyGuidGenerator>();
+        using var scope = DepositoryResolveScope.Create();
+        var option = new DependencyResolveOption();
+
+        depository.ResolveMultipleInScope<IGuidGenerator>(scope, option);
+
+        option.Scope.Should().BeNull();
+    }
+
     private static Core.Depository CreateNewDepository() => DepositoryFactory.CreateNew();
 }
