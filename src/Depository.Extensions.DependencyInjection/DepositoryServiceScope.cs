@@ -7,6 +7,7 @@ public class DepositoryServiceScope : IServiceScope
 {
     private readonly IDepositoryResolveScope _scope;
     private readonly IDepository _depository;
+    private bool _disposed;
 
     public DepositoryServiceScope(IDepositoryResolveScope scope, IDepository depository)
     {
@@ -16,11 +17,15 @@ public class DepositoryServiceScope : IServiceScope
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _scope.Dispose();
     }
 
     private IServiceProvider? _serviceProviderCache;
 
     public IServiceProvider ServiceProvider =>
-        _serviceProviderCache ??= new DepositoryServiceProvider(_depository);
+        _disposed
+            ? throw new ObjectDisposedException(nameof(DepositoryServiceScope))
+            : _serviceProviderCache ??= new DepositoryServiceProvider(_depository);
 }

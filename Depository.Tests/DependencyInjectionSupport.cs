@@ -180,6 +180,8 @@ public class DependencyInjectionSupport
         var serviceChecker = app.Services.GetRequiredService<IServiceProviderIsService>();
 
         serviceChecker.IsService(typeof(IGuidGenerator)).Should().BeTrue();
+        serviceChecker.IsService(typeof(IEnumerable<IGuidGenerator>)).Should().BeTrue();
+        serviceChecker.IsService(typeof(IEnumerable<IConstructorInjectService>)).Should().BeTrue();
         serviceChecker.IsService(typeof(IConstructorInjectService)).Should().BeFalse();
     }
 
@@ -192,6 +194,32 @@ public class DependencyInjectionSupport
         var serviceChecker = app.Services.GetRequiredService<IServiceProviderIsKeyedService>();
 
         serviceChecker.IsKeyedService(typeof(IGuidGenerator), "known").Should().BeTrue();
+        serviceChecker.IsKeyedService(typeof(IEnumerable<IGuidGenerator>), "known").Should().BeTrue();
         serviceChecker.IsKeyedService(typeof(IGuidGenerator), "missing").Should().BeFalse();
+    }
+
+    [Test]
+    public void ServiceProvider_Dispose_ShouldRejectFurtherResolution()
+    {
+        _host.Services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
+        var app = _host.Build();
+
+        ((IDisposable)app.Services).Dispose();
+
+        var action = () => app.Services.GetRequiredService<IGuidGenerator>();
+        action.Should().Throw<ObjectDisposedException>();
+    }
+
+    [Test]
+    public void ServiceScope_Dispose_ShouldRejectFurtherServiceProviderAccess()
+    {
+        _host.Services.AddScoped<IGuidGenerator, RandomGuidGenerator>();
+        var app = _host.Build();
+        var scope = app.Services.CreateScope();
+
+        scope.Dispose();
+
+        var action = () => scope.ServiceProvider.GetRequiredService<IGuidGenerator>();
+        action.Should().Throw<ObjectDisposedException>();
     }
 }
