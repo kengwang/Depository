@@ -1,91 +1,45 @@
-﻿using Autofac;
 using BenchmarkDotNet.Attributes;
-using Depository.Abstraction.Models.Options;
-using Depository.Benchmarks.Implements;
 using Depository.Benchmarks.Interfaces;
-using Depository.Core;
 using Depository.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
 namespace Depository.Benchmarks;
-
-
 
 public partial class IoCContainersBenchmarks
 {
     [Benchmark]
-    public void Depository_MultiToMultiBenchmark_IEnumerable()
+    public IGuidGenerator[] Depository_MultiToMultiBenchmark_IEnumerable()
     {
-        var depository = DepositoryFactory.CreateNew();
-        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
-        depository.Resolve<IEnumerable<IGuidGenerator>>();
-    }
-    
-    [Benchmark]
-    public void Depository_Optimized_MultiToMultiBenchmark_IEnumerable()
-    {
-        var depository = DepositoryFactory.CreateNew();
-        depository.Option.AutoNotifyDependencyChange = false;
-        depository.Option.CheckerOption = new DepositoryCheckerOption
-        {
-            ImplementIsInheritedFromDependency = false,
-            ImplementIsInstantiable = false,
-            AutoConstructor = false,
-            CheckImplementationDuplication = false
-        };
-        depository.Option.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue;
-        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
-        depository.Resolve<IEnumerable<IGuidGenerator>>();
+        return (IGuidGenerator[])_depositoryMultiToMulti.Resolve<IEnumerable<IGuidGenerator>>();
     }
 
     [Benchmark]
-    public void Depository_Optimized_MultiToMultiBenchmark_ResolveMultuple()
+    public IGuidGenerator[] Depository_Optimized_MultiToMultiBenchmark_IEnumerable()
     {
-        var depository = DepositoryFactory.CreateNew();
-        depository.Option.AutoNotifyDependencyChange = false;
-        depository.Option.CheckerOption = new DepositoryCheckerOption
-        {
-            ImplementIsInheritedFromDependency = false,
-            ImplementIsInstantiable = false,
-            AutoConstructor = false,
-            CheckImplementationDuplication = false
-        };
-        depository.Option.ImplementTypeDuplicatedAction = ImplementTypeDuplicatedAction.Continue;
-        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
-        depository.ResolveMultiple<IGuidGenerator>();
-    }
-    
-    [Benchmark]
-    public void Depository_MultiToMultiBenchmark_ResolveMultiple()
-    {
-        var depository = DepositoryFactory.CreateNew();
-        depository.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-        depository.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
-        depository.ResolveMultiple<IGuidGenerator>();
-    }
-
-
-    [Benchmark]
-    public object MicrosoftExtensionDependencyInjection_MultiToMultiBenchmark()
-    {
-        ServiceCollection services = new();
-        services.AddSingleton<IGuidGenerator, RandomGuidGenerator>();
-        services.AddSingleton<IGuidGenerator, EmptyGuidGenerator>();
-        var provider = services.BuildServiceProvider();
-        return provider.GetService<IEnumerable<IGuidGenerator>>()!;
+        return (IGuidGenerator[])_depositoryOptimizedMultiToMulti.Resolve<IEnumerable<IGuidGenerator>>();
     }
 
     [Benchmark]
-    public object AutoFac_MultiToMultiBenchmark()
+    public List<IGuidGenerator> Depository_Optimized_MultiToMultiBenchmark_ResolveMultiple()
     {
-        var builder = new ContainerBuilder();
-        builder.RegisterType<RandomGuidGenerator>().As<IGuidGenerator>();
-        builder.RegisterType<EmptyGuidGenerator>().As<IGuidGenerator>();
-        var container = builder.Build();
-        return container.Resolve<IEnumerable<IGuidGenerator>>();
+        return _depositoryOptimizedMultiToMulti.ResolveMultiple<IGuidGenerator>();
+    }
+
+    [Benchmark]
+    public List<IGuidGenerator> Depository_MultiToMultiBenchmark_ResolveMultiple()
+    {
+        return _depositoryMultiToMulti.ResolveMultiple<IGuidGenerator>();
+    }
+
+    [Benchmark]
+    public IGuidGenerator[] MicrosoftExtensionDependencyInjection_MultiToMultiBenchmark()
+    {
+        return _microsoftMultiToMulti.GetServices<IGuidGenerator>().ToArray();
+    }
+
+    [Benchmark]
+    public IGuidGenerator[] AutoFac_MultiToMultiBenchmark()
+    {
+        return Autofac.ResolutionExtensions.Resolve<IEnumerable<IGuidGenerator>>(_autofacMultiToMulti).ToArray();
     }
 }
